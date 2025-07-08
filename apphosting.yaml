@@ -1,0 +1,22 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+# Specifies the version of the App Hosting platform.
+# We recommend 'v1' for all new backends.
+version: v1
+
+# Specifies the command to run your application.
+# For a Next.js app, this is typically `npm run start`.
+runConfig:
+  command: npm run start
+  # Increase this value to automatically spin up more instances
+  # in response to increased traffic.
+  maxInstances: 1
+
+# Specifies the build process for your application.
+# App Hosting will run this command to build your app before deploying.
+build:
+  # The command to build your Next.js app.
+  command: npm run build
+  # The output directory of your Next.js build.
+  outputDir: .next
