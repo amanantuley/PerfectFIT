@@ -8,13 +8,37 @@ import { Label } from '@/components/ui/label';
 import { Chrome } from 'lucide-react';
 import Logo from '@/components/logo';
 import Image from 'next/image';
+import { useState } from 'react';
+
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '@/lib/firebase';
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    setError(null);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Failed to login');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Google login failed');
+    }
   };
 
   return (
@@ -23,7 +47,7 @@ export default function LoginPage() {
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <div className="mx-auto mb-4">
-                <Logo />
+              <Logo />
             </div>
             <h1 className="text-3xl font-bold font-headline">Welcome Back</h1>
             <p className="text-balance text-muted-foreground">
@@ -37,25 +61,34 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="m@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required />
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
+            {error && <p className="text-sm text-red-500">{error}</p>}
             <Button type="submit" className="w-full">
               Login
             </Button>
             <div className="relative my-2">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-                </div>
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
             </div>
-            <Button variant="outline" className="w-full" onClick={() => router.push('/dashboard')}>
+            <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
               <Chrome className="mr-2 h-4 w-4" />
               Login with Google
             </Button>
@@ -74,7 +107,6 @@ export default function LoginPage() {
           alt="A stylish person wearing tailored clothes"
           fill
           className="object-cover dark:brightness-[0.7]"
-          data-ai-hint="fashion model"
         />
       </div>
     </div>
