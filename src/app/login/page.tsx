@@ -1,113 +1,89 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Chrome } from 'lucide-react';
-import Logo from '@/components/logo';
-import Image from 'next/image';
 import { useState } from 'react';
-
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const handleLogin = async () => {
+    setError(''); // Clear previous errors
+
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      router.push('/dashboard'); // redirect on success
     } catch (err: any) {
-      setError(err.message || 'Failed to login');
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setError(null);
-    try {
-      await signInWithPopup(auth, googleProvider);
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Google login failed');
+      // Friendly error messages
+      if (err.code === 'auth/user-not-found') {
+        setError('No account found. Please sign up first.');
+      } else if (err.code === 'auth/wrong-password') {
+        setError('Incorrect password. Try again.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Invalid email format.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many login attempts. Please try again later.');
+      } else {
+        setError(err.message || 'Login failed');
+      }
     }
   };
 
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
-            <div className="mx-auto mb-4">
-              <Logo />
-            </div>
-            <h1 className="text-3xl font-bold font-headline">Welcome Back</h1>
-            <p className="text-balance text-muted-foreground">
-              Enter your credentials to access your account.
-            </p>
-          </div>
-          <form onSubmit={handleLogin} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
-              <Chrome className="mr-2 h-4 w-4" />
-              Login with Google
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline font-semibold text-primary">
-              Sign up
-            </Link>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+          />
         </div>
-      </div>
-      <div className="hidden bg-muted lg:block relative">
-        <Image
-          src="https://placehold.co/1080x1920.png"
-          alt="A stylish person wearing tailored clothes"
-          fill
-          className="object-cover dark:brightness-[0.7]"
-        />
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+          />
+        </div>
+
+        {error && (
+          <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 p-2 rounded">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handleLogin}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+        >
+          Sign In
+        </button>
+
+        <p className="text-center mt-4 text-sm text-gray-600">
+          Don't have an account?{' '}
+          <a href="/signup" className="text-blue-600 hover:underline">
+            Sign up here
+          </a>
+        </p>
       </div>
     </div>
   );
