@@ -23,11 +23,28 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Failed to login');
+      // Better error handling
+      switch (err.code) {
+        case 'auth/user-not-found':
+          setError('No user found with this email.');
+          break;
+        case 'auth/wrong-password':
+          setError('Incorrect password.');
+          break;
+        case 'auth/invalid-email':
+          setError('Invalid email format.');
+          break;
+        case 'auth/too-many-requests':
+          setError('Too many attempts. Try again later.');
+          break;
+        default:
+          setError('Failed to login. Please try again.');
+      }
     }
   };
 
@@ -37,7 +54,11 @@ export default function LoginPage() {
       await signInWithPopup(auth, googleProvider);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Google login failed');
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Unauthorized domain. Add your domain in Firebase console.');
+      } else {
+        setError('Google login failed. Please try again.');
+      }
     }
   };
 
@@ -76,7 +97,11 @@ export default function LoginPage() {
                 required
               />
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-500 bg-red-50 p-2 rounded border border-red-200">
+                {error}
+              </p>
+            )}
             <Button type="submit" className="w-full">
               Login
             </Button>
@@ -85,17 +110,27 @@ export default function LoginPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
               </div>
             </div>
-            <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
+            <Button
+              variant="outline"
+              className="w-full"
+              type="button"
+              onClick={handleGoogleLogin}
+            >
               <Chrome className="mr-2 h-4 w-4" />
               Login with Google
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline font-semibold text-primary">
+            Don&apos;t have an account?{' '}
+            <Link
+              href="/signup"
+              className="underline font-semibold text-primary"
+            >
               Sign up
             </Link>
           </div>
