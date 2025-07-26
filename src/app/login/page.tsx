@@ -8,9 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Chrome } from 'lucide-react';
 import Logo from '@/components/logo';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  sendEmailVerification,
+} from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
 export default function LoginPage() {
@@ -19,16 +23,34 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const currentUser = userCredential.user;
+      if (!currentUser.emailVerified) {
+        setUser(currentUser); // To show email verification button
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
-      // Better error handling
       switch (err.code) {
         case 'auth/user-not-found':
           setError('No user found with this email.');
@@ -51,13 +73,30 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
-      router.push('/dashboard');
+      const result = await signInWithPopup(auth, googleProvider);
+      const currentUser = result.user;
+      if (!currentUser.emailVerified) {
+        setUser(currentUser);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       if (err.code === 'auth/unauthorized-domain') {
         setError('Unauthorized domain. Add your domain in Firebase console.');
       } else {
         setError('Google login failed. Please try again.');
+      }
+    }
+  };
+
+  const handleSendVerification = async () => {
+    if (auth.currentUser && !auth.currentUser.emailVerified) {
+      try {
+        await sendEmailVerification(auth.currentUser);
+        setVerificationSent(true);
+      } catch (error) {
+        console.error('Error sending verification email:', error);
+        setError('Failed to send verification email.');
       }
     }
   };
@@ -105,6 +144,28 @@ export default function LoginPage() {
             <Button type="submit" className="w-full">
               Login
             </Button>
+
+            {user && !user.emailVerified && (
+              <div className="mt-2 text-center">
+                <p className="text-sm text-yellow-600">
+                  Your email is not verified.
+                </p>
+                {!verificationSent ? (
+                  <Button
+                    type="button"
+                    onClick={handleSendVerification}
+                    className="mt-2 w-full bg-yellow-500 hover:bg-yellow-600"
+                  >
+                    Send Verification Email
+                  </Button>
+                ) : (
+                  <p className="text-green-600 mt-2">
+                    Verification email sent. Check your inbox!
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="relative my-2">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
