@@ -6,7 +6,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBG2zB42UJ1b8WAxLV3CLkdBaGAP-jCqM4",
   authDomain: "perfectfit-b5581.firebaseapp.com",
   projectId: "perfectfit-b5581",
-  storageBucket: "perfectfit-b5581.firebasestorage.app",
+  storageBucket: "perfectfit-b5581.appspot.com",
   messagingSenderId: "459674943880",
   appId: "1:459674943880:web:387c759500868d02943a3d",
   measurementId: "G-8N9TX7MB19"
