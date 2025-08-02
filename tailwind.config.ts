@@ -65,6 +65,10 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        brown: {
+          '400': '#A16207',
+          '600': '#713F12',
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',
