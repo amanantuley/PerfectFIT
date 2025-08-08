@@ -1,4 +1,5 @@
-import type { Config } from 'tailwindcss';
+
+import type {Config} from 'tailwindcss';
 
 export default {
   darkMode: ['class'],
@@ -9,9 +10,11 @@ export default {
   ],
   theme: {
     extend: {
+      backgroundSize: {
+        '200': '200% auto',
+      },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
@@ -68,7 +71,7 @@ export default {
         brown: {
           '400': '#A16207',
           '600': '#713F12',
-        },
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -77,12 +80,20 @@ export default {
       },
       keyframes: {
         'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
+          from: {
+            height: '0',
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)',
+          },
         },
         'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
+          from: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+          to: {
+            height: '0',
+          },
         },
         'fade-in-up': {
           '0%': {
@@ -99,12 +110,21 @@ export default {
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
         },
+        'spin': {
+          from: {
+            transform: 'rotate(0deg)',
+          },
+          to: {
+            transform: 'rotate(360deg)',
+          },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
-        'text-rainbow': 'text-rainbow 3s linear infinite',
+        'text-rainbow': 'text-rainbow 3s ease-in-out infinite',
+        'spin': 'spin 1.5s linear infinite',
       },
     },
   },
