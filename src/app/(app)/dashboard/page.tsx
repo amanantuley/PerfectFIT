@@ -72,12 +72,8 @@ export default function DashboardPage() {
 
 
   useEffect(() => {
-    // Show the tour and video only on the first visit
-    const hasSeenTour = localStorage.getItem('hasSeenDashboardTour');
-    if (!hasSeenTour) {
-      setShowWelcomeVideo(true);
-      localStorage.setItem('hasSeenDashboardTour', 'true');
-    }
+    // Show the video every time the user visits the dashboard
+    setShowWelcomeVideo(true);
   }, []);
   
   const closeVideoAndStartTour = () => {
