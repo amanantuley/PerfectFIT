@@ -74,7 +74,7 @@ export default function TailorCustomersPage() {
         <Card className="animate-fade-in-up">
             <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">{t('Customers')}</CardTitle>
+                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Customers')}</CardTitle>
                     <CardDescription>
                         {t('Manage your customers and view their order history.')}
                     </CardDescription>

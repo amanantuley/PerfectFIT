@@ -54,7 +54,7 @@ export default function TailorProfilePage() {
     <div className="flex justify-center items-start animate-fade-in-up">
        <Card className="w-full max-w-3xl shadow-lg">
         <CardHeader>
-          <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">{t('Tailor Profile')}</CardTitle>
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Tailor Profile')}</CardTitle>
           <CardDescription>
             {t('This information will be displayed to customers. Keep it up-to-date.')}
           </CardDescription>

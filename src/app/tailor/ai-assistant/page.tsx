@@ -51,10 +51,10 @@ export default function TailorAiAssistantPage() {
         <div className="space-y-8 animate-fade-in-up">
             <Card className="shadow-lg">
                 <CardHeader className="text-center">
-                    <div className="mx-auto bg-pink-100 p-4 rounded-full mb-4">
-                        <Wand2 className="h-12 w-12 text-pink-500" />
+                    <div className="mx-auto bg-primary/10 p-4 rounded-full mb-4">
+                        <Wand2 className="h-12 w-12 text-primary" />
                     </div>
-                    <CardTitle className="text-3xl font-headline text-rainbow bg-size-200 animate-text-rainbow">{t('AI Assistant')}</CardTitle>
+                    <CardTitle className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('AI Assistant')}</CardTitle>
                     <CardDescription className="text-lg">
                         {t('Get creative suggestions for your next masterpiece.')}
                     </CardDescription>
@@ -99,7 +99,7 @@ export default function TailorAiAssistantPage() {
                             <Label htmlFor="customerPreferences">{t('Customer Preferences')}</Label>
                             <Textarea id="customerPreferences" name="customerPreferences" placeholder={t('e.g., Prefers modern, slim fits and breathable fabrics.')} required />
                         </div>
-                        <Button type="submit" className="w-full bg-pink-500 hover:bg-pink-600" disabled={isLoading}>
+                        <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                             {t('Generate Ideas')}
                         </Button>
@@ -109,7 +109,7 @@ export default function TailorAiAssistantPage() {
 
             {isLoading && (
                  <div className="text-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-pink-500 mb-4" />
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary mb-4" />
                     <p className="text-muted-foreground">{t('Your AI assistant is thinking...')}</p>
                 </div>
             )}
@@ -118,7 +118,7 @@ export default function TailorAiAssistantPage() {
                 <div className="grid lg:grid-cols-3 gap-8 items-start">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl"><Lightbulb className="text-pink-500"/>{t('Fabric Suggestions')}</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-xl"><Lightbulb className="text-primary"/>{t('Fabric Suggestions')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {suggestions.fabricSuggestions.map((item, index) => (
@@ -131,7 +131,7 @@ export default function TailorAiAssistantPage() {
                     </Card>
                      <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl"><Scissors className="text-pink-500"/>{t('Design Elements')}</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-xl"><Scissors className="text-primary"/>{t('Design Elements')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                              {suggestions.designSuggestions.map((item, index) => (
@@ -144,7 +144,7 @@ export default function TailorAiAssistantPage() {
                     </Card>
                      <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl"><Check className="text-pink-500"/>{t('Customization Ideas')}</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-xl"><Check className="text-primary"/>{t('Customization Ideas')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                            <ul className="list-disc pl-5 text-muted-foreground">

@@ -76,7 +76,7 @@ const recentOrders = [
 const getStatusConfig = (status: string) => {
   switch (status) {
     case 'Ready':
-      return { variant: 'default' as const, icon: CheckCircle, className: 'bg-pink-500 text-white' };
+      return { variant: 'default' as const, icon: CheckCircle, className: 'bg-green-500 text-white' };
     case 'Pending':
       return { variant: 'secondary' as const, icon: Clock, className: 'bg-gray-200 text-gray-800' };
     case 'In Progress':
@@ -221,7 +221,7 @@ export default function TailorDashboard() {
           </CardContent>
         </Card>
       </div>
-      <Button className="fixed bottom-6 right-6 rounded-full w-16 h-16 bg-pink-500 hover:bg-pink-600 shadow-lg">
+      <Button className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg">
         <Plus className="h-8 w-8" />
       </Button>
     </div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -18,13 +19,17 @@ const LogoIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 
-export default function Logo() {
+export default function Logo({ isSpinning = false }: { isSpinning?: boolean }) {
   return (
     <div className="flex items-center gap-3 group">
-      <div className="bg-primary rounded-lg p-2 transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-[-12deg]">
+      <div className={cn(
+        "bg-primary rounded-lg p-2 transition-transform duration-300 ease-in-out",
+        !isSpinning && "group-hover:scale-110 group-hover:rotate-[-12deg]",
+        isSpinning && "animate-spin"
+      )}>
         <LogoIcon className="h-6 w-6 text-primary-foreground" />
       </div>
-      <h1 className="text-2xl font-bold font-headline">
+      <h1 className="text-2xl font-bold">
         Perfect<span className="text-primary">Fit</span>
       </h1>
     </div>

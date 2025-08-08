@@ -7,9 +7,31 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';
 import { Camera, Scissors, Ruler, Bot, Users, Star, Shirt, Award, Facebook, Twitter, Instagram, Linkedin, Sparkles, Wand2, Lightbulb, Quote, LogIn, Download } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import ChatWidget from '@/components/chat-widget';
+import { useEffect, useState } from 'react';
+
+function PreLoader() {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
+      <Logo isSpinning={true} />
+    </div>
+  );
+}
 
 export default function LandingPage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500); 
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <PreLoader />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Header */}
@@ -22,7 +44,7 @@ export default function LandingPage() {
           <ThemeToggle />
           <Link href="/signup">
             <Button>
-              <LogIn className="sm:mr-2 h-4 w-4" />
+              <LogIn className="mr-0 sm:mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Sign In</span>
             </Button>
           </Link>
@@ -31,7 +53,7 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-16 md:py-24 lg:py-32 xl:py-48 text-center overflow-x-hidden">
+        <section className="w-full py-16 md:py-24 lg:py-32 xl:py-48 text-center overflow-x-hidden animate-fade-in-up">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:gap-8">
               <div className="flex flex-col justify-center space-y-4">
@@ -58,7 +80,7 @@ export default function LandingPage() {
         </section>
         
         {/* Our Vision Section */}
-        <section id="vision" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40">
+        <section id="vision" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <div className="container px-4 md:px-6">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -74,7 +96,7 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide flex items-center gap-2">
@@ -146,7 +168,7 @@ export default function LandingPage() {
         </section>
         
         {/* How It Works Section */}
-        <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40">
+        <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
           <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
             <div className="space-y-3 flex flex-col items-center">
                <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -179,7 +201,7 @@ export default function LandingPage() {
         </section>
 
         {/* Team Section */}
-        <section id="team" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="team" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
             <div className="container px-4 md:px-6">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -193,19 +215,19 @@ export default function LandingPage() {
                 </div>
                 <div className="mx-auto grid max-w-5xl grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
-                        <Image className="rounded-full mb-4 object-cover h-36 w-36" src="/aman-image.png" alt="Team member" width={144} height={144} />
+                        <Image className="rounded-full mb-4 object-cover h-40 w-40" src="/aman-image.png" alt="Team member" width={160} height={160} />
                         <h3 className="text-xl font-bold">Aman Antuley</h3>
                         <p className="text-sm text-muted-foreground">Software Developer</p>
                         <p className="mt-2 text-sm text-muted-foreground">The architect of our seamless user experience and robust application logic.</p>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
-                         <Image className="rounded-full mb-4 object-cover h-36 w-36" src="/alamin.jpg" alt="Team member" width={144} height={144} />
+                         <Image className="rounded-full mb-4 object-cover h-40 w-40" src="/alamin.jpg" alt="Team member" width={160} height={160} />
                         <h3 className="text-xl font-bold">Alamin Mondal</h3>
                         <p className="text-sm text-muted-foreground">AI/ML Engineer</p>
                          <p className="mt-2 text-sm text-muted-foreground">The mastermind behind our powerful AI, ensuring our core technology is always learning and improving.</p>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
-                         <Image className="rounded-full mb-4 object-cover h-36 w-36" src="/iqra.jpg" alt="Team member" width={144} height={144} style={{objectPosition: 'center'}}/>
+                         <Image className="rounded-full mb-4 object-cover h-40 w-40 object-center" src="/iqra.jpg" alt="Team member" width={160} height={160} />
                         <h3 className="text-xl font-bold">Iqra Shaikh</h3>
                         <p className="text-sm text-muted-foreground">App Developer</p>
                          <p className="mt-2 text-sm text-muted-foreground">The creative talent who brings our vision to life with elegant design and intuitive interfaces.</p>
@@ -215,7 +237,7 @@ export default function LandingPage() {
         </section>
 
          {/* Testimonials Section */}
-        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40">
+        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '1.0s' }}>
           <div className="container px-4 md:px-6">
              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -275,7 +297,7 @@ export default function LandingPage() {
         </section>
         
         {/* Newsletter Section */}
-        <section id="newsletter" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="newsletter" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up" style={{ animationDelay: '1.2s' }}>
             <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
                 <div className="space-y-3 flex flex-col items-center">
                     <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Stay in the Loop</h2>
@@ -338,7 +360,6 @@ export default function LandingPage() {
             <p>&copy; 2025 PerfectFit Inc. All rights reserved.</p>
         </div>
       </footer>
-      <ChatWidget />
     </div>
   );
 }

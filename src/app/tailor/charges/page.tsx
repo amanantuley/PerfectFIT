@@ -61,7 +61,7 @@ export default function TailorChargesPage() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle className="flex items-center gap-2 text-rainbow bg-size-200 animate-text-rainbow">
+              <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
                 <CircleDollarSign />
                 {t('Service Charges')}
               </CardTitle>

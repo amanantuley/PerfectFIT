@@ -39,7 +39,6 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import ChatWidget from '@/components/chat-widget';
 import { TranslationProvider, useTranslation } from '@/context/translation-provider';
 import Logo from '@/components/logo';
 
@@ -194,7 +193,6 @@ function TailorLayoutContent({ children }: { children: React.ReactNode }) {
            </div>
         </header>
         <main className="flex-1 p-4 sm:p-6 bg-secondary/40 overflow-y-auto">{children}</main>
-        <ChatWidget />
       </SidebarInset>
     </>
   );

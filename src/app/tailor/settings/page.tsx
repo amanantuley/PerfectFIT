@@ -35,7 +35,7 @@ export default function TailorSettingsPage() {
     <div className="flex justify-center items-start animate-fade-in-up">
     <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader>
-        <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">{t('Settings')}</CardTitle>
+        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Settings')}</CardTitle>
         <CardDescription>
             {t('Manage your account and notification preferences.')}
         </CardDescription>

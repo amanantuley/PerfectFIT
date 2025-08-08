@@ -22,7 +22,7 @@ export default function TailorEarningsPage() {
     <div className="space-y-8 animate-fade-in-up">
       <Card>
         <CardHeader>
-          <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">{t('Earnings Overview')}</CardTitle>
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Earnings Overview')}</CardTitle>
           <CardDescription>{t('Track your finances and manage payouts.')}</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -63,7 +63,7 @@ export default function TailorEarningsPage() {
       
        <Card>
         <CardHeader>
-          <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">{t('Payout History')}</CardTitle>
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Payout History')}</CardTitle>
           <CardDescription>{t('A record of all your past payouts.')}</CardDescription>
         </CardHeader>
         <CardContent>

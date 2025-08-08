@@ -53,7 +53,7 @@ export default function TailorReportsPage() {
     <div className="space-y-8 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-rainbow bg-size-200 animate-text-rainbow">
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
             {t('Reports')}
           </h1>
           <p className="text-muted-foreground">{t('Analyze your business performance.')}</p>
@@ -102,7 +102,7 @@ export default function TailorReportsPage() {
         {/* Sales Chart */}
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
               {t('Monthly Sales')}
             </CardTitle>
             <CardDescription>{t('Sales performance over the last 6 months.')}</CardDescription>
@@ -130,7 +130,7 @@ export default function TailorReportsPage() {
         {/* Category Breakdown */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
               {t('Order by Category')}
             </CardTitle>
             <CardDescription>{t('Breakdown of your most popular garment types.')}</CardDescription>
@@ -165,7 +165,7 @@ export default function TailorReportsPage() {
       {/* Top Designs Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-rainbow bg-size-200 animate-text-rainbow">
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
             {t('Top Performing Designs')}
           </CardTitle>
           <CardDescription>{t('Your most popular designs by sales volume.')}</CardDescription>

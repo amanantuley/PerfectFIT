@@ -29,7 +29,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, Package, User, LogOut, Undo2, Info, Mail, Percent, Crown, MessageSquare, HeartPulse, Download, HelpCircle, ShoppingCart, Settings, Gem, Award, Wallet } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import ChatWidget from '@/components/chat-widget';
 import { SubscriptionProvider, useSubscription } from '@/context/subscription-provider';
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
@@ -225,7 +224,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
            {/* Can add breadcrumbs or other header content here */}
         </header>
         <main className="flex-1 p-4 sm:p-6">{children}</main>
-        <ChatWidget />
       </SidebarInset>
     </>
   );
