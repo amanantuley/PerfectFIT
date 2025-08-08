@@ -10,12 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import { extractBodyMeasurements, type ExtractBodyMeasurementsOutput } from '@/ai/flows/extract-body-measurements';
 import { recommendGarments } from '@/ai/flows/recommend-garments';
 import { garments } from '@/lib/garments';
-import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb } from 'lucide-react';
+import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb, PlayCircle, PlusCircle, History, Video } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Using an inline SVG for the scale icon as it's not in lucide-react
 const ScaleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -41,33 +42,15 @@ const MannequinIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-const tourSteps = [
-    {
-        title: "Welcome to Your Dashboard!",
-        description: "Let's quickly walk you through how to get your AI-powered measurements.",
-        targetId: 'welcome-step',
-    },
-    {
-        title: "Live Measurement",
-        description: "For instant results, use your device's camera. Stand back to get your full body in the frame and click 'Measure Live'.",
-        targetId: 'live-measurement-card',
-    },
-    {
-        title: "Upload a Photo",
-        description: "Alternatively, you can upload a full-body photo from your device. Click here to select a file.",
-        targetId: 'upload-photo-card',
-    },
-    {
-        title: "View Your Results",
-        description: "Your measurements and a digital mannequin will appear here after the analysis is complete.",
-        targetId: 'your-measurements-card',
-    },
-    {
-        title: "Get Recommendations",
-        description: "Once you have your measurements, we'll recommend garments from our collection that are a perfect fit for you!",
-        targetId: 'recommendations-section',
-    },
-];
+const BodyShapeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M8.4 19A2.4 2.4 0 0 0 6 17a2.4 2.4 0 0 0-2.4-2.4c-1.3 0-2.4-1.1-2.4-2.4S2.3 9.8 3.6 9.8a2.4 2.4 0 0 0 2.4-2.4A2.4 2.4 0 0 0 3.6 5c0-1.3 1.1-2.4 2.4-2.4a2.4 2.4 0 0 0 2.4-2.4C9.7 0 12 0 12 0s2.3 0 3.6 1.3a2.4 2.4 0 0 0 2.4 2.4c1.3 0 2.4 1.1 2.4 2.4a2.4 2.4 0 0 0-2.4 2.4 2.4 2.4 0 0 0-2.4 2.4c0 1.3 1.1 2.4 2.4 2.4a2.4 2.4 0 0 0 2.4 2.4 2.4 2.4 0 0 0 2.4 2.4c0 1.3-1.1 2.4-2.4 2.4a2.4 2.4 0 0 0-2.4 2.4c-1.3 1.3-3.6 1.3-3.6 1.3s-2.3 0-3.6-1.3a2.4 2.4 0 0 0-2.4-2.4Z"/></svg>
+);
+
+type MeasurementEntry = ExtractBodyMeasurementsOutput & {
+  id: string;
+  date: string;
+  source: 'AI' | 'Manual';
+};
 
 export default function DashboardPage() {
   const { toast } = useToast();
@@ -80,33 +63,26 @@ export default function DashboardPage() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
   const [measurements, setMeasurements] = useState<ExtractBodyMeasurementsOutput | null>(null);
+  const [measurementHistory, setMeasurementHistory] = useState<MeasurementEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<string[] | null>(null);
   const [isRecommending, setIsRecommending] = useState(false);
 
-  const [showTour, setShowTour] = useState(false);
-  const [tourStep, setTourStep] = useState(0);
+  const [showWelcomeVideo, setShowWelcomeVideo] = useState(false);
+
 
   useEffect(() => {
-    // Show the tour only on the first visit
+    // Show the tour and video only on the first visit
     const hasSeenTour = localStorage.getItem('hasSeenDashboardTour');
     if (!hasSeenTour) {
-      setShowTour(true);
+      setShowWelcomeVideo(true);
       localStorage.setItem('hasSeenDashboardTour', 'true');
     }
   }, []);
   
-  const handleNextStep = () => {
-    if (tourStep < tourSteps.length - 1) {
-      setTourStep(tourStep + 1);
-    } else {
-      setShowTour(false);
-    }
-  };
-
-  const handleSkipTour = () => {
-    setShowTour(false);
-  };
+  const closeVideoAndStartTour = () => {
+    setShowWelcomeVideo(false);
+  }
 
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -154,6 +130,25 @@ export default function DashboardPage() {
       setRecommendations(null);
     }
   };
+
+  const processNewMeasurements = (newMeasurements: ExtractBodyMeasurementsOutput, source: 'AI' | 'Manual') => {
+    setMeasurements(newMeasurements);
+
+    const newEntry: MeasurementEntry = {
+        ...newMeasurements,
+        id: new Date().toISOString(),
+        date: new Date().toLocaleDateString(),
+        source,
+    };
+    setMeasurementHistory(prev => [newEntry, ...prev]);
+
+    toast({
+        title: 'Measurements Ready!',
+        description: "Now, let's find clothes that fit you.",
+    });
+
+    getRecommendations(newMeasurements);
+  };
   
   const handleGetMeasurements = async (photoDataUri: string | null) => {
     if (!photoDataUri) {
@@ -171,19 +166,7 @@ export default function DashboardPage() {
 
     try {
       const result = await extractBodyMeasurements({ photoDataUri });
-      setMeasurements(result);
-      toast({
-        title: 'Measurements Extracted!',
-        description: "Now, let's find clothes that fit you.",
-      });
-      
-      setIsRecommending(true);
-      const recommendationResult = await recommendGarments(result);
-      setRecommendations(recommendationResult.recommendations);
-      toast({
-        title: 'Recommendations Ready!',
-        description: 'Check out the garments we picked for you.',
-      });
+      processNewMeasurements(result, 'AI');
     } catch (error) {
       console.error(error);
       toast({
@@ -194,8 +177,48 @@ export default function DashboardPage() {
       setRecommendations([]);
     } finally {
       setIsLoading(false);
-      setIsRecommending(false);
     }
+  };
+
+  const getRecommendations = async (meas: ExtractBodyMeasurementsOutput) => {
+     setIsRecommending(true);
+      try {
+        const recommendationResult = await recommendGarments(meas);
+        setRecommendations(recommendationResult.recommendations);
+        toast({
+            title: 'Recommendations Ready!',
+            description: 'Check out the garments we picked for you.',
+        });
+      } catch (error) {
+        console.error("Failed to get recommendations", error);
+        toast({
+            variant: 'destructive',
+            title: 'Recommendation Failed',
+            description: 'Could not get recommendations at this time.',
+        });
+        setRecommendations([]);
+      } finally {
+        setIsRecommending(false);
+      }
+  };
+
+  const handleManualSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const manualMeasurements: ExtractBodyMeasurementsOutput = {
+        chest: Number(formData.get('chest')),
+        waist: Number(formData.get('waist')),
+        hip: Number(formData.get('hip')),
+        shoulder: Number(formData.get('shoulder')),
+        inseam: Number(formData.get('inseam')),
+        sleeveLength: Number(formData.get('sleeveLength')),
+        height: Number(formData.get('height')),
+        weight: Number(formData.get('weight')),
+        neckSize: Number(formData.get('neckSize')),
+        bodyShape: 'N/A', // Not available for manual input
+    };
+    processNewMeasurements(manualMeasurements, 'Manual');
+    (e.target as HTMLFormElement).reset();
   };
 
   const handleCameraMeasure = async () => {
@@ -211,14 +234,23 @@ export default function DashboardPage() {
     await handleGetMeasurements(dataUri);
   };
 
+  const reuseMeasurement = (entry: MeasurementEntry) => {
+    setMeasurements(entry);
+    getRecommendations(entry);
+     toast({
+        title: `Using measurements from ${entry.date}`,
+        description: "Recommendations are being updated.",
+    });
+  }
+
   const measurementItems = measurements
     ? [
         { label: 'Height', value: `${measurements.height}"`, icon: PersonStanding },
         { label: 'Weight', value: `${measurements.weight} lbs`, icon: ScaleIcon },
-        { label: 'Neck', value: `${measurements.neckSize}"`, icon: GitCommitHorizontal },
+        { label: 'Body Shape', value: measurements.bodyShape, icon: BodyShapeIcon },
         { label: 'Shoulder', value: `${measurements.shoulder}"`, icon: Armchair },
         { label: 'Chest', value: `${measurements.chest}"`, icon: Shirt },
-        { label: 'Sleeve Length', value: `${measurements.sleeveLength}"`, icon: Hand },
+        { label: 'Sleeve', value: `${measurements.sleeveLength}"`, icon: Hand },
         { label: 'Waist', value: `${measurements.waist}"`, icon: Waves },
         { label: 'Hip', value: `${measurements.hip}"`, icon: PersonStanding },
         { label: 'Inseam', value: `${measurements.inseam}"`, icon: ChevronRight },
@@ -232,11 +264,12 @@ export default function DashboardPage() {
   return (
     <div id="welcome-step" className="space-y-8 animate-fade-in-up">
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-5">
-        <div className="xl:col-span-2 h-fit">
+        <div className="xl:col-span-2 h-fit space-y-8">
            <Tabs defaultValue="live" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="live">Live Camera</TabsTrigger>
                 <TabsTrigger value="upload">Upload Photo</TabsTrigger>
+                <TabsTrigger value="manual">Manual Input</TabsTrigger>
               </TabsList>
               <TabsContent value="live">
                 <Card id="live-measurement-card" className="shadow-lg mt-2">
@@ -289,6 +322,7 @@ export default function DashboardPage() {
                         )}
                         <Input id="picture" type="file" className="absolute h-full w-full opacity-0 cursor-pointer" accept="image/*" onChange={handleImageChange} />
                       </label>
+                      <p className="text-xs text-muted-foreground text-center">Photos may be reviewed for quality assurance before processing.</p>
                     </div>
                     <Button onClick={() => handleGetMeasurements(imagePreview)} disabled={isLoading || !imageFile} className="w-full">
                       {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Ruler className="mr-2 h-4 w-4" />}
@@ -297,7 +331,73 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               </TabsContent>
+              <TabsContent value="manual">
+                 <Card className="shadow-lg mt-2">
+                    <CardHeader>
+                        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Manual Input</CardTitle>
+                        <CardDescription>Enter your measurements directly.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleManualSubmit} className="space-y-3">
+                           <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label htmlFor="height">Height (in)</Label>
+                                    <Input id="height" name="height" type="number" step="0.1" required />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="weight">Weight (lbs)</Label>
+                                    <Input id="weight" name="weight" type="number" step="0.1" required />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="neckSize">Neck (in)</Label>
+                                    <Input id="neckSize" name="neckSize" type="number" step="0.1" required />
+                                </div>
+                                 <div className="space-y-1">
+                                    <Label htmlFor="shoulder">Shoulder (in)</Label>
+                                    <Input id="shoulder" name="shoulder" type="number" step="0.1" required />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="chest">Chest (in)</Label>
+                                    <Input id="chest" name="chest" type="number" step="0.1" required />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="sleeveLength">Sleeve (in)</Label>
+                                    <Input id="sleeveLength" name="sleeveLength" type="number" step="0.1" required />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="waist">Waist (in)</Label>
+                                    <Input id="waist" name="waist" type="number" step="0.1" required />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="hip">Hip (in)</Label>
+                                    <Input id="hip" name="hip" type="number" step="0.1" required />
+                                </div>
+                                <div className="space-y-1 col-span-2">
+                                    <Label htmlFor="inseam">Inseam (in)</Label>
+                                    <Input id="inseam" name="inseam" type="number" step="0.1" required />
+                                </div>
+                           </div>
+                           <Button type="submit" className="w-full">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Save & Use Measurements
+                           </Button>
+                        </form>
+                    </CardContent>
+                 </Card>
+              </TabsContent>
             </Tabs>
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle>Need Help?</CardTitle>
+                    <CardDescription>Get one-on-one help with your measurements.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button className="w-full" variant="outline" onClick={() => toast({ title: "Coming Soon!", description: "Video consultations will be available soon." })}>
+                        <Video className="mr-2 h-4 w-4" />
+                        Schedule Video Consultation
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
 
         <div className="xl:col-span-3">
@@ -389,6 +489,45 @@ export default function DashboardPage() {
         </div>
       </div>
 
+       {measurementHistory.length > 0 && (
+         <Card className="shadow-lg">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                    <History /> Measurement History
+                </CardTitle>
+                <CardDescription>View your past measurements and reuse them for recommendations.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Source</TableHead>
+                            <TableHead>Chest</TableHead>
+                            <TableHead>Waist</TableHead>
+                            <TableHead>Hip</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {measurementHistory.map((entry) => (
+                            <TableRow key={entry.id}>
+                                <TableCell>{entry.date}</TableCell>
+                                <TableCell>{entry.source}</TableCell>
+                                <TableCell>{entry.chest}"</TableCell>
+                                <TableCell>{entry.waist}"</TableCell>
+                                <TableCell>{entry.hip}"</TableCell>
+                                <TableCell className="text-right">
+                                    <Button size="sm" variant="outline" onClick={() => reuseMeasurement(entry)}>Reuse</Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+         </Card>
+       )}
+
       <div id="recommendations-section">
         <h2 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
           {recommendations ? 'Recommended For You' : 'Our Collection'}
@@ -444,35 +583,25 @@ export default function DashboardPage() {
         )}
       </div>
 
-       {showTour && (
-        <Dialog open={showTour} onOpenChange={setShowTour}>
-          <DialogContent className="sm:max-w-md" hideCloseButton>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
-                <Lightbulb />
-                {tourSteps[tourStep].title}
-              </DialogTitle>
-              <DialogDescription>
-                {tourSteps[tourStep].description}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-center mt-2">
-                 <div className="flex space-x-2">
-                    {tourSteps.map((_, index) => (
-                        <div
-                            key={index}
-                            className={`h-2 w-2 rounded-full ${tourStep === index ? 'bg-primary' : 'bg-muted'}`}
-                        />
-                    ))}
+      {showWelcomeVideo && (
+        <Dialog open={showWelcomeVideo} onOpenChange={setShowWelcomeVideo}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Welcome to PerfectFit!</DialogTitle>
+                    <DialogDescription>
+                        Watch this short video to learn how to get the most accurate AI measurements.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="aspect-video rounded-lg overflow-hidden relative group cursor-pointer">
+                    <Image src="https://placehold.co/1600x900.png" alt="Demo video thumbnail" fill className="object-cover" data-ai-hint="tutorial video"/>
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <PlayCircle className="h-16 w-16 text-white/80 group-hover:scale-110 transition-transform" />
+                    </div>
                 </div>
-            </div>
-            <DialogFooter className="mt-4 sm:justify-between">
-                <Button variant="ghost" onClick={handleSkipTour}>Skip Tour</Button>
-                <Button onClick={handleNextStep}>
-                    {tourStep === tourSteps.length - 1 ? "Finish" : "Next"}
-                </Button>
-            </DialogFooter>
-          </DialogContent>
+                <DialogFooter>
+                    <Button onClick={closeVideoAndStartTour}>Get Started</Button>
+                </DialogFooter>
+            </DialogContent>
         </Dialog>
       )}
     </div>

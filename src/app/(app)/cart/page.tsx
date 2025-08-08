@@ -29,7 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Loader2, Wallet, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, Loader2, Wallet, ArrowLeft, Upload, Wand2, CalendarDays } from 'lucide-react';
 import Image from 'next/image';
 import { useFormState, useFormStatus } from 'react-dom';
 import React, { useEffect, useRef, useState } from 'react';
@@ -39,6 +39,8 @@ import { tailors } from '@/lib/tailors';
 import { Separator } from '@/components/ui/separator';
 import { useSubscription } from '@/context/subscription-provider';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { addDays, format } from 'date-fns';
 
 const initialState = {
   message: '',
@@ -117,6 +119,8 @@ export default function CartPage() {
   const discountAmount = (originalPrice * discount) / 100;
   const finalPrice = originalPrice - discountAmount;
 
+  const estimatedDeliveryDate = format(addDays(new Date(), 10), 'PPP');
+
   useEffect(() => {
     if (state.message && !state.error) {
         // On successful form submission, open the payment dialog.
@@ -151,162 +155,212 @@ export default function CartPage() {
   return (
     <div className="animate-fade-in-up">
         <form ref={formRef} action={formAction}>
-            <Card className="shadow-lg max-w-4xl mx-auto">
-                <CardHeader>
-                    <CardTitle className="text-3xl flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
-                        <ShoppingCart className="h-8 w-8" />
-                        Customize Your Order
-                    </CardTitle>
-                    <CardDescription>
-                        Select your preferences for the {itemInCart.name}.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-8">
-                    <div className="flex items-center gap-4 border-b pb-4">
-                        <Image
-                            src={itemInCart.image}
-                            alt={itemInCart.name}
-                            width={80}
-                            height={80}
-                            className="rounded-md object-cover"
-                            data-ai-hint={itemInCart.dataAiHint}
-                        />
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold">{itemInCart.name}</h3>
-                            <p className="text-muted-foreground">Custom Tailored</p>
-                        </div>
-                         <div className="text-right">
-                            {activePlan && (
-                                <p className="text-muted-foreground line-through">${originalPrice.toFixed(2)}</p>
-                            )}
-                            <p className="text-xl font-bold">${finalPrice.toFixed(2)}</p>
-                        </div>
-                        <input type="hidden" name="itemName" value={itemInCart.name} />
-                    </div>
-                    
-                    <div className="space-y-4">
-                        <h4 className="text-lg font-semibold text-foreground">Fabric & Quality</h4>
-                        <div className="grid sm:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="color">Color</Label>
-                                <Select name="color" required>
-                                    <SelectTrigger id="color">
-                                        <SelectValue placeholder="Select a color" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="navy-blue">Navy Blue</SelectItem>
-                                        <SelectItem value="charcoal-gray">Charcoal Gray</SelectItem>
-                                        <SelectItem value="classic-white">Classic White</SelectItem>
-                                        <SelectItem value="black">Black</SelectItem>
-                                    </SelectContent>
-                                </Select>
+            <div className="grid lg:grid-cols-3 gap-8 items-start">
+                <div className="lg:col-span-2 space-y-8">
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle className="text-3xl flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                                <ShoppingCart className="h-8 w-8" />
+                                Customize Your Order
+                            </CardTitle>
+                            <CardDescription>
+                                Select your preferences for the {itemInCart.name}.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center gap-4 border-b pb-4">
+                                <Image
+                                    src={itemInCart.image}
+                                    alt={itemInCart.name}
+                                    width={80}
+                                    height={80}
+                                    className="rounded-md object-cover"
+                                    data-ai-hint={itemInCart.dataAiHint}
+                                />
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold">{itemInCart.name}</h3>
+                                    <p className="text-muted-foreground">Custom Tailored</p>
+                                </div>
+                                <div className="text-right">
+                                    {activePlan && (
+                                        <p className="text-muted-foreground line-through">${originalPrice.toFixed(2)}</p>
+                                    )}
+                                    <p className="text-xl font-bold">${finalPrice.toFixed(2)}</p>
+                                </div>
+                                <input type="hidden" name="itemName" value={itemInCart.name} />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="quality">Cloth Quality</Label>
-                                 <Select name="quality" required>
-                                    <SelectTrigger id="quality">
-                                        <SelectValue placeholder="Select quality" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="standard">Standard (Wool Blend)</SelectItem>
-                                        <SelectItem value="premium">Premium (100% Merino Wool)</SelectItem>
-                                        <SelectItem value="luxury">Luxury (Cashmere Blend)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <Separator />
+                            
+                           <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
+                                <AccordionItem value="item-1">
+                                    <AccordionTrigger className="text-lg font-semibold">Fabric & Quality</AccordionTrigger>
+                                    <AccordionContent className="pt-4">
+                                        <div className="grid sm:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="color">Color</Label>
+                                                <Select name="color" required>
+                                                    <SelectTrigger id="color">
+                                                        <SelectValue placeholder="Select a color" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="navy-blue">Navy Blue</SelectItem>
+                                                        <SelectItem value="charcoal-gray">Charcoal Gray</SelectItem>
+                                                        <SelectItem value="classic-white">Classic White</SelectItem>
+                                                        <SelectItem value="black">Black</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="quality">Cloth Quality</Label>
+                                                <Select name="quality" required>
+                                                    <SelectTrigger id="quality">
+                                                        <SelectValue placeholder="Select quality" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="standard">Standard (Wool Blend)</SelectItem>
+                                                        <SelectItem value="premium">Premium (100% Merino Wool)</SelectItem>
+                                                        <SelectItem value="luxury">Luxury (Cashmere Blend)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-2">
+                                    <AccordionTrigger className="text-lg font-semibold">Style & Fit</AccordionTrigger>
+                                    <AccordionContent className="pt-4">
+                                        <div className="grid sm:grid-cols-3 gap-6">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="fit">Fit Style</Label>
+                                                <Select name="fit" required>
+                                                    <SelectTrigger id="fit">
+                                                        <SelectValue placeholder="Select a fit" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="slim-fit">Slim Fit</SelectItem>
+                                                        <SelectItem value="modern-fit">Modern Fit</SelectItem>
+                                                        <SelectItem value="classic-fit">Classic Fit</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="lapel">Lapel Style</Label>
+                                                <Select name="lapel" required>
+                                                    <SelectTrigger id="lapel">
+                                                        <SelectValue placeholder="Select a lapel" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="notch">Notch Lapel</SelectItem>
+                                                        <SelectItem value="peak">Peak Lapel</SelectItem>
+                                                        <SelectItem value="shawl">Shawl Lapel</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="buttons">Button Stance</Label>
+                                                <Select name="buttons" required>
+                                                    <SelectTrigger id="buttons">
+                                                        <SelectValue placeholder="Select buttons" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="one-button">One-Button</SelectItem>
+                                                        <SelectItem value="two-button">Two-Button</SelectItem>
+                                                        <SelectItem value="double-breasted">Double-Breasted</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-3">
+                                    <AccordionTrigger className="text-lg font-semibold">Tailor & Notes</AccordionTrigger>
+                                    <AccordionContent className="pt-4 space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="tailor">Nearby Tailor</Label>
+                                            <Select name="tailor" required>
+                                                <SelectTrigger id="tailor">
+                                                    <SelectValue placeholder="Select a tailor" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {tailors.map(tailor => (
+                                                        <SelectItem key={tailor.id} value={tailor.id}>
+                                                            {tailor.name} - {tailor.location}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="message">Customization Message (Optional)</Label>
+                                            <Textarea id="message" name="message" placeholder="e.g., 'I'd like slightly shorter sleeves and a modern, slim fit.'"/>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </CardContent>
+                    </Card>
 
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-foreground">Style & Fit</h4>
-                      <div className="grid sm:grid-cols-3 gap-6">
-                          <div className="space-y-2">
-                              <Label htmlFor="fit">Fit Style</Label>
-                              <Select name="fit" required>
-                                  <SelectTrigger id="fit">
-                                      <SelectValue placeholder="Select a fit" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      <SelectItem value="slim-fit">Slim Fit</SelectItem>
-                                      <SelectItem value="modern-fit">Modern Fit</SelectItem>
-                                      <SelectItem value="classic-fit">Classic Fit</SelectItem>
-                                  </SelectContent>
-                              </Select>
-                          </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="lapel">Lapel Style</Label>
-                              <Select name="lapel" required>
-                                  <SelectTrigger id="lapel">
-                                      <SelectValue placeholder="Select a lapel" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      <SelectItem value="notch">Notch Lapel</SelectItem>
-                                      <SelectItem value="peak">Peak Lapel</SelectItem>
-                                      <SelectItem value="shawl">Shawl Lapel</SelectItem>
-                                  </SelectContent>
-                              </Select>
-                          </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="buttons">Button Stance</Label>
-                              <Select name="buttons" required>
-                                  <SelectTrigger id="buttons">
-                                      <SelectValue placeholder="Select buttons" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      <SelectItem value="one-button">One-Button</SelectItem>
-                                      <SelectItem value="two-button">Two-Button</SelectItem>
-                                      <SelectItem value="double-breasted">Double-Breasted</SelectItem>
-                                  </SelectContent>
-                              </Select>
-                          </div>
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                     <div className="space-y-2">
-                        <Label htmlFor="tailor">Nearby Tailor</Label>
-                         <Select name="tailor" required>
-                            <SelectTrigger id="tailor">
-                                <SelectValue placeholder="Select a tailor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {tailors.map(tailor => (
-                                    <SelectItem key={tailor.id} value={tailor.id}>
-                                        {tailor.name} - {tailor.location}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="message">Customization Message (Optional)</Label>
-                        <Textarea id="message" name="message" placeholder="e.g., 'I'd like slightly shorter sleeves and a modern, slim fit.'"/>
-                    </div>
-                </CardContent>
-                <CardFooter className="flex-col items-stretch">
-                     <div className="w-full space-y-2 mb-6">
-                        <div className="flex justify-between items-center text-muted-foreground">
-                            <span>Subtotal</span>
-                            <span>${originalPrice.toFixed(2)}</span>
-                        </div>
-                        {activePlan && (
-                            <div className="flex justify-between items-center text-primary font-medium">
-                                <span>{activePlan} Discount ({discount}%)</span>
-                                <span>-${discountAmount.toFixed(2)}</span>
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2"><Wand2/> Replicate a Design</CardTitle>
+                            <CardDescription>Have a design in mind? Upload an image and we'll create it for you.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="design-upload">Upload Your Design</Label>
+                                <Input id="design-upload" type="file" />
                             </div>
-                        )}
-                        <Separator className="my-2" />
-                        <div className="flex justify-between items-center font-bold text-xl">
-                            <span>Total</span>
-                            <span>${finalPrice.toFixed(2)}</span>
-                        </div>
-                    </div>
-                    <SubmitButton />
-                </CardFooter>
-            </Card>
+                            <div className="space-y-2">
+                                <Label htmlFor="design-notes">Replication Notes (Optional)</Label>
+                                <Textarea id="design-notes" placeholder="e.g., 'I want the fabric from this image, but the color from my selection above.'" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                
+                <div className="lg:col-span-1 space-y-8 sticky top-24">
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle>Virtual Try-On</CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative aspect-square w-full">
+                            <Image src="https://placehold.co/600x600.png" alt="3D Model Preview" fill className="rounded-md object-cover" data-ai-hint="mannequin fashion" />
+                            <Badge variant="secondary" className="absolute top-2 right-2">Coming Soon</Badge>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle>Order Summary</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                             <div className="w-full space-y-2">
+                                <div className="flex justify-between items-center text-muted-foreground">
+                                    <span>Subtotal</span>
+                                    <span>${originalPrice.toFixed(2)}</span>
+                                </div>
+                                {activePlan && (
+                                    <div className="flex justify-between items-center text-primary font-medium">
+                                        <span>{activePlan} Discount ({discount}%)</span>
+                                        <span>-${discountAmount.toFixed(2)}</span>
+                                    </div>
+                                )}
+                                <Separator className="my-2" />
+                                <div className="flex justify-between items-center font-bold text-xl">
+                                    <span>Total</span>
+                                    <span>${finalPrice.toFixed(2)}</span>
+                                </div>
+                            </div>
+                             <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                                <CalendarDays className="h-4 w-4"/>
+                                <span>Estimated Delivery: {estimatedDeliveryDate}</span>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                             <SubmitButton />
+                        </CardFooter>
+                    </Card>
+                </div>
+            </div>
         </form>
 
         <Dialog open={isPaymentDialogOpen} onOpenChange={closeDialog}>
@@ -391,3 +445,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+    

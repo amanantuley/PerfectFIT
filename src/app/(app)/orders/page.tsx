@@ -16,7 +16,7 @@ const orders = [
   {
     id: 'ORD015',
     item: 'Navy Blue Suit',
-    image: 'https://placehold.co/40x40.png',
+    image: 'https://placehold.co/64x64.png',
     dataAiHint: 'blue suit',
     type: 'Rent',
     status: 'Processing',
@@ -25,7 +25,7 @@ const orders = [
   {
     id: 'ORD014',
     item: 'Classic White Shirt',
-    image: 'https://placehold.co/40x40.png',
+    image: 'https://placehold.co/64x64.png',
     dataAiHint: 'white shirt',
     type: 'Buy',
     status: 'Shipped',
@@ -34,7 +34,7 @@ const orders = [
   {
     id: 'ORD012',
     item: 'Charcoal Gray Suit',
-    image: 'https://placehold.co/40x40.png',
+    image: 'https://placehold.co/64x64.png',
     dataAiHint: 'gray suit',
     type: 'Buy',
     status: 'Delivered',
@@ -43,7 +43,7 @@ const orders = [
   {
     id: 'ORD011',
     item: 'Casual Checkered Shirt',
-    image: 'https://placehold.co/40x40.png',
+    image: 'https://placehold.co/64x64.png',
     dataAiHint: 'checkered shirt',
     type: 'Rent',
     status: 'Returned',
@@ -52,7 +52,7 @@ const orders = [
   {
     id: 'ORD009',
     item: 'Classic White Shirt',
-    image: 'https://placehold.co/40x40.png',
+    image: 'https://placehold.co/64x64.png',
     dataAiHint: 'white shirt',
     type: 'Buy',
     status: 'Canceled',
@@ -176,3 +176,5 @@ export default function OrdersPage() {
     </Card>
   );
 }
+
+    
