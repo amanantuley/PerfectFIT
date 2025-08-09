@@ -274,7 +274,7 @@ export default function DashboardPage() {
                     <CardDescription>Use your camera for instant results.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="relative flex h-48 w-full items-center justify-center rounded-md border-2 border-dashed bg-muted/50 overflow-hidden">
+                    <div className="relative aspect-video w-full rounded-md border-2 border-dashed bg-muted/50 overflow-hidden">
                       <video ref={videoRef} className="w-full h-full object-cover scale-x-[-1]" autoPlay muted playsInline />
                        {hasCameraPermission === false && (
                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center text-white p-4">
@@ -307,7 +307,7 @@ export default function DashboardPage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="picture" className="sr-only">Full-Body Photo</Label>
-                      <label htmlFor="picture" className="relative flex h-48 w-full cursor-pointer items-center justify-center rounded-md border-2 border-dashed bg-muted/50 transition-colors hover:border-primary hover:bg-accent/20 flex-col gap-2">
+                      <label htmlFor="picture" className="relative flex aspect-video w-full cursor-pointer items-center justify-center rounded-md border-2 border-dashed bg-muted/50 transition-colors hover:border-primary hover:bg-accent/20 flex-col gap-2">
                         {imagePreview ? (
                             <Image src={imagePreview} alt="Image preview" fill className="rounded-md object-contain" />
                         ) : (

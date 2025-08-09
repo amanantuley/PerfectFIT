@@ -14,8 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, RefreshCw, Truck, Package, MoreHorizontal } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useTranslation } from '@/context/translation-provider';
+import { useRouter } from 'next/navigation';
 
 const allOrders = [
   { orderId: '#T302', customer: 'Liam Johnson', item: 'Navy Blue Suit', date: '2025-07-20', status: 'In Progress' },
@@ -41,9 +42,14 @@ const getStatusConfig = (status: string) => {
 
 export default function TailorOrdersPage() {
   const { t } = useTranslation();
+  const router = useRouter();
+
+  const handleMessageClick = () => {
+    router.push('/tailor/messages');
+  };
 
   return (
-    <Card className="animate-fade-in-up">
+    <Card className="animate-fade-in-up shadow-lg">
       <CardHeader>
         <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Manage Orders')}</CardTitle>
         <CardDescription>{t('View, update, and manage all incoming customer orders.')}</CardDescription>
@@ -72,8 +78,9 @@ export default function TailorOrdersPage() {
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>{t('Actions')}</DropdownMenuLabel>
                                         <DropdownMenuItem>{t('View Order Details')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleMessageClick}>{t('Message Customer' as any)}</DropdownMenuItem>
+                                        <DropdownMenuSeparator />
                                         <DropdownMenuItem>{t('Update Status')}</DropdownMenuItem>
-                                        <DropdownMenuItem>{t('Contact Customer')}</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -88,7 +95,7 @@ export default function TailorOrdersPage() {
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden md:block rounded-md border">
             <Table>
             <TableHeader>
                 <TableRow>
@@ -126,8 +133,9 @@ export default function TailorOrdersPage() {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>{t('Actions')}</DropdownMenuLabel>
                             <DropdownMenuItem>{t('View Order Details')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleMessageClick}>{t('Message Customer' as any)}</DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem>{t('Update Status')}</DropdownMenuItem>
-                            <DropdownMenuItem>{t('Contact Customer')}</DropdownMenuItem>
                         </DropdownMenuContent>
                         </DropdownMenu>
                     </TableCell>

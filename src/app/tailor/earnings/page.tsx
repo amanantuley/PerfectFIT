@@ -20,13 +20,13 @@ export default function TailorEarningsPage() {
 
   return (
     <div className="space-y-8 animate-fade-in-up">
-      <Card>
+      <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Earnings Overview')}</CardTitle>
           <CardDescription>{t('Track your finances and manage payouts.')}</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-muted/40">
+          <Card className="bg-muted/40 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t('Available for Payout')}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -38,7 +38,7 @@ export default function TailorEarningsPage() {
               <Button className="w-full"><Banknote className="mr-2 h-4 w-4"/>{t('Request Payout')}</Button>
             </CardFooter>
           </Card>
-           <Card className="bg-muted/40">
+           <Card className="bg-muted/40 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t('Next Payout Date')}</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -48,7 +48,7 @@ export default function TailorEarningsPage() {
               <p className="text-xs text-muted-foreground">{t('Payouts are processed on the 15th of each month.')}</p>
             </CardContent>
           </Card>
-           <Card className="bg-muted/40">
+           <Card className="bg-muted/40 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t('Total Earned (All Time)')}</CardTitle>
                <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -61,7 +61,7 @@ export default function TailorEarningsPage() {
         </CardContent>
       </Card>
       
-       <Card>
+       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Payout History')}</CardTitle>
           <CardDescription>{t('A record of all your past payouts.')}</CardDescription>
@@ -90,7 +90,7 @@ export default function TailorEarningsPage() {
             </div>
 
           {/* Desktop View */}
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden md:block rounded-md border">
             <Table>
                 <TableHeader>
                 <TableRow>

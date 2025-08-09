@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Loader2, Send } from 'lucide-react';
+import { MessageSquare, Loader2, Send, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { chatWithPerfectAI } from '@/ai/flows/chat-with-perfect-ai';
 import { cn } from '@/lib/utils';
@@ -91,10 +92,13 @@ export default function ChatWidget() {
                      <div className="bg-primary rounded-full p-2">
                         <LogoIcon className="h-5 w-5 text-primary-foreground" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                         <p className="text-lg font-bold">PerfectAI</p>
                         <p className="text-xs text-muted-foreground">Your Personal Style Assistant</p>
                     </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsOpen(false)}>
+                        <X className="h-4 w-4" />
+                    </Button>
                 </div>
                 <ScrollArea className="flex-1 p-4 bg-background/50">
                     <div className="space-y-4">

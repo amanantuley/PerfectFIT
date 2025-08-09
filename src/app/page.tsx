@@ -40,7 +40,7 @@ export default function LandingPage() {
           <Logo />
           <span className="sr-only">PerfectFit</span>
         </Link>
-        <nav className="ml-auto flex items-center gap-2 sm:gap-4">
+        <nav className="ml-auto flex items-center gap-4 sm:gap-6">
           <ThemeToggle />
           <Link href="/signup">
             <Button>
@@ -201,7 +201,7 @@ export default function LandingPage() {
         </section>
 
         {/* Team Section */}
-        <section id="team" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+        <section id="team" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '1.0s' }}>
             <div className="container px-4 md:px-6">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -237,7 +237,7 @@ export default function LandingPage() {
         </section>
 
          {/* Testimonials Section */}
-        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '1.0s' }}>
+        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up" style={{ animationDelay: '1.2s' }}>
           <div className="container px-4 md:px-6">
              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -334,7 +334,7 @@ export default function LandingPage() {
             <div>
                 <h4 className="font-semibold mb-4 text-foreground">Company</h4>
                 <ul className="space-y-2">
-                    <li><Link href="#team" className="text-sm hover:text-primary transition-colors">About Us</Link></li>
+                    <li><Link href="#about" className="text-sm hover:text-primary transition-colors">About Us</Link></li>
                     <li><Link href="#newsletter" className="text-sm hover:text-primary transition-colors">Contact</Link></li>
                     <li><Link href="#testimonials" className="text-sm hover:text-primary transition-colors">Testimonials</Link></li>
                 </ul>

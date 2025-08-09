@@ -1,4 +1,7 @@
 
+
+'use client';
+
 import {
   Table,
   TableBody,
@@ -8,9 +11,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package } from 'lucide-react';
+import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const orders = [
   {
@@ -78,6 +83,8 @@ const getStatusConfig = (status: string) => {
 };
 
 export default function OrdersPage() {
+    const router = useRouter();
+
   return (
     <Card className="shadow-lg animate-fade-in-up">
       <CardHeader>
@@ -116,12 +123,16 @@ export default function OrdersPage() {
                     </div>
                   </div>
                 </CardContent>
-                <div className="px-4 pb-3">
+                <CardFooter className="px-4 pb-3 flex flex-col sm:flex-row gap-2">
                    <Badge variant={statusConfig.variant} className="w-full justify-center py-2">
                         <statusConfig.icon className="h-4 w-4 mr-2" />
                         {statusConfig.text}
                     </Badge>
-                </div>
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => router.push('/messages')}>
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Message Tailor
+                    </Button>
+                </CardFooter>
               </Card>
             );
           })}
@@ -136,7 +147,8 @@ export default function OrdersPage() {
                 <TableHead>Item</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Date</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -165,7 +177,13 @@ export default function OrdersPage() {
                                     {statusConfig.text}
                                 </Badge>
                             </TableCell>
-                            <TableCell className="text-right">{order.date}</TableCell>
+                            <TableCell>{order.date}</TableCell>
+                             <TableCell className="text-right">
+                                <Button variant="outline" size="sm" onClick={() => router.push('/messages')}>
+                                    <MessageCircle className="mr-2 h-4 w-4" />
+                                    Message Tailor
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     );
                 })}
@@ -176,5 +194,3 @@ export default function OrdersPage() {
     </Card>
   );
 }
-
-    

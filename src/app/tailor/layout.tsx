@@ -13,6 +13,7 @@ import {
   SidebarInset,
   SidebarTrigger,
   useSidebar,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -36,6 +37,7 @@ import {
   User,
   LogOut,
   Settings,
+  MessageCircle,
 } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -93,6 +95,17 @@ function TailorLayoutContent({ children }: { children: React.ReactNode }) {
                 {t('Orders')}
               </SidebarMenuButton>
             </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() => handleNavigation('/tailor/messages')}
+                isActive={isActive('/tailor/messages')}
+                tooltip={t('Messages' as any)}
+              >
+                <MessageCircle />
+                {t('Messages' as any)}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarSeparator className="my-2" />
              <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={() => handleNavigation('/tailor/designs')}

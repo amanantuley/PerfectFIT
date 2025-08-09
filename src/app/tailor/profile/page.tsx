@@ -67,7 +67,7 @@ export default function TailorProfilePage() {
                             <AvatarImage src={avatarPreview} alt="Tailor Avatar" data-ai-hint="person avatar" />
                             <AvatarFallback>T</AvatarFallback>
                         </Avatar>
-                        <Label htmlFor="avatar-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90">
+                        <Label htmlFor="avatar-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors">
                             <Camera className="h-4 w-4" />
                             <Input id="avatar-upload" type="file" className="sr-only" accept="image/*" onChange={handleAvatarChange} />
                         </Label>

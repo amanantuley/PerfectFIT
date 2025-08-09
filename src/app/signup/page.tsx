@@ -10,6 +10,7 @@ import { Chrome } from 'lucide-react';
 import Image from 'next/image';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import Logo from '@/components/logo';
 
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
@@ -27,6 +28,14 @@ const AuthLogo = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+function PreLoader() {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
+      <Logo isSpinning={true} />
+    </div>
+  );
+}
+
 export default function SignupPage() {
   const router = useRouter();
 
@@ -34,10 +43,12 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [userType, setUserType] = useState<'customer' | 'tailor'>('customer');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       if (userType === 'tailor') {
@@ -47,11 +58,13 @@ export default function SignupPage() {
       }
     } catch (err: any) {
       setError(err.message || 'Login failed');
+      setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
     setError(null);
+    setIsLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
       if (userType === 'tailor') {
@@ -61,11 +74,16 @@ export default function SignupPage() {
       }
     } catch (err: any) {
       setError(err.message || 'Google login failed');
+      setIsLoading(false);
     }
   };
 
+  if (isLoading) {
+    return <PreLoader />;
+  }
+
   return (
-    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 animate-fade-in-up">
       <div className="hidden lg:block relative">
         <Image 
           src="/loginpage.png"

@@ -7,7 +7,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import {
   Accordion,
@@ -87,7 +86,7 @@ export default function TailorChargesPage() {
                     {category.services.map((service) => (
                       <div
                         key={service.id}
-                        className="grid grid-cols-1 md:grid-cols-3 items-end gap-4 rounded-md border p-4"
+                        className="grid grid-cols-1 md:grid-cols-3 items-end gap-4 rounded-md border p-4 transition-colors hover:bg-muted/30"
                       >
                         <div className="md:col-span-1 space-y-1">
                           <h4 className="font-semibold">{t(service.name as any)}</h4>

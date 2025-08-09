@@ -6,21 +6,21 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Building2, Target, Users, Gem, Recycle, Handshake } from 'lucide-react';
+import { Gem, Recycle, Handshake } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AboutUsPage() {
   return (
     <div className="space-y-8 animate-fade-in-up">
-      <Card className="shadow-lg">
-        <CardHeader className="text-center">
+      <Card className="shadow-lg overflow-hidden">
+        <CardHeader className="text-center p-6">
           <CardTitle className="text-4xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">About PerfectFit</CardTitle>
           <CardDescription className="text-lg">
             Redefining Tailoring with Artificial Intelligence.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-12">
-          <div className="relative h-64 w-full rounded-lg overflow-hidden">
+        <CardContent className="space-y-12 p-6">
+          <div className="relative h-48 sm:h-64 w-full rounded-lg overflow-hidden">
              <Image src="https://placehold.co/1200x400.png" alt="Tailoring workshop" fill className="object-cover" data-ai-hint="tailor workshop" />
           </div>
            <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -45,22 +45,22 @@ export default function AboutUsPage() {
           
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Our Core Values</h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="space-y-2">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-colors">
                 <Gem className="h-12 w-12 mx-auto text-primary" />
                 <h3 className="text-xl font-bold">Quality & Craftsmanship</h3>
                 <p className="text-muted-foreground">
                   We partner with skilled tailors and use only high-quality materials to ensure every garment is a masterpiece of comfort and durability.
                 </p>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-colors">
                 <Recycle className="h-12 w-12 mx-auto text-primary" />
                 <h3 className="text-xl font-bold">Sustainability</h3>
                 <p className="text-muted-foreground">
                   By creating made-to-order clothing, we minimize waste and promote a more sustainable fashion industry. Our rental service further supports a circular economy.
                 </p>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-colors sm:col-span-2 md:col-span-1">
                 <Handshake className="h-12 w-12 mx-auto text-primary" />
                 <h3 className="text-xl font-bold">Customer-Centric</h3>
                 <p className="text-muted-foreground">

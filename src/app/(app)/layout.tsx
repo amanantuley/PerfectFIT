@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Package, User, LogOut, Undo2, Info, Mail, Percent, Crown, MessageSquare, HeartPulse, Download, HelpCircle, ShoppingCart, Settings, Gem, Award, Wallet } from 'lucide-react';
+import { LayoutDashboard, Package, User, LogOut, Undo2, Info, Mail, Percent, Crown, MessageSquare, HeartPulse, HelpCircle, ShoppingCart, Settings, Gem, Award, Wallet, MessageCircle } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SubscriptionProvider, useSubscription } from '@/context/subscription-provider';
@@ -74,6 +74,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 <Package />
                 My Orders
               </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+                <SidebarMenuButton onClick={() => handleNavigation('/messages')} isActive={isActive('/messages')} tooltip="Messages">
+                    <MessageCircle />
+                    Messages
+                </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => handleNavigation('/cart')} isActive={isActive('/cart')} tooltip="My Cart">
@@ -142,20 +148,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 Offers
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={() => handleNavigation('/download')}
-                isActive={isActive('/download')}
-                tooltip="Download App"
-              >
-                <Download />
-                Download App
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            
+
             <SidebarSeparator className="my-2" />
-            
-            <SidebarMenuItem>
+
+             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={() => handleNavigation('/about')}
                 isActive={isActive('/about')}
@@ -165,6 +161,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 About Us
               </SidebarMenuButton>
             </SidebarMenuItem>
+            
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={() => handleNavigation('/contact')}

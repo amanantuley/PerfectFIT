@@ -6,8 +6,8 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md text-center shadow-lg animate-fade-in-up">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 animate-fade-in-up">
+      <Card className="w-full max-w-md text-center shadow-lg">
         <CardHeader>
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
             <SearchX className="h-12 w-12 text-primary" />
