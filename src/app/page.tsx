@@ -53,14 +53,18 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-16 md:py-24 lg:py-32 xl:py-48 text-center overflow-x-hidden animate-fade-in-up">
-          <div className="container px-4 md:px-6">
+        <section className="relative w-full py-16 md:py-24 lg:py-32 xl:py-48 text-center overflow-x-hidden animate-fade-in-up">
+          <div className="absolute inset-0 z-0">
+             <Image src="/landbcck.png" alt="Tailoring background" fill className="object-cover" />
+             <div className="absolute inset-0 bg-black/50"></div>
+          </div>
+          <div className="container relative px-4 md:px-6 z-10">
             <div className="grid gap-6 lg:gap-8">
               <div className="flex flex-col justify-center space-y-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
                   The Future of Tailoring is Here.
                 </h1>
-                <p className="max-w-[700px] text-foreground/80 md:text-xl mx-auto" >
+                <p className="max-w-[700px] text-muted-foreground text-lg sm:text-xl mx-auto" >
                   PerfectFit uses cutting-edge AI to take your precise body measurements from a single photo. Get custom-fit clothing delivered to your door.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center" >
@@ -199,7 +203,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
+        
         {/* Team Section */}
         <section id="team" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '1.0s' }}>
             <div className="container px-4 md:px-6">
@@ -334,7 +338,7 @@ export default function LandingPage() {
             <div>
                 <h4 className="font-semibold mb-4 text-foreground">Company</h4>
                 <ul className="space-y-2">
-                    <li><Link href="#about" className="text-sm hover:text-primary transition-colors">About Us</Link></li>
+                    <li><Link href="/about" className="text-sm hover:text-primary transition-colors">About Us</Link></li>
                     <li><Link href="#newsletter" className="text-sm hover:text-primary transition-colors">Contact</Link></li>
                     <li><Link href="#testimonials" className="text-sm hover:text-primary transition-colors">Testimonials</Link></li>
                 </ul>
