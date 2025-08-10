@@ -353,10 +353,10 @@ export default function LandingPage() {
                 <Logo />
                 <p className="text-sm">Redefining Tailoring with Artificial Intelligence.</p>
                 <div className="flex gap-4">
+                    <Link href="https://www.facebook.com/profile.php?id=61579391364648" className="hover:text-primary transition-colors"><FacebookIcon /></Link>
+                    <Link href="https://www.instagram.com/perfectfit_ai?igsh=ZmYzeXlsYXp0bW04" className="hover:text-primary transition-colors"><InstagramIcon /></Link>
                     <Link href="#" className="hover:text-primary transition-colors"><TwitterIcon /></Link>
-                    <Link href="#" className="hover:text-primary transition-colors"><FacebookIcon /></Link>
-                    <Link href="#" className="hover:text-primary transition-colors"><InstagramIcon /></Link>
-                    <Link href="#" className="hover:text-primary transition-colors"><LinkedinIcon /></Link>
+                    <Link href="https://www.linkedin.com/company/perfectfit-ai/" className="hover:text-primary transition-colors"><LinkedinIcon /></Link>
                 </div>
             </div>
             <div>

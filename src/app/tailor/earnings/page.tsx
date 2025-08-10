@@ -7,8 +7,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Download, Banknote, Calendar } from 'lucide-react';
 import { useTranslation } from '@/context/translation-provider';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
-const earningsHistory = [
+interface Payout {
+  payoutId: string;
+  date: string;
+  amount: number;
+  status: string;
+}
+
+const earningsHistory: Payout[] = [
   { payoutId: 'POUT-007', date: '2025-07-15', amount: 1250.00, status: 'Completed' },
   { payoutId: 'POUT-006', date: '2025-06-15', amount: 1100.50, status: 'Completed' },
   { payoutId: 'POUT-005', date: '2025-05-15', amount: 1300.75, status: 'Completed' },
@@ -17,6 +26,62 @@ const earningsHistory = [
 
 export default function TailorEarningsPage() {
   const { t } = useTranslation();
+
+  const handleDownloadInvoice = (payout: Payout) => {
+    const doc = new jsPDF();
+
+    // Add header
+    doc.setFontSize(20);
+    doc.text('PerfectFit Invoice', 14, 22);
+    doc.setFontSize(10);
+    doc.text('PerfectFit Inc.', 14, 30);
+    doc.text('Navi Mumbai, Maharashtra, India', 14, 35);
+    doc.text('support@perfectfit.com', 14, 40);
+
+    // Add invoice details
+    doc.setFontSize(12);
+    doc.text('Payout Details', 14, 60);
+    doc.setFontSize(10);
+    doc.text(`Payout ID: ${payout.payoutId}`, 14, 70);
+    doc.text(`Date: ${payout.date}`, 14, 75);
+    doc.text(`Status: ${payout.status}`, 14, 80);
+    doc.setFontSize(12);
+    doc.text(`Amount: ₹${payout.amount.toFixed(2)}`, 140, 70);
+    
+    // Add a line separator
+    doc.setLineWidth(0.5);
+    doc.line(14, 90, 196, 90);
+
+    // Add table using jspdf-autotable
+    (doc as any).autoTable({
+      startY: 100,
+      head: [['Description', 'Quantity', 'Rate', 'Amount']],
+      body: [
+        ['Suit Stitching Orders', '10', '₹800.00', '₹8000.00'],
+        ['Shirt Stitching Orders', '15', '₹400.00', '₹6000.00'],
+        ['Alterations', '5', '₹150.00', '₹750.00'],
+        ['Platform Fee', '', '', '-₹2250.00'],
+      ],
+      foot: [
+        ['', '', 'Subtotal', `₹${payout.amount.toFixed(2)}`],
+        ['', '', 'Total Payout', `₹${payout.amount.toFixed(2)}`],
+      ],
+      theme: 'striped',
+      headStyles: { fillColor: [34, 34, 34] }, // Dark grey header
+      footStyles: { fillColor: [230, 230, 230], textColor: [0,0,0] },
+    });
+
+    // Add footer
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text('Thank you for your partnership with PerfectFit!', 14, doc.internal.pageSize.height - 15);
+        doc.text(`Page ${i} of ${pageCount}`, 190, doc.internal.pageSize.height - 15);
+    }
+    
+    doc.save(`Invoice-${payout.payoutId}.pdf`);
+  };
 
   return (
     <div className="space-y-8 animate-fade-in-up">
@@ -32,7 +97,7 @@ export default function TailorEarningsPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$2,350.50</div>
+              <div className="text-2xl font-bold">₹2,350.50</div>
             </CardContent>
             <CardFooter>
               <Button className="w-full"><Banknote className="mr-2 h-4 w-4"/>{t('Request Payout')}</Button>
@@ -54,7 +119,7 @@ export default function TailorEarningsPage() {
                <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$45,231.89</div>
+              <div className="text-2xl font-bold">₹45,231.89</div>
               <p className="text-xs text-muted-foreground">{t('Since joining in Jan 2025.')}</p>
             </CardContent>
           </Card>
@@ -74,13 +139,13 @@ export default function TailorEarningsPage() {
                     <CardContent className="p-4 flex flex-col gap-2">
                          <div className="flex justify-between items-center">
                             <span className="font-medium">{payout.payoutId}</span>
-                            <span className="font-bold">${payout.amount.toFixed(2)}</span>
+                            <span className="font-bold">₹{payout.amount.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm text-muted-foreground">
                             <span>{payout.date}</span>
                             <Badge>{t(payout.status as any)}</Badge>
                         </div>
-                         <Button variant="outline" size="sm" className="w-full mt-2">
+                         <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => handleDownloadInvoice(payout)}>
                             <Download className="mr-2 h-3.5 w-3.5"/>
                             {t('Invoice')}
                         </Button>
@@ -106,12 +171,12 @@ export default function TailorEarningsPage() {
                     <TableRow key={payout.payoutId} className="transition-colors hover:bg-muted/30">
                     <TableCell className="font-medium">{payout.payoutId}</TableCell>
                     <TableCell>{payout.date}</TableCell>
-                    <TableCell>${payout.amount.toFixed(2)}</TableCell>
+                    <TableCell>₹{payout.amount.toFixed(2)}</TableCell>
                     <TableCell>
                         <Badge>{t(payout.status as any)}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleDownloadInvoice(payout)}>
                         <Download className="mr-2 h-3.5 w-3.5"/>
                         {t('Invoice')}
                         </Button>

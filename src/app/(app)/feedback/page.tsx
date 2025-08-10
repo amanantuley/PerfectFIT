@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Star } from 'lucide-react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { submitFeedback } from './actions';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const initialState = {
   message: '',
@@ -32,6 +32,7 @@ export default function FeedbackPage() {
     const { toast } = useToast();
     const formRef = useRef<HTMLFormElement>(null);
     const [state, formAction] = useFormState(submitFeedback, initialState);
+    const [rating, setRating] = useState(5);
 
     useEffect(() => {
       if (state.message) {
@@ -47,6 +48,7 @@ export default function FeedbackPage() {
             description: "Thanks for helping us improve.",
           });
           formRef.current?.reset();
+          setRating(5);
         }
       }
     }, [state, toast]);
@@ -73,16 +75,14 @@ export default function FeedbackPage() {
                     </div>
                 </div>
 
-                 <div className="space-y-2">
+                 <div className="space-y-3">
                     <Label>Overall Rating</Label>
-                    <RadioGroup name="rating" defaultValue="5" className="flex flex-wrap gap-4">
-                       {[1,2,3,4,5].map(rating => (
-                           <Label key={rating} htmlFor={`rating-${rating}`} className="flex flex-col items-center gap-2 cursor-pointer">
-                               <RadioGroupItem value={rating.toString()} id={`rating-${rating}`} className="sr-only" />
-                               <div className="p-3 rounded-md border-2 border-transparent peer-data-[state=checked]:border-primary">
-                                 <Star className="h-6 w-6 peer-data-[state=checked]:text-primary peer-data-[state=checked]:fill-primary text-muted-foreground" />
-                               </div>
-                               <span className="text-sm">{rating}</span>
+                     <RadioGroup name="rating" value={rating.toString()} onValueChange={(value) => setRating(Number(value))} className="flex flex-wrap gap-4 justify-center">
+                       {[1,2,3,4,5].map(star => (
+                           <Label key={star} htmlFor={`rating-${star}`} className="flex flex-col items-center gap-2 cursor-pointer p-2 rounded-md transition-colors hover:bg-muted">
+                               <RadioGroupItem value={star.toString()} id={`rating-${star}`} className="sr-only" />
+                               <Star className={`h-8 w-8 transition-colors ${rating >= star ? 'text-primary fill-primary' : 'text-muted-foreground'}`} />
+                               <span className="text-xs font-medium">{star}</span>
                            </Label>
                        ))}
                     </RadioGroup>

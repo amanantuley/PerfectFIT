@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 
 // Using an inline SVG for the scale icon as it's not in lucide-react
 const ScaleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -69,6 +70,8 @@ export default function DashboardPage() {
   const [isRecommending, setIsRecommending] = useState(false);
 
   const [showWelcomeVideo, setShowWelcomeVideo] = useState(false);
+  const [showConsultationDialog, setShowConsultationDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   useEffect(() => {
@@ -238,6 +241,20 @@ export default function DashboardPage() {
         description: "Recommendations are being updated.",
     });
   }
+  
+  const handleConsultationSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    // Simulate API call
+    setTimeout(() => {
+        setIsSubmitting(false);
+        setShowConsultationDialog(false);
+        toast({
+            title: "Request Submitted!",
+            description: "Our team will get back to you within 24 hours to schedule your consultation.",
+        });
+    }, 1500);
+  };
 
   const measurementItems = measurements
     ? [
@@ -388,7 +405,7 @@ export default function DashboardPage() {
                     <CardDescription>Get one-on-one help with your measurements.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Button className="w-full" variant="outline" onClick={() => toast({ title: "Coming Soon!", description: "Video consultations will be available soon." })}>
+                    <Button className="w-full" variant="outline" onClick={() => setShowConsultationDialog(true)}>
                         <Video className="mr-2 h-4 w-4" />
                         Schedule Video Consultation
                     </Button>
@@ -600,6 +617,38 @@ export default function DashboardPage() {
             </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={showConsultationDialog} onOpenChange={setShowConsultationDialog}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Schedule a Consultation</DialogTitle>
+                <DialogDescription>
+                    Fill out the form below and our team will contact you to schedule a video call.
+                </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleConsultationSubmit} className="space-y-4 py-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input id="name" name="name" required />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" name="email" type="email" required />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="notes">What would you like to discuss?</Label>
+                    <Textarea id="notes" name="notes" placeholder="e.g., 'I need help taking accurate photos for the AI measurement.'"/>
+                </div>
+                <DialogFooter>
+                    <Button variant="ghost" onClick={() => setShowConsultationDialog(false)}>Cancel</Button>
+                     <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Submit Request
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -75,12 +75,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 My Orders
               </SidebarMenuButton>
             </SidebarMenuItem>
-             <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => handleNavigation('/messages')} isActive={isActive('/messages')} tooltip="Messages">
-                    <MessageCircle />
-                    Messages
-                </SidebarMenuButton>
-            </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => handleNavigation('/cart')} isActive={isActive('/cart')} tooltip="My Cart">
                     <ShoppingCart />

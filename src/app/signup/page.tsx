@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
@@ -11,8 +11,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import Logo from '@/components/logo';
 
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult
+} from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
+import { Phone } from 'lucide-react';
 
 const AuthLogo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -50,9 +57,61 @@ export default function SignupPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [userType, setUserType] = useState<'customer' | 'tailor'>('customer');
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response: any) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+      });
+    }
+  }, []);
+
+  const handlePhoneLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const verifier = window.recaptchaVerifier;
+      const result = await signInWithPhoneNumber(auth, `+91${phone}`, verifier);
+      setConfirmationResult(result);
+      setShowOtpInput(true);
+      setIsLoading(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send OTP');
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    if (!confirmationResult) {
+      setError('Something went wrong. Please try sending OTP again.');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await confirmationResult.confirm(otp);
+      router.push(userType === 'tailor' ? '/tailor/dashboard' : '/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Invalid OTP');
+      setIsLoading(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,12 +146,13 @@ export default function SignupPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !showOtpInput) {
     return <PreLoader />;
   }
 
   return (
     <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 animate-fade-in-up">
+      <div id="recaptcha-container"></div>
       <div className="hidden lg:block relative">
         <Image 
           src="/loginpage.png"
@@ -139,11 +199,59 @@ export default function SignupPage() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                or continue with email
+                or continue with
               </span>
             </div>
           </div>
 
+          {!showOtpInput ? (
+            <form onSubmit={handlePhoneLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" variant="outline" disabled={isLoading}>
+                 {isLoading ? 'Sending...' : <><Phone className="mr-2 h-4 w-4" /> Continue with Phone</>}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpSubmit} className="space-y-4">
+               <p className="text-sm text-center text-muted-foreground">
+                Enter the OTP sent to +91{phone}. <Button variant="link" size="sm" className="p-0 h-auto" onClick={() => setShowOtpInput(false)}>Change</Button>
+               </p>
+              <div className="space-y-2">
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Verifying...' : 'Verify OTP & Sign In'}
+              </Button>
+            </form>
+          )}
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                or email
+              </span>
+            </div>
+          </div>
+          
           <form onSubmit={handleAuth} className="space-y-4">
             <div className="space-y-2">
               <Input
@@ -159,7 +267,7 @@ export default function SignupPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Create a password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -175,11 +283,12 @@ export default function SignupPage() {
                 />
               </div>
             )}
-            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
             <Button type="submit" className="w-full">
-              Continue as {userType === 'customer' ? 'Customer' : 'Tailor'}
+              Continue with Email
             </Button>
           </form>
+
+          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
           <p className="px-8 text-center text-sm text-muted-foreground">
             By signing up, you agree to our{' '}
@@ -196,4 +305,10 @@ export default function SignupPage() {
       </div>
     </div>
   );
+}
+
+declare global {
+  interface Window {
+    recaptchaVerifier: any;
+  }
 }

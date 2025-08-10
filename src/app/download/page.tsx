@@ -72,20 +72,18 @@ export default function DownloadAppPage() {
             <CardContent className="grid md:grid-cols-2 gap-12 items-center">
                 <div className="flex justify-center">
                     <Image 
-                        src="https://placehold.co/250x500.png"
+                        src="/app.png"
                         alt="App Screenshot 1"
                         width={250}
                         height={500}
                         className="rounded-xl shadow-2xl md:transform md:-rotate-6"
-                        data-ai-hint="app screenshot"
                     />
                     <Image 
-                        src="https://placehold.co/250x500.png"
+                        src="/app.png"
                         alt="App Screenshot 2"
                         width={250}
                         height={500}
                         className="rounded-xl shadow-2xl transform rotate-6 hidden md:block"
-                        data-ai-hint="app interface"
                     />
                 </div>
                 <div className="space-y-8">

@@ -71,14 +71,14 @@ export default function ContactUsPage() {
                 <Phone className="h-6 w-6 mt-1 text-primary"/>
                 <div>
                     <h3 className="font-semibold">Phone</h3>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                    <p className="text-muted-foreground">+91 9867408609</p>
                 </div>
             </div>
              <div className="flex items-start gap-4">
                 <MapPin className="h-6 w-6 mt-1 text-primary"/>
                 <div>
                     <h3 className="font-semibold">Address</h3>
-                    <p className="text-muted-foreground">123 Fashion Ave, Style City, 10001</p>
+                    <p className="text-muted-foreground">Navi Mumbai, Maharashtra, India</p>
                 </div>
             </div>
         </CardContent>
