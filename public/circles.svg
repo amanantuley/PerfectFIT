@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 440 440" width="440" height="440" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="ringsG" x1="0" x2="1">
+      <stop offset="0" stop-color="#8a6bff"></stop>
+      <stop offset="0.5" stop-color="#e66bff"></stop>
+      <stop offset="1" stop-color="#57d9ff"></stop>
+    </linearGradient>
+    <filter id="blurR" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5"></feGaussianBlur>
+    </filter>
+  </defs>
+
+  <g fill="none" stroke="url(#ringsG)" stroke-linecap="round" stroke-width="6" opacity="0.95">
+    <circle cx="120" cy="120" r="90" filter="url(#blurR)"></circle>
+    <circle cx="220" cy="180" r="105" stroke-width="4" opacity="0.9"></circle>
+    <circle cx="170" cy="80" r="55" stroke-width="5" opacity="0.85"></circle>
+    <circle cx="280" cy="60" r="38" stroke-width="3.5" opacity="0.8"></circle>
+  </g>
+</svg>

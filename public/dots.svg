@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420" width="420" height="420" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="dg" x1="0" x2="1">
+      <stop offset="0" stop-color="#6be"></stop>
+      <stop offset="1" stop-color="#ff7ac2"></stop>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(210,210)" fill="url(#dg)" opacity="0.95">
+    <!-- ring function: draw 18 dots per ring -->
+    <!-- inner -->
+    <g id="ring1">
+      <!-- manual circle placements for crisp distribution -->
+      <circle cx="0" cy="-28" r="4"></circle>
+      <circle cx="17" cy="-24" r="3.4"></circle>
+      <circle cx="28" cy="-6" r="3.6"></circle>
+      <circle cx="28" cy="18" r="3.4"></circle>
+      <circle cx="17" cy="33" r="3.6"></circle>
+      <circle cx="0" cy="38" r="3.2"></circle>
+      <circle cx="-17" cy="33" r="3.6"></circle>
+      <circle cx="-28" cy="18" r="3.4"></circle>
+      <circle cx="-28" cy="-6" r="3.2"></circle>
+    </g>
+
+    <!-- medium ring (scaled) -->
+    <g transform="scale(1.8)" opacity="0.9">
+      <use href="#ring1"></use>
+    </g>
+
+    <!-- large ring -->
+    <g transform="scale(3.2)" opacity="0.8">
+      <use href="#ring1"></use>
+    </g>
+  </g>
+</svg>

@@ -108,8 +108,9 @@ export default function LandingPage() {
         </section>
         
         {/* Our Vision Section */}
-        <section id="vision" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <div className="container px-4 md:px-6">
+        <section id="vision" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
+            <Image src="/dots.svg" alt="" aria-hidden="true" width={500} height={500} className="absolute -top-1/4 -left-24 opacity-20" />
+            <div className="container px-4 md:px-6 relative">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
                         <Lightbulb className="h-4 w-4" />
@@ -197,7 +198,7 @@ export default function LandingPage() {
         
         {/* How It Works Section */}
         <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 relative">
             <div className="space-y-3 flex flex-col items-center">
                <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
                   <Wand2 className="h-4 w-4" />
@@ -208,7 +209,7 @@ export default function LandingPage() {
                 Getting custom-tailored clothing has never been easier. Our process is designed for your convenience and precision.
               </p>
             </div>
-            <div className="mx-auto w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
+            <div className="mx-auto w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 relative">
               <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
                 <div className="p-4 bg-primary rounded-full text-primary-foreground font-bold text-2xl w-16 h-16 flex items-center justify-center">1</div>
                 <h3 className="text-xl font-bold">Scan</h3>
@@ -229,8 +230,9 @@ export default function LandingPage() {
         </section>
         
         {/* Team Section */}
-        <section id="team" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up" style={{ animationDelay: '1.0s' }}>
-            <div className="container px-4 md:px-6">
+        <section id="team" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '1.0s' }}>
+            <Image src="/circles.svg" alt="" aria-hidden="true" width={700} height={700} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15" />
+            <div className="container px-4 md:px-6 relative">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
                       <Users className="h-4 w-4"/>
