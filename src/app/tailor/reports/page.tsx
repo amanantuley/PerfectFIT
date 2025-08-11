@@ -32,12 +32,14 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend, // ✅ FIX: Import Legend
+  Legend,
 } from 'recharts';
 import { DollarSign, ClipboardList, TrendingUp, Download } from 'lucide-react';
 import { useTranslation } from '@/context/translation-provider';
 import { salesData, topDesigns, categoryData, COLORS } from '@/lib/reports-data';
 import { Button } from '@/components/ui/button';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const chartConfig = {
   sales: {
@@ -48,6 +50,58 @@ const chartConfig = {
 
 export default function TailorReportsPage() {
   const { t } = useTranslation();
+  
+  const handleExportPdf = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Business Performance Report', pageWidth / 2, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(`Date Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 28, { align: 'center' });
+    
+    // Key Metrics
+    doc.setFontSize(16);
+    doc.text('Key Metrics Summary', 14, 45);
+    doc.setFontSize(10);
+    (doc as any).autoTable({
+        startY: 50,
+        head: [['Metric', 'Value', 'Comparison']],
+        body: [
+            [t('Total Revenue'), '₹1,25,430', t('+15.2% from last month')],
+            [t('Total Orders'), '+210', t('+12.1% from last month')],
+            [t('Average Order Value'), '₹597.28', t('+3.1% from last month')],
+        ],
+        theme: 'grid',
+    });
+    
+    let lastY = (doc as any).lastAutoTable.finalY + 15;
+    
+    // Top Designs
+    doc.setFontSize(16);
+    doc.text(t('Top Performing Designs'), 14, lastY);
+    (doc as any).autoTable({
+        startY: lastY + 5,
+        head: [[t('Design Name'), t('Category'), t('Units Sold'), t('Total Revenue')]],
+        body: topDesigns.map(d => [t(d.name as any), t(d.category as any), d.unitsSold, `₹${d.totalRevenue.toLocaleString()}`]),
+        theme: 'striped',
+    });
+    
+     lastY = (doc as any).lastAutoTable.finalY + 15;
+    
+    // Monthly Sales
+    doc.setFontSize(16);
+    doc.text(t('Monthly Sales'), 14, lastY);
+    (doc as any).autoTable({
+        startY: lastY + 5,
+        head: [['Month', 'Sales (₹)']],
+        body: salesData.map(d => [d.month, `₹${d.sales.toLocaleString()}`]),
+        theme: 'striped'
+    });
+    
+    doc.save('PerfectFit-Business-Report.pdf');
+  };
 
   return (
     <div className="space-y-8 animate-fade-in-up">
@@ -58,7 +112,7 @@ export default function TailorReportsPage() {
           </h1>
           <p className="text-muted-foreground">{t('Analyze your business performance.')}</p>
         </div>
-        <Button>
+        <Button onClick={handleExportPdf}>
           <Download className="mr-2 h-4 w-4" />
           {t('Export PDF')}
         </Button>

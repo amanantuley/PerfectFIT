@@ -42,6 +42,8 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { addDays, format } from 'date-fns';
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import Logo from '@/components/logo';
 
 const initialState = {
   message: '',
@@ -127,11 +129,74 @@ export default function CartPage() {
   
   const handleDownloadInvoice = () => {
     const doc = new jsPDF();
-    doc.text("PerfectFit Invoice", 20, 20);
-    doc.text(`Order for: ${itemInCart.name}`, 20, 30);
-    doc.text(`Total Amount Paid: ₹${finalPrice.toFixed(2)}`, 20, 40);
-    doc.text(`Estimated Delivery: ${estimatedDeliveryDate}`, 20, 50);
-    doc.save(`invoice-${itemInCart.name.replace(/\s+/g, '-')}.pdf`);
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Header
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PerfectFit', 14, 22);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Navi Mumbai, Maharashtra, India', 14, 30);
+    doc.text('support@perfectfit.com', 14, 35);
+    doc.text('+91 9867408609', 14, 40);
+
+    doc.setFontSize(18);
+    doc.text('Invoice', pageWidth - 14, 22, { align: 'right' });
+    doc.setFontSize(10);
+    doc.text(`Invoice #: INV-${new Date().getTime()}`, pageWidth - 14, 30, { align: 'right' });
+    doc.text(`Date: ${format(new Date(), 'PPP')}`, pageWidth - 14, 35, { align: 'right' });
+
+    // Customer Info
+    doc.setLineWidth(0.5);
+    doc.line(14, 50, pageWidth - 14, 50);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Bill To:', 14, 58);
+    doc.setFont('helvetica', 'normal');
+    doc.text('User', 14, 64);
+    doc.text('user@example.com', 14, 69);
+    doc.text('123 Fashion Ave, Style City, 10001', 14, 74);
+    
+    // Order Details
+    (doc as any).autoTable({
+        startY: 85,
+        head: [['Item Description', 'Customizations', 'Unit Price', 'Total']],
+        body: [[
+            itemInCart.name,
+            'Color: Navy Blue\nQuality: Premium\nFit: Slim Fit\nLapel: Notch',
+            `₹${originalPrice.toFixed(2)}`,
+            `₹${originalPrice.toFixed(2)}`
+        ]],
+        theme: 'striped',
+        headStyles: { fillColor: [22, 163, 74] }, // A green color
+    });
+
+    // Totals
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.text('Subtotal:', pageWidth - 60, finalY);
+    doc.text(`₹${originalPrice.toFixed(2)}`, pageWidth - 14, finalY, { align: 'right' });
+
+    if(discount > 0) {
+        doc.text(`Discount (${discount}%):`, pageWidth - 60, finalY + 7);
+        doc.text(`-₹${discountAmount.toFixed(2)}`, pageWidth - 14, finalY + 7, { align: 'right' });
+    }
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Total Amount:', pageWidth - 60, finalY + 14);
+    doc.text(`₹${finalPrice.toFixed(2)}`, pageWidth - 14, finalY + 14, { align: 'right' });
+    
+    // Footer
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setLineWidth(0.5);
+    doc.line(14, pageHeight - 30, pageWidth - 14, pageHeight - 30);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Thank you for your business!', pageWidth / 2, pageHeight - 22, { align: 'center' });
+    doc.text('If you have any questions, please contact support@perfectfit.com.', pageWidth / 2, pageHeight - 15, { align: 'center' });
+
+    doc.save(`PerfectFit-Invoice-${itemInCart.name.replace(/\s+/g, '-')}.pdf`);
   };
 
   useEffect(() => {

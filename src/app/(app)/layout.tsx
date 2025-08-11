@@ -30,6 +30,8 @@ import { LayoutDashboard, Package, User, LogOut, Undo2, Info, Mail, Percent, Cro
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SubscriptionProvider, useSubscription } from '@/context/subscription-provider';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -40,6 +42,15 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const handleNavigation = (path: string) => {
     router.push(path);
     setOpenMobile(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      handleNavigation('/');
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
   };
 
   const isActive = (path: string) => pathname === path;
@@ -201,7 +212,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigation('/')}>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
