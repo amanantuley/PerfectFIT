@@ -96,13 +96,16 @@ export default function TailorChargesPage() {
                         </div>
                         <div className="md:col-span-1">
                            <Label htmlFor={service.id}>{t('Your Price')}</Label>
-                           <Input
-                             id={service.id}
-                             type="number"
-                             value={prices[service.id]}
-                             onChange={(e) => handlePriceChange(service.id, e.target.value)}
-                             className="mt-1"
-                           />
+                           <div className="relative">
+                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
+                             <Input
+                              id={service.id}
+                              type="number"
+                              value={prices[service.id]}
+                              onChange={(e) => handlePriceChange(service.id, e.target.value)}
+                              className="mt-1 pl-6"
+                             />
+                           </div>
                         </div>
                         <div className="md:col-span-1">
                           <p className="text-sm text-muted-foreground">

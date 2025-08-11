@@ -152,7 +152,7 @@ export default function SubscriptionPage() {
             Choose a plan to unlock premium perks and elevate your style.
             </p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8 items-start">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
             {plans.map((plan) => (
             <Card key={plan.name} className={`shadow-lg hover:shadow-xl transition-shadow flex flex-col ${plan.popular ? 'border-primary border-2' : ''}`}>
                 {plan.popular && <div className="text-center py-1 bg-primary text-primary-foreground text-sm font-bold">Most Popular</div>}

@@ -30,11 +30,11 @@ export default function AboutUsPage() {
                 Founded in 2025, PerfectFit was born from a desire to blend the timeless art of tailoring with the precision of modern technology. We saw a world where "off-the-rack" was the norm, leading to inconsistent fits, high return rates, and a disconnect between people and the clothes they wear. We believed there had to be a better way. Our founders, a team of fashion enthusiasts and tech innovators, came together to create a solution that brings the bespoke tailoring experience into the digital age. We believe everyone deserves to wear clothes that feel like they were made just for them, because they are.
               </p>
             </div>
-            <Image src="https://placehold.co/600x400.png" alt="Founders" width={600} height={400} className="rounded-lg shadow-md" data-ai-hint="team startup" />
+            <Image src="https://placehold.co/600x400.png" alt="Founders" width={600} height={400} className="rounded-lg shadow-md transition-transform duration-300 hover:scale-105" data-ai-hint="team startup" />
           </div>
 
            <div className="grid md:grid-cols-2 gap-8 items-center">
-             <Image src="https://placehold.co/600x400.png" alt="AI Technology" width={600} height={400} className="rounded-lg shadow-md md:order-2" data-ai-hint="abstract technology" />
+             <Image src="https://placehold.co/600x400.png" alt="AI Technology" width={600} height={400} className="rounded-lg shadow-md md:order-2 transition-transform duration-300 hover:scale-105" data-ai-hint="abstract technology" />
             <div className="md:order-1">
               <h2 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Our Mission</h2>
               <p className="text-muted-foreground leading-relaxed">
@@ -46,21 +46,21 @@ export default function AboutUsPage() {
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Our Core Values</h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
-              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-colors">
+              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-105">
                 <Gem className="h-12 w-12 mx-auto text-primary" />
                 <h3 className="text-xl font-bold">Quality & Craftsmanship</h3>
                 <p className="text-muted-foreground">
                   We partner with skilled tailors and use only high-quality materials to ensure every garment is a masterpiece of comfort and durability.
                 </p>
               </div>
-              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-colors">
+              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-105">
                 <Recycle className="h-12 w-12 mx-auto text-primary" />
                 <h3 className="text-xl font-bold">Sustainability</h3>
                 <p className="text-muted-foreground">
                   By creating made-to-order clothing, we minimize waste and promote a more sustainable fashion industry. Our rental service further supports a circular economy.
                 </p>
               </div>
-              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-colors sm:col-span-2 md:col-span-1">
+              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-105 sm:col-span-2 md:col-span-1">
                 <Handshake className="h-12 w-12 mx-auto text-primary" />
                 <h3 className="text-xl font-bold">Customer-Centric</h3>
                 <p className="text-muted-foreground">
