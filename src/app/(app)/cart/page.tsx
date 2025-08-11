@@ -29,7 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Loader2, Wallet, ArrowLeft, Upload, Wand2, CalendarDays } from 'lucide-react';
+import { ShoppingCart, Loader2, Wallet, ArrowLeft, Wand2, CalendarDays, Download } from 'lucide-react';
 import Image from 'next/image';
 import { useFormState, useFormStatus } from 'react-dom';
 import React, { useEffect, useRef, useState } from 'react';
@@ -41,6 +41,7 @@ import { useSubscription } from '@/context/subscription-provider';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { addDays, format } from 'date-fns';
+import jsPDF from 'jspdf';
 
 const initialState = {
   message: '',
@@ -123,10 +124,18 @@ export default function CartPage() {
   const finalPrice = originalPrice - discountAmount;
 
   const estimatedDeliveryDate = format(addDays(new Date(), 10), 'PPP');
+  
+  const handleDownloadInvoice = () => {
+    const doc = new jsPDF();
+    doc.text("PerfectFit Invoice", 20, 20);
+    doc.text(`Order for: ${itemInCart.name}`, 20, 30);
+    doc.text(`Total Amount Paid: ₹${finalPrice.toFixed(2)}`, 20, 40);
+    doc.text(`Estimated Delivery: ${estimatedDeliveryDate}`, 20, 50);
+    doc.save(`invoice-${itemInCart.name.replace(/\s+/g, '-')}.pdf`);
+  };
 
   useEffect(() => {
     if (state.message && !state.error) {
-        // On successful form submission, open the payment dialog.
         setIsPaymentDialogOpen(true);
     } else if (state.message && state.error) {
         toast({
@@ -145,9 +154,14 @@ export default function CartPage() {
       description: method === 'PerfectPay'
         ? `${state.message} You've earned 5% cashback!`
         : state.message,
+      action: (
+        <Button variant="outline" size="sm" onClick={handleDownloadInvoice}>
+            <Download className="mr-2 h-4 w-4" />
+            Download Invoice
+        </Button>
+      ),
     });
     formRef.current?.reset();
-    // In a real app, you might redirect to an order confirmation page.
   };
 
   const closeDialog = () => {
@@ -186,9 +200,9 @@ export default function CartPage() {
                                 </div>
                                 <div className="text-right">
                                     {activePlan && (
-                                        <p className="text-muted-foreground line-through">${originalPrice.toFixed(2)}</p>
+                                        <p className="text-muted-foreground line-through">₹{originalPrice.toFixed(2)}</p>
                                     )}
-                                    <p className="text-xl font-bold">${finalPrice.toFixed(2)}</p>
+                                    <p className="text-xl font-bold">₹{finalPrice.toFixed(2)}</p>
                                 </div>
                                 <input type="hidden" name="itemName" value={itemInCart.name} />
                             </div>
@@ -298,39 +312,28 @@ export default function CartPage() {
                                         </div>
                                     </AccordionContent>
                                 </AccordionItem>
+                                <AccordionItem value="item-4">
+                                    <AccordionTrigger className="text-lg font-semibold">
+                                        <div className='flex items-center gap-2'><Wand2/> Replicate a Design</div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pt-4 space-y-4">
+                                        <p className='text-sm text-muted-foreground'>Have a design in mind? Upload an image and we'll create it for you.</p>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="design-upload">Upload Your Design</Label>
+                                            <Input id="design-upload" type="file" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="design-notes">Replication Notes (Optional)</Label>
+                                            <Textarea id="design-notes" placeholder="e.g., 'I want the fabric from this image, but the color from my selection above.'" />
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
                             </Accordion>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2"><Wand2/> Replicate a Design</CardTitle>
-                            <CardDescription>Have a design in mind? Upload an image and we'll create it for you.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                             <div className="space-y-2">
-                                <Label htmlFor="design-upload">Upload Your Design</Label>
-                                <Input id="design-upload" type="file" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="design-notes">Replication Notes (Optional)</Label>
-                                <Textarea id="design-notes" placeholder="e.g., 'I want the fabric from this image, but the color from my selection above.'" />
-                            </div>
                         </CardContent>
                     </Card>
                 </div>
                 
                 <div className="lg:col-span-1 space-y-8 sticky top-24">
-                    <Card className="shadow-lg">
-                        <CardHeader>
-                            <CardTitle>Virtual Try-On</CardTitle>
-                        </CardHeader>
-                        <CardContent className="relative aspect-square w-full">
-                            <Image src="https://placehold.co/600x600.png" alt="3D Model Preview" fill className="rounded-md object-cover" data-ai-hint="mannequin fashion" />
-                            <Badge variant="secondary" className="absolute top-2 right-2">Coming Soon</Badge>
-                        </CardContent>
-                    </Card>
-
                     <Card className="shadow-lg">
                         <CardHeader>
                             <CardTitle>Order Summary</CardTitle>
@@ -339,18 +342,18 @@ export default function CartPage() {
                              <div className="w-full space-y-2">
                                 <div className="flex justify-between items-center text-muted-foreground">
                                     <span>Subtotal</span>
-                                    <span>${originalPrice.toFixed(2)}</span>
+                                    <span>₹{originalPrice.toFixed(2)}</span>
                                 </div>
                                 {activePlan && (
                                     <div className="flex justify-between items-center text-primary font-medium">
                                         <span>{activePlan} Discount ({discount}%)</span>
-                                        <span>-${discountAmount.toFixed(2)}</span>
+                                        <span>-₹{discountAmount.toFixed(2)}</span>
                                     </div>
                                 )}
                                 <Separator className="my-2" />
                                 <div className="flex justify-between items-center font-bold text-xl">
                                     <span>Total</span>
-                                    <span>${finalPrice.toFixed(2)}</span>
+                                    <span>₹{finalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
                              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
@@ -361,6 +364,16 @@ export default function CartPage() {
                         <CardFooter>
                              <SubmitButton />
                         </CardFooter>
+                    </Card>
+
+                     <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle>Virtual Try-On</CardTitle>
+                        </CardHeader>
+                        <CardContent className="relative aspect-square w-full">
+                            <Image src="https://placehold.co/600x600.png" alt="3D Model Preview" fill className="rounded-md object-cover" data-ai-hint="mannequin fashion" />
+                            <Badge variant="secondary" className="absolute top-2 right-2">Coming Soon</Badge>
+                        </CardContent>
                     </Card>
                 </div>
             </div>
@@ -375,8 +388,8 @@ export default function CartPage() {
                     </DialogTitle>
                      <DialogDescription>
                         {selectedPaymentMethod === 'creditCard'
-                            ? `Please provide your payment information for the amount of $${finalPrice.toFixed(2)}.`
-                            : `Choose your preferred payment method to finalize your order for $${finalPrice.toFixed(2)}.`}
+                            ? `Please provide your payment information for the amount of ₹${finalPrice.toFixed(2)}.`
+                            : `Choose your preferred payment method to finalize your order for ₹${finalPrice.toFixed(2)}.`}
                     </DialogDescription>
                 </DialogHeader>
 

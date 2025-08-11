@@ -1,4 +1,6 @@
 
+'use client';
+
 import {
   Card,
   CardContent,
@@ -11,10 +13,21 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Award } from 'lucide-react';
 import { rewards } from '@/lib/rewards-data';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 export default function RewardsPage() {
-  const currentPoints = 250;
-  const pointsToNextReward = 500;
+  const { toast } = useToast();
+  const [currentPoints, setCurrentPoints] = useState(250);
+  const pointsToNextReward = 300; // Next reward is at 300 points
+
+  const handleRedeem = (points: number, title: string) => {
+    setCurrentPoints(prev => prev - points);
+    toast({
+        title: "Reward Redeemed!",
+        description: `You've successfully redeemed "${title}".`,
+    });
+  };
 
   return (
     <div className="space-y-8 animate-fade-in-up">
@@ -36,7 +49,7 @@ export default function RewardsPage() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Next reward at {pointsToNextReward} points</span>
-                <span>{pointsToNextReward - currentPoints} points to go</span>
+                <span>{pointsToNextReward - currentPoints > 0 ? `${pointsToNextReward - currentPoints} points to go` : 'New reward unlocked!'}</span>
             </div>
             <Progress value={(currentPoints / pointsToNextReward) * 100} className="h-2" />
           </div>
@@ -59,8 +72,13 @@ export default function RewardsPage() {
               </CardContent>
               <CardFooter className="flex-col gap-2">
                 <p className="font-bold text-lg">{reward.points} Points</p>
-                <Button variant="secondary" className="w-full" disabled={currentPoints < reward.points}>
-                  Redeem
+                <Button 
+                    variant={currentPoints >= reward.points ? 'default' : 'secondary'} 
+                    className="w-full" 
+                    disabled={currentPoints < reward.points}
+                    onClick={() => handleRedeem(reward.points, reward.title)}
+                >
+                  {currentPoints >= reward.points ? 'Redeem' : 'Not enough points'}
                 </Button>
               </CardFooter>
             </Card>

@@ -1,6 +1,10 @@
 
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tag, Percent, Sparkles, ShoppingBag } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tag, Percent, Sparkles, ShoppingBag, Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const offers = [
   {
@@ -42,6 +46,17 @@ const offers = [
 ];
 
 export default function OffersPage() {
+  const { toast } = useToast();
+
+  const handleCopyCode = (code: string) => {
+    if (code === 'No code needed') return;
+    navigator.clipboard.writeText(code);
+    toast({
+      title: 'Code Copied!',
+      description: `"${code}" has been copied to your clipboard.`,
+    });
+  };
+
   return (
     <div className="space-y-8 animate-fade-in-up">
       <div className="text-center">
@@ -61,9 +76,17 @@ export default function OffersPage() {
                 </div>
             </CardHeader>
             <CardContent className="flex-grow flex items-end">
-                <div className="w-full text-center p-4 border-2 border-dashed rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground">Use Code</p>
-                    <p className="text-2xl font-bold tracking-widest">{offer.code}</p>
+                <div className="w-full text-center p-4 border-2 border-dashed rounded-lg bg-muted/50 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm text-muted-foreground">Use Code</p>
+                        <p className="text-2xl font-bold tracking-widest">{offer.code}</p>
+                    </div>
+                    {offer.code !== 'No code needed' && (
+                        <Button variant="ghost" size="icon" onClick={() => handleCopyCode(offer.code)}>
+                            <Copy className="h-5 w-5" />
+                            <span className="sr-only">Copy code</span>
+                        </Button>
+                    )}
                 </div>
             </CardContent>
           </Card>

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -13,9 +12,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle } from 'lucide-react';
+import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 const orders = [
   {
@@ -65,6 +69,23 @@ const orders = [
   },
 ];
 
+type Order = (typeof orders)[0];
+
+const initialConversation = [
+    {
+        role: 'user',
+        name: 'You',
+        content: "Hi! Just wanted to confirm if it's possible to add functional cuff buttons to my order?",
+        avatar: "https://placehold.co/100x100.png",
+    },
+    {
+        role: 'tailor',
+        name: 'John "The Stitch" Doe',
+        content: "Hello! Absolutely, consider it done. We'll add surgeon's cuffs to your suit jacket. Great choice!",
+        avatar: "https://placehold.co/100x100.png",
+    },
+];
+
 const getStatusConfig = (status: string) => {
   switch (status.toLowerCase()) {
     case 'processing':
@@ -83,9 +104,16 @@ const getStatusConfig = (status: string) => {
 };
 
 export default function OrdersPage() {
-    const router = useRouter();
+    const [isMessageOpen, setIsMessageOpen] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+    const handleOpenMessageDialog = (order: Order) => {
+        setSelectedOrder(order);
+        setIsMessageOpen(true);
+    };
 
   return (
+    <>
     <Card className="shadow-lg animate-fade-in-up">
       <CardHeader>
         <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">My Orders</CardTitle>
@@ -128,7 +156,7 @@ export default function OrdersPage() {
                         <statusConfig.icon className="h-4 w-4 mr-2" />
                         {statusConfig.text}
                     </Badge>
-                    <Button variant="outline" size="sm" className="w-full" onClick={() => router.push('/messages')}>
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => handleOpenMessageDialog(order)}>
                         <MessageCircle className="mr-2 h-4 w-4" />
                         Message Tailor
                     </Button>
@@ -179,7 +207,7 @@ export default function OrdersPage() {
                             </TableCell>
                             <TableCell>{order.date}</TableCell>
                              <TableCell className="text-right">
-                                <Button variant="outline" size="sm" onClick={() => router.push('/messages')}>
+                                <Button variant="outline" size="sm" onClick={() => handleOpenMessageDialog(order)}>
                                     <MessageCircle className="mr-2 h-4 w-4" />
                                     Message Tailor
                                 </Button>
@@ -192,5 +220,66 @@ export default function OrdersPage() {
         </div>
       </CardContent>
     </Card>
+
+    <Dialog open={isMessageOpen} onOpenChange={setIsMessageOpen}>
+        <DialogContent className="h-[32rem] flex flex-col p-0">
+             <DialogHeader className="p-4 border-b">
+                <DialogTitle>Conversation about {selectedOrder?.item}</DialogTitle>
+                <DialogDescription>Order ID: {selectedOrder?.id}</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="flex-1 p-4">
+                <div className="space-y-6">
+                    {initialConversation.map((message, index) => (
+                         <div
+                            key={index}
+                            className={cn(
+                                "flex items-start gap-4",
+                                message.role === 'user' ? 'justify-end' : 'justify-start'
+                            )}
+                        >
+                            {message.role === 'tailor' && (
+                                <Avatar className="h-10 w-10 border">
+                                    <AvatarImage src={message.avatar} alt={message.name} data-ai-hint="person face" />
+                                    <AvatarFallback>T</AvatarFallback>
+                                </Avatar>
+                            )}
+                            <div className={cn(
+                                "max-w-xs space-y-2",
+                                message.role === 'user' && 'text-right'
+                            )}>
+                                <p className="font-bold text-sm">{message.name}</p>
+                                <div
+                                    className={cn(
+                                        "rounded-lg px-4 py-3 text-sm",
+                                        message.role === 'user'
+                                            ? 'bg-primary text-primary-foreground rounded-br-none'
+                                            : 'bg-muted rounded-bl-none'
+                                    )}
+                                >
+                                    <p className="whitespace-pre-wrap">{message.content}</p>
+                                </div>
+                            </div>
+                            {message.role === 'user' && (
+                                <Avatar className="h-10 w-10 border">
+                                    <AvatarImage src={message.avatar} alt={message.name} data-ai-hint="person avatar" />
+                                    <AvatarFallback>U</AvatarFallback>
+                                </Avatar>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </ScrollArea>
+             <div className="p-4 border-t bg-background">
+                <form className="flex items-center gap-4">
+                    <Input placeholder="Type your message..." className="flex-1" />
+                    <Button type="submit">
+                        <Send className="mr-2 h-4 w-4" />
+                        Send
+                    </Button>
+                </form>
+            </div>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }

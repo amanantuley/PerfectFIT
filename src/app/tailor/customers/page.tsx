@@ -17,7 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Plus, Star } from 'lucide-react';
+import { MoreHorizontal, Plus, Star, User, MessageSquare, StickyNote, Loader2 } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,8 +25,21 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/context/translation-provider';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const customers = [
     {
@@ -66,11 +79,39 @@ const customers = [
     },
 ];
 
+type Customer = typeof customers[0];
 
 export default function TailorCustomersPage() {
     const { t } = useTranslation();
+    const router = useRouter();
+    const { toast } = useToast();
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [isNoteOpen, setIsNoteOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleAction = (customer: Customer, action: 'details' | 'message' | 'note') => {
+        setSelectedCustomer(customer);
+        if (action === 'details') setIsDetailOpen(true);
+        if (action === 'message') router.push('/tailor/messages');
+        if (action === 'note') setIsNoteOpen(true);
+    };
+
+    const handleNoteSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setTimeout(() => {
+            setIsSubmitting(false);
+            setIsNoteOpen(false);
+            toast({
+                title: t('Note Saved'),
+                description: `${t('A new note for')} ${selectedCustomer?.name} ${t('has been saved.')}`,
+            });
+        }, 1000);
+    };
 
     return (
+        <>
         <Card className="animate-fade-in-up shadow-lg">
             <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -85,7 +126,6 @@ export default function TailorCustomersPage() {
                 </Button>
             </CardHeader>
             <CardContent>
-                {/* Mobile View */}
                 <div className="md:hidden space-y-4">
                 {customers.map((customer) => (
                     <Card key={customer.email} className="overflow-hidden transition-all hover:shadow-md hover:bg-muted/50">
@@ -112,9 +152,9 @@ export default function TailorCustomersPage() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>{t('Actions')}</DropdownMenuLabel>
-                                    <DropdownMenuItem>{t('View Details')}</DropdownMenuItem>
-                                    <DropdownMenuItem>{t('Message')}</DropdownMenuItem>
-                                    <DropdownMenuItem>{t('Add Note')}</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleAction(customer, 'details')}>{t('View Details')}</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleAction(customer, 'message')}>{t('Message')}</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleAction(customer, 'note')}>{t('Add Note')}</DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </CardContent>
@@ -122,7 +162,6 @@ export default function TailorCustomersPage() {
                 ))}
                 </div>
 
-                {/* Desktop View */}
                 <div className="hidden md:block rounded-md border">
                     <Table>
                         <TableHeader>
@@ -157,9 +196,9 @@ export default function TailorCustomersPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>{t('Actions')}</DropdownMenuLabel>
-                                                <DropdownMenuItem>{t('View Details')}</DropdownMenuItem>
-                                                <DropdownMenuItem>{t('Message')}</DropdownMenuItem>
-                                                <DropdownMenuItem>{t('Add Note')}</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleAction(customer, 'details')}>{t('View Details')}</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleAction(customer, 'message')}>{t('Message')}</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleAction(customer, 'note')}>{t('Add Note')}</DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
@@ -170,5 +209,46 @@ export default function TailorCustomersPage() {
                 </div>
             </CardContent>
         </Card>
+
+        {/* Dialog for Customer Details */}
+        <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2"><User /> {selectedCustomer?.name}</DialogTitle>
+                    <DialogDescription>{selectedCustomer?.email} &bull; {selectedCustomer?.phone}</DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                    <h3 className="font-semibold mb-2">{t('Order History')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('A list of past orders will appear here.')}</p>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsDetailOpen(false)}>{t('Close')}</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        {/* Dialog for Adding a Note */}
+        <Dialog open={isNoteOpen} onOpenChange={setIsNoteOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2"><StickyNote /> {t('Add Note for')} {selectedCustomer?.name}</DialogTitle>
+                    <DialogDescription>{t('Add a private note. This will not be visible to the customer.')}</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleNoteSubmit} className="py-4 space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="note">{t('Note')}</Label>
+                        <Textarea id="note" placeholder={t('e.g., Prefers a specific type of lining...')} rows={4} />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" type="button" onClick={() => setIsNoteOpen(false)}>{t('Cancel')}</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {t('Save Note')}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+        </>
     );
 }

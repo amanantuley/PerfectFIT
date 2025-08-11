@@ -4,11 +4,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, Download, Banknote, Calendar } from 'lucide-react';
+import { DollarSign, Download, Banknote, Calendar, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/context/translation-provider';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Payout {
   payoutId: string;
@@ -18,19 +28,34 @@ interface Payout {
 }
 
 const earningsHistory: Payout[] = [
-  { payoutId: 'POUT-007', date: '2025-07-15', amount: 1250.00, status: 'Completed' },
-  { payoutId: 'POUT-006', date: '2025-06-15', amount: 1100.50, status: 'Completed' },
-  { payoutId: 'POUT-005', date: '2025-05-15', amount: 1300.75, status: 'Completed' },
-  { payoutId: 'POUT-004', date: '2025-04-15', amount: 950.00, status: 'Completed' },
+  { payoutId: 'POUT-007', date: '2025-07-15', amount: 12500.00, status: 'Completed' },
+  { payoutId: 'POUT-006', date: '2025-06-15', amount: 11005.50, status: 'Completed' },
+  { payoutId: 'POUT-005', date: '2025-05-15', amount: 13007.75, status: 'Completed' },
+  { payoutId: 'POUT-004', date: '2025-04-15', amount: 9500.00, status: 'Completed' },
 ];
 
 export default function TailorEarningsPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [isPayoutDialogOpen, setIsPayoutDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRequestPayout = () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+        setIsLoading(false);
+        setIsPayoutDialogOpen(false);
+        toast({
+            title: t('Payout Requested'),
+            description: t('Your payout request for ₹2,350.50 has been submitted.'),
+        });
+    }, 1500);
+  };
 
   const handleDownloadInvoice = (payout: Payout) => {
     const doc = new jsPDF();
 
-    // Add header
     doc.setFontSize(20);
     doc.text('PerfectFit Invoice', 14, 22);
     doc.setFontSize(10);
@@ -38,7 +63,6 @@ export default function TailorEarningsPage() {
     doc.text('Navi Mumbai, Maharashtra, India', 14, 35);
     doc.text('support@perfectfit.com', 14, 40);
 
-    // Add invoice details
     doc.setFontSize(12);
     doc.text('Payout Details', 14, 60);
     doc.setFontSize(10);
@@ -48,11 +72,9 @@ export default function TailorEarningsPage() {
     doc.setFontSize(12);
     doc.text(`Amount: ₹${payout.amount.toFixed(2)}`, 140, 70);
     
-    // Add a line separator
     doc.setLineWidth(0.5);
     doc.line(14, 90, 196, 90);
 
-    // Add table using jspdf-autotable
     (doc as any).autoTable({
       startY: 100,
       head: [['Description', 'Quantity', 'Rate', 'Amount']],
@@ -63,15 +85,14 @@ export default function TailorEarningsPage() {
         ['Platform Fee', '', '', '-₹2250.00'],
       ],
       foot: [
-        ['', '', 'Subtotal', `₹${payout.amount.toFixed(2)}`],
+        ['', '', 'Subtotal', `₹${(payout.amount * 1.2).toFixed(2)}`],
         ['', '', 'Total Payout', `₹${payout.amount.toFixed(2)}`],
       ],
       theme: 'striped',
-      headStyles: { fillColor: [34, 34, 34] }, // Dark grey header
+      headStyles: { fillColor: [34, 34, 34] }, 
       footStyles: { fillColor: [230, 230, 230], textColor: [0,0,0] },
     });
 
-    // Add footer
     const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -84,6 +105,7 @@ export default function TailorEarningsPage() {
   };
 
   return (
+    <>
     <div className="space-y-8 animate-fade-in-up">
       <Card className="shadow-lg">
         <CardHeader>
@@ -100,7 +122,7 @@ export default function TailorEarningsPage() {
               <div className="text-2xl font-bold">₹2,350.50</div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full"><Banknote className="mr-2 h-4 w-4"/>{t('Request Payout')}</Button>
+              <Button className="w-full" onClick={() => setIsPayoutDialogOpen(true)}><Banknote className="mr-2 h-4 w-4"/>{t('Request Payout')}</Button>
             </CardFooter>
           </Card>
            <Card className="bg-muted/40 hover:shadow-md transition-shadow">
@@ -132,7 +154,6 @@ export default function TailorEarningsPage() {
           <CardDescription>{t('A record of all your past payouts.')}</CardDescription>
         </CardHeader>
         <CardContent>
-           {/* Mobile View */}
             <div className="md:hidden space-y-4">
             {earningsHistory.map((payout) => (
                 <Card key={payout.payoutId} className="overflow-hidden transition-all hover:shadow-md hover:bg-muted/50">
@@ -154,7 +175,6 @@ export default function TailorEarningsPage() {
             ))}
             </div>
 
-          {/* Desktop View */}
           <div className="hidden md:block rounded-md border">
             <Table>
                 <TableHeader>
@@ -189,5 +209,24 @@ export default function TailorEarningsPage() {
         </CardContent>
       </Card>
     </div>
+    
+    <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{t('Confirm Payout Request')}</DialogTitle>
+                <DialogDescription>
+                    {t('You are about to request a payout of')} <b>₹2,350.50</b>. {t('This amount will be transferred to your registered bank account within 3-5 business days.')}
+                </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+                <Button variant="ghost" onClick={() => setIsPayoutDialogOpen(false)}>{t('Cancel')}</Button>
+                <Button onClick={handleRequestPayout} disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {t('Confirm')}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }

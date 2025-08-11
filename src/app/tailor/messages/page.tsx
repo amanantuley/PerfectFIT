@@ -8,41 +8,98 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Send, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from '@/context/translation-provider';
 
-const conversation = [
-    {
-        role: 'user',
-        name: 'Rohan Sharma',
-        content: "Hi John! I just placed order #T307. For the casual shirt, could you make the sleeves a bit longer than standard? Maybe by an inch?",
-        avatar: "https://placehold.co/100x100.png",
-    },
-    {
-        role: 'tailor',
-        name: 'You',
-        content: "Hello Rohan, thank you for your order! Absolutely, I can add an inch to the sleeve length. I'll make a note of that right now. Great choice on the fabric, by the way.",
-        avatar: "https://placehold.co/100x100.png",
-    },
-];
+const conversations = {
+  'rohan': {
+    name: 'Rohan Sharma',
+    order: '#T307',
+    avatar: 'https://placehold.co/100x100.png',
+    messages: [
+      { role: 'user', content: "Hi John! I just placed order #T307. For the casual shirt, could you make the sleeves a bit longer than standard? Maybe by an inch?" },
+      { role: 'tailor', content: "Hello Rohan, thank you for your order! Absolutely, I can add an inch to the sleeve length. I'll make a note of that right now. Great choice on the fabric, by the way." },
+    ]
+  },
+  'priya': {
+    name: 'Priya Patel',
+    order: '#T302',
+    avatar: 'https://placehold.co/100x100.png',
+    messages: [
+      { role: 'user', content: "Hello! Just checking in on my Navy Blue Suit. Any updates?" },
+    ]
+  },
+   'sneha': {
+    name: 'Sneha Reddy',
+    order: '#T304',
+    avatar: 'https://placehold.co/100x100.png',
+    messages: [
+      { role: 'user', content: "Could you confirm the delivery date for my order?" },
+      { role: 'tailor', content: "Hi Sneha, I'm just putting the finishing touches on it. It's scheduled for delivery by August 20th as planned." },
+    ]
+  },
+   'amit': {
+    name: 'Amit Singh',
+    order: '#T299',
+    avatar: 'https://placehold.co/100x100.png',
+    messages: [
+      { role: 'user', content: "The shirt fits perfectly, thank you so much!" },
+    ]
+  }
+};
+
+type ConversationKey = keyof typeof conversations;
 
 export default function TailorMessagesPage() {
     const { t } = useTranslation();
+    const [activeConversation, setActiveConversation] = useState<ConversationKey>('rohan');
+    const currentConversation = conversations[activeConversation];
 
     return (
-        <div className="h-[calc(100vh-8rem)] flex flex-col animate-fade-in-up">
+        <div className="h-[calc(100vh-8rem)] flex animate-fade-in-up gap-6">
+            <Card className="w-1/3 hidden md:flex flex-col shadow-lg">
+                <CardHeader className="border-b">
+                    <CardTitle className="text-xl">{t('Chats')}</CardTitle>
+                </CardHeader>
+                <ScrollArea>
+                    {Object.keys(conversations).map((key) => {
+                        const convo = conversations[key as ConversationKey];
+                        const lastMessage = convo.messages[convo.messages.length - 1];
+                        return (
+                            <div
+                                key={key}
+                                className={cn(
+                                    "flex items-center gap-4 p-4 cursor-pointer hover:bg-muted/50 border-b",
+                                    activeConversation === key && "bg-muted"
+                                )}
+                                onClick={() => setActiveConversation(key as ConversationKey)}
+                            >
+                                <Avatar className="h-10 w-10 border">
+                                    <AvatarImage src={convo.avatar} alt={convo.name} data-ai-hint="person face" />
+                                    <AvatarFallback>{convo.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 truncate">
+                                    <p className="font-semibold truncate">{convo.name}</p>
+                                    <p className="text-sm text-muted-foreground truncate">{lastMessage.content}</p>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </ScrollArea>
+            </Card>
+
             <Card className="flex-1 flex flex-col shadow-lg">
                 <CardHeader className="border-b">
                      <CardTitle className="flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
                         <MessageCircle />
-                        {t('Messages' as any)}
+                        {currentConversation.name}
                     </CardTitle>
-                    <CardDescription>{t('Conversation with' as any)} Rohan Sharma - {t('Order' as any)} #T307</CardDescription>
+                    <CardDescription>{t('Order' as any)} {currentConversation.order}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 p-0">
                     <ScrollArea className="h-full p-6">
                         <div className="space-y-6">
-                            {conversation.map((message, index) => (
+                            {currentConversation.messages.map((message, index) => (
                                 <div
                                     key={index}
                                     className={cn(
@@ -52,15 +109,15 @@ export default function TailorMessagesPage() {
                                 >
                                     {message.role === 'user' && (
                                         <Avatar className="h-10 w-10 border">
-                                            <AvatarImage src={message.avatar} alt={message.name} data-ai-hint="person face" />
-                                            <AvatarFallback>C</AvatarFallback>
+                                            <AvatarImage src={currentConversation.avatar} alt={currentConversation.name} data-ai-hint="person face" />
+                                            <AvatarFallback>{currentConversation.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                     )}
                                     <div className={cn(
                                         "max-w-md space-y-2",
                                         message.role === 'tailor' && 'text-right'
                                     )}>
-                                        <p className="font-bold text-sm">{message.name}</p>
+                                        <p className="font-bold text-sm">{message.role === 'user' ? currentConversation.name : t('You')}</p>
                                         <div
                                             className={cn(
                                                 "rounded-lg px-4 py-3 text-sm",
@@ -74,7 +131,7 @@ export default function TailorMessagesPage() {
                                     </div>
                                     {message.role === 'tailor' && (
                                         <Avatar className="h-10 w-10 border">
-                                            <AvatarImage src={message.avatar} alt={message.name} data-ai-hint="person avatar" />
+                                            <AvatarImage src="https://placehold.co/100x100.png" alt="Tailor" data-ai-hint="person avatar" />
                                             <AvatarFallback>T</AvatarFallback>
                                         </Avatar>
                                     )}

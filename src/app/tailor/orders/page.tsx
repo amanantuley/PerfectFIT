@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -10,22 +9,42 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, RefreshCw, Truck, Package, MoreHorizontal } from 'lucide-react';
+import { CheckCircle, RefreshCw, Truck, Package, MoreHorizontal, FileText, Calendar, DollarSign, Loader2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useTranslation } from '@/context/translation-provider';
 import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const allOrders = [
-  { orderId: '#T302', customer: 'Liam Johnson', item: 'Navy Blue Suit', date: '2025-07-20', status: 'In Progress' },
-  { orderId: '#T301', customer: 'Olivia Smith', item: 'Classic White Shirt', date: '2025-07-18', status: 'Completed' },
-  { orderId: '#T300', customer: 'Noah Williams', item: 'Charcoal Gray Suit', date: '2025-07-15', status: 'Shipped' },
-  { orderId: '#T299', customer: 'Emma Brown', item: 'Casual Checkered Shirt', date: '2025-07-14', status: 'Completed' },
-  { orderId: '#T298', customer: 'James Jones', item: 'Black Tuxedo', date: '2025-07-12', status: 'In Progress' },
-  { orderId: '#T297', customer: 'Sophia Garcia', item: 'Linen Trousers', date: '2025-07-11', status: 'New' },
+  { orderId: '#T302', customer: 'Liam Johnson', item: 'Navy Blue Suit', date: '2025-07-20', status: 'In Progress', amount: 4500 },
+  { orderId: '#T301', customer: 'Olivia Smith', item: 'Classic White Shirt', date: '2025-07-18', status: 'Completed', amount: 800 },
+  { orderId: '#T300', customer: 'Noah Williams', item: 'Charcoal Gray Suit', date: '2025-07-15', status: 'Shipped', amount: 4200 },
+  { orderId: '#T299', customer: 'Emma Brown', item: 'Casual Checkered Shirt', date: '2025-07-14', status: 'Completed', amount: 950 },
+  { orderId: '#T298', customer: 'James Jones', item: 'Black Tuxedo', date: '2025-07-12', status: 'In Progress', amount: 5500 },
+  { orderId: '#T297', customer: 'Sophia Garcia', item: 'Linen Trousers', date: '2025-07-11', status: 'New', amount: 1200 },
 ];
+
+type Order = typeof allOrders[0];
+type OrderStatus = 'New' | 'In Progress' | 'Shipped' | 'Completed';
 
 const getStatusConfig = (status: string) => {
   switch (status) {
@@ -43,21 +62,48 @@ const getStatusConfig = (status: string) => {
 export default function TailorOrdersPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleMessageClick = () => {
-    router.push('/tailor/messages');
+  const [orders, setOrders] = useState(allOrders);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState<OrderStatus | ''>('');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleOpenDialog = (order: Order, type: 'details' | 'status') => {
+    setSelectedOrder(order);
+    if (type === 'details') setIsDetailOpen(true);
+    if (type === 'status') {
+      setNewStatus(order.status as OrderStatus);
+      setIsStatusOpen(true);
+    }
+  };
+  
+  const handleUpdateStatus = () => {
+    if (!selectedOrder || !newStatus) return;
+    setIsUpdating(true);
+    setTimeout(() => {
+        setOrders(orders.map(o => o.orderId === selectedOrder.orderId ? { ...o, status: newStatus } : o));
+        setIsUpdating(false);
+        setIsStatusOpen(false);
+        toast({
+            title: t('Status Updated'),
+            description: `${t('Order')} ${selectedOrder.orderId} ${t('has been updated to')} "${t(newStatus as any)}".`
+        })
+    }, 1000);
   };
 
   return (
+    <>
     <Card className="animate-fade-in-up shadow-lg">
       <CardHeader>
         <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Manage Orders')}</CardTitle>
         <CardDescription>{t('View, update, and manage all incoming customer orders.')}</CardDescription>
       </CardHeader>
       <CardContent>
-         {/* Mobile View */}
         <div className="md:hidden space-y-4">
-            {allOrders.map((order) => {
+            {orders.map((order) => {
                  const { variant, icon: Icon } = getStatusConfig(order.status);
                  return (
                     <Card key={order.orderId} className="overflow-hidden transition-all hover:shadow-md hover:bg-muted/50">
@@ -77,10 +123,10 @@ export default function TailorOrdersPage() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>{t('Actions')}</DropdownMenuLabel>
-                                        <DropdownMenuItem>{t('View Order Details')}</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={handleMessageClick}>{t('Message Customer' as any)}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleOpenDialog(order, 'details')}>{t('View Order Details')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => router.push('/tailor/messages')}>{t('Message Customer' as any)}</DropdownMenuItem>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem>{t('Update Status')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleOpenDialog(order, 'status')}>{t('Update Status')}</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -94,7 +140,6 @@ export default function TailorOrdersPage() {
             })}
         </div>
 
-        {/* Desktop View */}
         <div className="hidden md:block rounded-md border">
             <Table>
             <TableHeader>
@@ -108,7 +153,7 @@ export default function TailorOrdersPage() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {allOrders.map((order) => {
+                {orders.map((order) => {
                 const { variant, icon: Icon } = getStatusConfig(order.status);
                 return (
                     <TableRow key={order.orderId} className="transition-colors hover:bg-muted/30">
@@ -132,10 +177,10 @@ export default function TailorOrdersPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>{t('Actions')}</DropdownMenuLabel>
-                            <DropdownMenuItem>{t('View Order Details')}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleMessageClick}>{t('Message Customer' as any)}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenDialog(order, 'details')}>{t('View Order Details')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/tailor/messages')}>{t('Message Customer' as any)}</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>{t('Update Status')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenDialog(order, 'status')}>{t('Update Status')}</DropdownMenuItem>
                         </DropdownMenuContent>
                         </DropdownMenu>
                     </TableCell>
@@ -147,5 +192,51 @@ export default function TailorOrdersPage() {
         </div>
       </CardContent>
     </Card>
+
+    <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{t('Order Details')}</DialogTitle>
+                <DialogDescription>{selectedOrder?.orderId}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Item')}:</b> {t(selectedOrder?.item as any)}</span></div>
+                <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Customer')}:</b> {selectedOrder?.customer}</span></div>
+                <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Date')}:</b> {selectedOrder?.date}</span></div>
+                <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Amount')}:</b> ₹{selectedOrder?.amount.toFixed(2)}</span></div>
+                <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Status')}:</b> {t(selectedOrder?.status as any)}</span></div>
+            </div>
+        </DialogContent>
+    </Dialog>
+
+    <Dialog open={isStatusOpen} onOpenChange={setIsStatusOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{t('Update Order Status')}</DialogTitle>
+                <DialogDescription>{t('Select the new status for order')} {selectedOrder?.orderId}.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2">
+                <Select value={newStatus} onValueChange={(v) => setNewStatus(v as OrderStatus)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder={t('Select status')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="New">{t('New')}</SelectItem>
+                        <SelectItem value="In Progress">{t('In Progress')}</SelectItem>
+                        <SelectItem value="Shipped">{t('Shipped')}</SelectItem>
+                        <SelectItem value="Completed">{t('Completed')}</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            <DialogFooter>
+                <Button variant="ghost" onClick={() => setIsStatusOpen(false)}>{t('Cancel')}</Button>
+                <Button onClick={handleUpdateStatus} disabled={isUpdating}>
+                    {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {t('Update')}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
