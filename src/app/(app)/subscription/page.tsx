@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -89,20 +88,6 @@ const CreditCardIcon = () => (
     </svg>
 );
 
-const PaypalIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M8.32,18.18,8,19.89a.57.57,0,0,0,.6.63h3.33a.56.56,0,0,0,.55-.42l.52-2.73a.83.83,0,0,1,.81-.67h.17c3.12,0,5.75-2.31,6-5.43.22-2.86-1.63-5-4.25-5.38a.56.56,0,0,0-.61.59l-.31,1.87a.82.82,0,0,1-.79.66H14c-1.51,0-2.82.68-3.48,1.87L9,15.11A.83.83,0,0,1,8.32,18.18Z" fill="#253b80"></path>
-        <path d="M12.39,3.23h-4a.56.56,0,0,0-.55.42L4.36,18.82a.56.56,0,0,0,.55.7H8.87a.56.56,0,0,0,.55-.42L10,15.63a.82.82,0,0,1,.8-.66h.17c3.84,0,6.67-2.67,6.91-6.2.22-3.32-2.11-5.89-5.35-6.16A.56.56,0,0,0,12.39,3.23Z" fill="#179bd7"></path>
-        <path d="M4.36,18.82,2,4.27A.56.56,0,0,0,1.41,3.7L1.13,3.84a.56.56,0,0,0-.41.67L4,19.51a.57.57,0,0,0,.56.41H8.87a.56.56,0,0,0,.55-.42L9.84,17a.84.84,0,0,1-.74-1,.82.82,0,0,0-.73.13L4.91,18.4a.56.56,0,0,1-.55.42Z" fill="#222d65"></path>
-    </svg>
-);
-
-const ApplePayIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19.39,14.73a5.3,5.3,0,0,1-2.2-1.37,5.56,5.56,0,0,1-1.3-2.12,4.06,4.06,0,0,1,1-2.87,4.32,4.32,0,0,1,2.83-1.39,1,1,0,0,1,.84.18,1,1,0,0,1,.35.78,4.5,4.5,0,0,1-.58,2.51,5,5,0,0,1-1.78,2.15C18,13.68,17.41,14.8,19.39,14.73Zm-6.52,2.05a4.87,4.87,0,0,1-2.31,1.38,4.42,4.42,0,0,1-2.73-.2,4.71,4.71,0,0,1-1.89-1.5,10.15,10.15,0,0,1-1.88-3.4,6.29,6.29,0,0,1,.83-4.11,5.2,5.2,0,0,1,2-2,4.48,4.48,0,0,1,2.91-.7,4.28,4.28,0,0,1,2.39.73,1.13,1.13,0,0,1,.51.81,1,1,0,0,1-.6.94,3,3,0,0,0-1.72-.48,3.22,3.22,0,0,0-2.22.7,4,4,0,0,0-1.4,2,6.48,6.48,0,0,0-.24,2.9,4.45,4.45,0,0,0,1.44,3.06,3.62,3.62,0,0,0,2.4.92,4.36,4.36,0,0,0,2.1-.53,1,1,0,0,1,1.17.84A.94.94,0,0,1,12.87,16.78Z" />
-    </svg>
-);
-
 const PerfectPayIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <path d="M17 4H7C5.34315 4 4 5.34315 4 7V17C4 18.6569 5.34315 20 7 20H17C18.6569 20 20 18.6569 20 17V7C20 5.34315 18.6569 4 17 4Z"/>
@@ -117,6 +102,16 @@ export default function SubscriptionPage() {
     const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+
+    // Utility to get numeric amount from plan price string like '₹3999'
+    const getPlanAmount = (planName: string | null) => {
+      if (!planName) return 0;
+      const plan = plans.find(p => p.name === planName);
+      if (!plan) return 0;
+      // remove non-digits and parse
+      const digits = plan.price.replace(/[^\d]/g, '');
+      return Number(digits) || 0;
+    };
     
     const handleChoosePlan = (planName: string) => {
         setSelectedPlan(planName as SubscriptionPlan);
@@ -124,6 +119,7 @@ export default function SubscriptionPage() {
     };
 
     const handlePaymentConfirmation = (method: string) => {
+        // This function remains for the in-app "Credit Card" flow.
         if (!selectedPlan) return;
         setIsPaymentDialogOpen(false);
         setSelectedPaymentMethod(null);
@@ -142,6 +138,19 @@ export default function SubscriptionPage() {
         setSelectedPaymentMethod(null);
         setSelectedPlan(null);
     }
+
+    // Replace these with real links from your gateway dashboards
+    const RAZORPAY_LINK_PLACEHOLDER = 'https://rzp.io/i/YOUR_RAZORPAY_LINK'; // replace with your Razorpay payment link
+    // UPI deep link: pa = payee vpa, pn = payee name, am = amount, cu = currency
+    const buildUpiLink = (amount: number) => {
+      const pa = encodeURIComponent('yourupiid@bank'); // replace
+      const pn = encodeURIComponent('YourName'); // replace
+      const am = encodeURIComponent(String(amount)); // amount in INR without symbol
+      const cu = 'INR';
+      // optional parameters (tn = transaction note)
+      const tn = encodeURIComponent(`${selectedPlan ?? 'Subscription'} plan`);
+      return `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=${cu}&tn=${tn}`;
+    };
 
   return (
     <>
@@ -223,26 +232,46 @@ export default function SubscriptionPage() {
                     </div>
                 ) : (
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+                       {/* Keep Credit Card option to open in-app form */}
                        <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => setSelectedPaymentMethod('creditCard')}>
                             <CreditCardIcon />
                             Credit Card
                        </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Google Pay')}>
+
+                       {/* Google Pay (UPI) - opens UPI app on mobile devices */}
+                       <Button
+                         variant="outline"
+                         className="w-full justify-center gap-3 py-4 text-base"
+                         onClick={() => {
+                           const amount = getPlanAmount(selectedPlan);
+                           const upiLink = buildUpiLink(amount);
+                           // Try to open UPI scheme; on desktop this will do nothing or show unsupported
+                           window.location.href = upiLink;
+                         }}
+                       >
                             <GooglePayIcon />
                             Google Pay
                        </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Apple Pay')}>
-                            <ApplePayIcon />
-                            Apple Pay
-                       </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Paypal')}>
-                            <PaypalIcon />
-                            Paypal
-                       </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Razorpay')}>
+
+                       {/* Razorpay — open hosted payment link in new tab */}
+                       <Button
+                         variant="outline"
+                         className="w-full justify-center gap-3 py-4 text-base"
+                         onClick={() => {
+                           // If you have a dynamic amount / order id, generate the Razorpay payment link server-side
+                           // and insert it here. This is a placeholder link.
+                           const amount = getPlanAmount(selectedPlan);
+                           // If you have a Razorpay Payment Link that encodes the amount, use it directly.
+                           // Here we open the placeholder - replace with your actual payment link.
+                           const razorpayLink = RAZORPAY_LINK_PLACEHOLDER;
+                           window.open(razorpayLink, '_blank', 'noopener,noreferrer');
+                         }}
+                       >
                             <RazorpayIcon />
                             Razorpay
                        </Button>
+
+                       {/* PerfectPay - Coming Soon */}
                        <div className="relative">
                             <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" disabled>
                                 <PerfectPayIcon />
