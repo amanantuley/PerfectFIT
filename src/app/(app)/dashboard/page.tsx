@@ -258,15 +258,15 @@ export default function DashboardPage() {
 
   const measurementItems = measurements
     ? [
-        { label: 'Height', value: `${measurements.height}"`, icon: PersonStanding },
-        { label: 'Weight', value: `${measurements.weight} lbs`, icon: ScaleIcon },
+        { label: 'Height', value: `${measurements.height} cm`, icon: PersonStanding },
+        { label: 'Weight', value: `${measurements.weight} kg`, icon: ScaleIcon },
         { label: 'Body Shape', value: measurements.bodyShape, icon: BodyShapeIcon },
-        { label: 'Shoulder', value: `${measurements.shoulder}"`, icon: Armchair },
-        { label: 'Chest', value: `${measurements.chest}"`, icon: Shirt },
-        { label: 'Sleeve', value: `${measurements.sleeveLength}"`, icon: Hand },
-        { label: 'Waist', value: `${measurements.waist}"`, icon: Waves },
-        { label: 'Hip', value: `${measurements.hip}"`, icon: PersonStanding },
-        { label: 'Inseam', value: `${measurements.inseam}"`, icon: ChevronRight },
+        { label: 'Shoulder', value: `${measurements.shoulder} cm`, icon: Armchair },
+        { label: 'Chest', value: `${measurements.chest} cm`, icon: Shirt },
+        { label: 'Sleeve', value: `${measurements.sleeveLength} cm`, icon: Hand },
+        { label: 'Waist', value: `${measurements.waist} cm`, icon: Waves },
+        { label: 'Hip', value: `${measurements.hip} cm`, icon: PersonStanding },
+        { label: 'Inseam', value: `${measurements.inseam} cm`, icon: ChevronRight },
       ]
     : [];
 
@@ -354,39 +354,39 @@ export default function DashboardPage() {
                         <form onSubmit={handleManualSubmit} className="space-y-3">
                            <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <Label htmlFor="height">Height (in)</Label>
+                                    <Label htmlFor="height">Height (cm)</Label>
                                     <Input id="height" name="height" type="number" step="0.1" required />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="weight">Weight (lbs)</Label>
+                                    <Label htmlFor="weight">Weight (kg)</Label>
                                     <Input id="weight" name="weight" type="number" step="0.1" required />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="neckSize">Neck (in)</Label>
+                                    <Label htmlFor="neckSize">Neck (cm)</Label>
                                     <Input id="neckSize" name="neckSize" type="number" step="0.1" required />
                                 </div>
                                  <div className="space-y-1">
-                                    <Label htmlFor="shoulder">Shoulder (in)</Label>
+                                    <Label htmlFor="shoulder">Shoulder (cm)</Label>
                                     <Input id="shoulder" name="shoulder" type="number" step="0.1" required />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="chest">Chest (in)</Label>
+                                    <Label htmlFor="chest">Chest (cm)</Label>
                                     <Input id="chest" name="chest" type="number" step="0.1" required />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="sleeveLength">Sleeve (in)</Label>
+                                    <Label htmlFor="sleeveLength">Sleeve (cm)</Label>
                                     <Input id="sleeveLength" name="sleeveLength" type="number" step="0.1" required />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="waist">Waist (in)</Label>
+                                    <Label htmlFor="waist">Waist (cm)</Label>
                                     <Input id="waist" name="waist" type="number" step="0.1" required />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="hip">Hip (in)</Label>
+                                    <Label htmlFor="hip">Hip (cm)</Label>
                                     <Input id="hip" name="hip" type="number" step="0.1" required />
                                 </div>
                                 <div className="space-y-1 col-span-2">
-                                    <Label htmlFor="inseam">Inseam (in)</Label>
+                                    <Label htmlFor="inseam">Inseam (cm)</Label>
                                     <Input id="inseam" name="inseam" type="number" step="0.1" required />
                                 </div>
                            </div>
@@ -468,31 +468,31 @@ export default function DashboardPage() {
                              {/* Annotations */}
                             <div className="absolute top-[8%] left-[20%] text-right text-xs">
                                 <p className="font-bold">Neck</p>
-                                <p>{measurements.neckSize}"</p>
+                                <p>{measurements.neckSize} cm</p>
                             </div>
                             <div className="absolute top-[18%] left-[5%] text-right text-xs">
                                 <p className="font-bold">Shoulder</p>
-                                <p>{measurements.shoulder}"</p>
+                                <p>{measurements.shoulder} cm</p>
                             </div>
                             <div className="absolute top-[25%] right-[5%] text-left text-xs">
                                 <p className="font-bold">Chest</p>
-                                <p>{measurements.chest}"</p>
+                                <p>{measurements.chest} cm</p>
                             </div>
                             <div className="absolute top-[40%] right-[10%] text-left text-xs">
                                 <p className="font-bold">Sleeve</p>
-                                <p>{measurements.sleeveLength}"</p>
+                                <p>{measurements.sleeveLength} cm</p>
                             </div>
                             <div className="absolute top-[45%] left-[10%] text-right text-xs">
                                 <p className="font-bold">Waist</p>
-                                <p>{measurements.waist}"</p>
+                                <p>{measurements.waist} cm</p>
                             </div>
                              <div className="absolute top-[60%] right-[15%] text-left text-xs">
                                 <p className="font-bold">Hip</p>
-                                <p>{measurements.hip}"</p>
+                                <p>{measurements.hip} cm</p>
                             </div>
                             <div className="absolute bottom-[10%] left-[15%] text-right text-xs">
                                 <p className="font-bold">Inseam</p>
-                                <p>{measurements.inseam}"</p>
+                                <p>{measurements.inseam} cm</p>
                             </div>
                         </div>
                     )}
@@ -527,9 +527,9 @@ export default function DashboardPage() {
                             <TableRow key={entry.id}>
                                 <TableCell>{entry.date}</TableCell>
                                 <TableCell>{entry.source}</TableCell>
-                                <TableCell>{entry.chest}"</TableCell>
-                                <TableCell>{entry.waist}"</TableCell>
-                                <TableCell>{entry.hip}"</TableCell>
+                                <TableCell>{entry.chest} cm</TableCell>
+                                <TableCell>{entry.waist} cm</TableCell>
+                                <TableCell>{entry.hip} cm</TableCell>
                                 <TableCell className="text-right">
                                     <Button size="sm" variant="outline" onClick={() => reuseMeasurement(entry)}>Reuse</Button>
                                 </TableCell>

@@ -14,11 +14,11 @@ import {z} from 'genkit';
 const GenerateFitnessPlanInputSchema = z.object({
   goal: z.enum(['maintain', 'gain', 'loss']).describe("The user's primary fitness goal (maintain size, muscle gain, or weight loss)."),
   measurements: z.object({
-    chest: z.number().describe("User's chest measurement in inches."),
-    waist: z.number().describe("User's waist measurement in inches."),
-    hip: z.number().describe("User's hip measurement in inches."),
+    chest: z.number().describe("User's chest measurement in centimeters (cm)."),
+    waist: z.number().describe("User's waist measurement in centimeters (cm)."),
+    hip: z.number().describe("User's hip measurement in centimeters (cm)."),
   }).describe("The user's latest body measurements."),
-  weightLossGoal: z.number().optional().describe("The user's desired weight loss in pounds (lbs). Only applies if goal is 'loss'."),
+  weightLossGoal: z.number().optional().describe("The user's desired weight loss in kilograms (kg). Only applies if goal is 'loss'."),
   timeframe: z.number().optional().describe("The user's desired timeframe to achieve the weight loss in weeks. Only applies if goal is 'loss'."),
 });
 export type GenerateFitnessPlanInput = z.infer<typeof GenerateFitnessPlanInputSchema>;
@@ -59,10 +59,10 @@ const prompt = ai.definePrompt({
 
 User's Goal: {{goal}}
 {{#if weightLossGoal}}
-Desired Weight Loss: {{weightLossGoal}} lbs
+Desired Weight Loss: {{weightLossGoal}} kg
 Timeframe: {{timeframe}} weeks
 {{/if}}
-User's Measurements (in inches):
+User's Measurements (in cm):
 - Chest: {{measurements.chest}}
 - Waist: {{measurements.waist}}
 - Hip: {{measurements.hip}}
@@ -80,7 +80,7 @@ Based on the user's goal (and specific weight loss targets if provided), generat
     - Create a sample one-day meal plan (breakfast, lunch, dinner) that aligns with the user's fitness goal.
     - Suggest 1-2 healthy snack options.
     - Make the meal suggestions simple and practical.
-    - If the goal is 'loss', ensure the diet plan is in a reasonable caloric deficit to meet the {{weightLossGoal}} lbs target over {{timeframe}} weeks.
+    - If the goal is 'loss', ensure the diet plan is in a reasonable caloric deficit to meet the {{weightLossGoal}} kg target over {{timeframe}} weeks.
     - Include a short, encouraging title and optional notes (e.g., "Drink plenty of water throughout the day.").
 
 Produce the output in the specified JSON format. Be creative and encouraging in your titles and notes.

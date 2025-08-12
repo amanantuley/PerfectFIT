@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 const plans = [
     {
         name: 'Basic',
-        price: '$29',
+        price: '₹1999',
         period: 'month',
         description: 'Perfect for occasional rentals and trying out our service.',
         features: [
@@ -36,7 +36,7 @@ const plans = [
     },
     {
         name: 'Pro',
-        price: '$59',
+        price: '₹3999',
         period: 'month',
         description: 'For the fashion-forward individual who loves variety.',
         features: [
@@ -51,7 +51,7 @@ const plans = [
     },
     {
         name: 'Ultimate',
-        price: '$99',
+        price: '₹6999',
         period: 'month',
         description: 'The ultimate wardrobe solution for any occasion.',
         features: [

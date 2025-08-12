@@ -22,15 +22,15 @@ const ExtractBodyMeasurementsInputSchema = z.object({
 export type ExtractBodyMeasurementsInput = z.infer<typeof ExtractBodyMeasurementsInputSchema>;
 
 const ExtractBodyMeasurementsOutputSchema = z.object({
-  chest: z.number().describe('The chest measurement in inches.'),
-  waist: z.number().describe('The waist measurement in inches.'),
-  hip: z.number().describe('The hip measurement in inches.'),
-  shoulder: z.number().describe('The shoulder measurement in inches.'),
-  inseam: z.number().describe('The inseam measurement in inches.'),
-  sleeveLength: z.number().describe('The sleeve length in inches.'),
-  height: z.number().describe('The estimated total height of the person in inches.'),
-  weight: z.number().describe('The estimated weight of the person in pounds (lbs).'),
-  neckSize: z.number().describe('The neck circumference in inches.'),
+  chest: z.number().describe('The chest measurement in centimeters (cm).'),
+  waist: z.number().describe('The waist measurement in centimeters (cm).'),
+  hip: z.number().describe('The hip measurement in centimeters (cm).'),
+  shoulder: z.number().describe('The shoulder measurement in centimeters (cm).'),
+  inseam: z.number().describe('The inseam measurement in centimeters (cm).'),
+  sleeveLength: z.number().describe('The sleeve length in centimeters (cm).'),
+  height: z.number().describe('The estimated total height of the person in centimeters (cm).'),
+  weight: z.number().describe('The estimated weight of the person in kilograms (kg).'),
+  neckSize: z.number().describe('The neck circumference in centimeters (cm).'),
   bodyShape: z.string().describe("The detected body shape of the person (e.g., 'Rectangle', 'Triangle', 'Inverted Triangle', 'Hourglass', 'Round')."),
 });
 export type ExtractBodyMeasurementsOutput = z.infer<typeof ExtractBodyMeasurementsOutputSchema>;
@@ -52,15 +52,15 @@ const prompt = ai.definePrompt({
   4.  The output must be a JSON object containing realistic and consistent measurements suitable for creating custom-fit clothing.
 
   **Measurements to Extract:**
-  - Chest (in inches)
-  - Waist (in inches)
-  - Hip (in inches)
-  - Shoulder (in inches)
-  - Inseam (in inches)
-  - Sleeve Length (in inches)
-  - Height (in inches)
-  - Weight (in lbs)
-  - Neck Size (in inches)
+  - Chest (in cm)
+  - Waist (in cm)
+  - Hip (in cm)
+  - Shoulder (in cm)
+  - Inseam (in cm)
+  - Sleeve Length (in cm)
+  - Height (in cm)
+  - Weight (in kg)
+  - Neck Size (in cm)
   - Body Shape (e.g., 'Rectangle', 'Hourglass')
 
   **Image for Analysis:**

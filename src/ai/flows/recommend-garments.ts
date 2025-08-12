@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Recommends garments based on body measurements.
@@ -41,7 +42,7 @@ const prompt = ai.definePrompt({
   prompt: `You are a personal stylist. Based on the user's body measurements, recommend which of the following garments would be a good fit.
 Only recommend items from the list.
 
-User Measurements (in inches):
+User Measurements (in cm):
 - Chest: {{measurements.chest}}
 - Waist: {{measurements.waist}}
 - Hip: {{measurements.hip}}

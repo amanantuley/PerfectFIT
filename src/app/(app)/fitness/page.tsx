@@ -26,9 +26,9 @@ import { generateFitnessPlan, type GenerateFitnessPlanInput } from '@/ai/flows/g
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const chartConfig = {
-  chest: { label: 'Chest (in)', color: 'hsl(var(--chart-1))' },
-  waist: { label: 'Waist (in)', color: 'hsl(var(--chart-2))' },
-  hip: { label: 'Hip (in)', color: 'hsl(var(--chart-3))' },
+  chest: { label: 'Chest (cm)', color: 'hsl(var(--chart-1))' },
+  waist: { label: 'Waist (cm)', color: 'hsl(var(--chart-2))' },
+  hip: { label: 'Hip (cm)', color: 'hsl(var(--chart-3))' },
 };
 
 const goals = [
@@ -41,7 +41,7 @@ export default function FitnessTrackingPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [aiPlan, setAiPlan] = useState<any | null>(null);
-  const [weightLossGoal, setWeightLossGoal] = useState<number>(10);
+  const [weightLossGoal, setWeightLossGoal] = useState<number>(5);
   const [timeframe, setTimeframe] = useState<number>(8);
   const [showLossInputs, setShowLossInputs] = useState<boolean>(false);
 
@@ -135,44 +135,44 @@ export default function FitnessTrackingPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="chest">Chest (in)</Label>
+                  <Label htmlFor="chest">Chest (cm)</Label>
                   <Input
                     id="chest"
                     type="number"
                     step="0.1"
-                    placeholder="e.g. 40.5"
+                    placeholder="e.g. 102.5"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="waist">Waist (in)</Label>
+                  <Label htmlFor="waist">Waist (cm)</Label>
                   <Input
                     id="waist"
                     type="number"
                     step="0.1"
-                    placeholder="e.g. 32.5"
+                    placeholder="e.g. 82.5"
                     required
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="hip">Hip (in)</Label>
+                  <Label htmlFor="hip">Hip (cm)</Label>
                   <Input
                     id="hip"
                     type="number"
                     step="0.1"
-                    placeholder="e.g. 38.5"
+                    placeholder="e.g. 98.5"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="shoulder">Shoulder (in)</Label>
+                  <Label htmlFor="shoulder">Shoulder (cm)</Label>
                   <Input
                     id="shoulder"
                     type="number"
                     step="0.1"
-                    placeholder="e.g. 18"
+                    placeholder="e.g. 45"
                   />
                 </div>
               </div>
@@ -206,7 +206,7 @@ export default function FitnessTrackingPage() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(value) => `${value}"`}
+                  tickFormatter={(value) => `${value} cm`}
                 />
                 <Tooltip
                   cursor={false}
@@ -274,13 +274,13 @@ export default function FitnessTrackingPage() {
                     <form onSubmit={handleLossSubmit} className="space-y-4">
                         <div className="grid sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="weightLossGoal">How much weight do you want to lose? (lbs)</Label>
+                                <Label htmlFor="weightLossGoal">How much weight do you want to lose? (kg)</Label>
                                 <Input 
                                     id="weightLossGoal" 
                                     type="number" 
                                     value={weightLossGoal} 
                                     onChange={(e) => setWeightLossGoal(Number(e.target.value))}
-                                    placeholder="e.g., 10"
+                                    placeholder="e.g., 5"
                                 />
                             </div>
                              <div className="space-y-2">

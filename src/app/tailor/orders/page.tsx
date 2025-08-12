@@ -35,12 +35,12 @@ import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 const allOrders = [
-  { orderId: '#T302', customer: 'Liam Johnson', item: 'Navy Blue Suit', date: '2025-07-20', status: 'In Progress', amount: 4500 },
-  { orderId: '#T301', customer: 'Olivia Smith', item: 'Classic White Shirt', date: '2025-07-18', status: 'Completed', amount: 800 },
-  { orderId: '#T300', customer: 'Noah Williams', item: 'Charcoal Gray Suit', date: '2025-07-15', status: 'Shipped', amount: 4200 },
-  { orderId: '#T299', customer: 'Emma Brown', item: 'Casual Checkered Shirt', date: '2025-07-14', status: 'Completed', amount: 950 },
-  { orderId: '#T298', customer: 'James Jones', item: 'Black Tuxedo', date: '2025-07-12', status: 'In Progress', amount: 5500 },
-  { orderId: '#T297', customer: 'Sophia Garcia', item: 'Linen Trousers', date: '2025-07-11', status: 'New', amount: 1200 },
+  { orderId: '#T302', customer: 'Liam Johnson', item: 'Navy Blue Suit', date: '2025-07-20', dueDate: '2025-08-05', status: 'In Progress', amount: 4500 },
+  { orderId: '#T301', customer: 'Olivia Smith', item: 'Classic White Shirt', date: '2025-07-18', dueDate: '2025-07-25', status: 'Completed', amount: 800 },
+  { orderId: '#T300', customer: 'Noah Williams', item: 'Charcoal Gray Suit', date: '2025-07-15', dueDate: '2025-07-30', status: 'Shipped', amount: 4200 },
+  { orderId: '#T299', customer: 'Emma Brown', item: 'Casual Checkered Shirt', date: '2025-07-14', dueDate: '2025-07-21', status: 'Completed', amount: 950 },
+  { orderId: '#T298', customer: 'James Jones', item: 'Black Tuxedo', date: '2025-07-12', dueDate: '2025-08-01', status: 'In Progress', amount: 5500 },
+  { orderId: '#T297', customer: 'Sophia Garcia', item: 'Linen Trousers', date: '2025-07-11', dueDate: '2025-07-18', status: 'New', amount: 1200 },
 ];
 
 type Order = typeof allOrders[0];
@@ -98,10 +98,11 @@ export default function TailorOrdersPage() {
     <>
     <Card className="animate-fade-in-up shadow-lg">
       <CardHeader>
-        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Manage Orders')}</CardTitle>
+        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-teal-500">{t('Manage Orders')}</CardTitle>
         <CardDescription>{t('View, update, and manage all incoming customer orders.')}</CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Mobile View */}
         <div className="md:hidden space-y-4">
             {orders.map((order) => {
                  const { variant, icon: Icon } = getStatusConfig(order.status);
@@ -112,7 +113,7 @@ export default function TailorOrdersPage() {
                                 <div className="space-y-1">
                                     <p className="font-bold">{t(order.item as any)}</p>
                                     <p className="text-sm text-muted-foreground">{order.customer}</p>
-                                    <p className="text-xs text-muted-foreground">{order.orderId} &bull; {order.date}</p>
+                                    <p className="text-xs text-muted-foreground">{order.orderId} &bull; {t('Due' as any)}: {order.dueDate}</p>
                                 </div>
                                  <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -140,6 +141,7 @@ export default function TailorOrdersPage() {
             })}
         </div>
 
+        {/* Desktop View */}
         <div className="hidden md:block rounded-md border">
             <Table>
             <TableHeader>
@@ -148,6 +150,7 @@ export default function TailorOrdersPage() {
                 <TableHead>{t('Customer')}</TableHead>
                 <TableHead>{t('Item')}</TableHead>
                 <TableHead>{t('Order Date')}</TableHead>
+                <TableHead>{t('Due Date')}</TableHead>
                 <TableHead>{t('Status')}</TableHead>
                 <TableHead className="text-right">{t('Actions')}</TableHead>
                 </TableRow>
@@ -161,6 +164,7 @@ export default function TailorOrdersPage() {
                     <TableCell>{order.customer}</TableCell>
                     <TableCell>{t(order.item as any)}</TableCell>
                     <TableCell>{order.date}</TableCell>
+                    <TableCell>{order.dueDate}</TableCell>
                     <TableCell>
                         <Badge variant={variant} className="gap-1.5">
                         <Icon className="h-3.5 w-3.5" />
@@ -202,7 +206,8 @@ export default function TailorOrdersPage() {
             <div className="space-y-4 py-4">
                 <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Item')}:</b> {t(selectedOrder?.item as any)}</span></div>
                 <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Customer')}:</b> {selectedOrder?.customer}</span></div>
-                <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Date')}:</b> {selectedOrder?.date}</span></div>
+                <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Order Date')}:</b> {selectedOrder?.date}</span></div>
+                <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Due Date')}:</b> {selectedOrder?.dueDate}</span></div>
                 <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Amount')}:</b> ₹{selectedOrder?.amount.toFixed(2)}</span></div>
                 <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Status')}:</b> {t(selectedOrder?.status as any)}</span></div>
             </div>
