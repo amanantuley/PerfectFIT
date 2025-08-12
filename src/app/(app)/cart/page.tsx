@@ -445,143 +445,84 @@ export default function CartPage() {
         </form>
 
         <Dialog open={isPaymentDialogOpen} onOpenChange={closeDialog}>
-  <DialogContent className="sm:max-w-md">
-    <DialogHeader>
-      <DialogTitle className="flex items-center gap-2 text-2xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
-        <Wallet />
-        {selectedPaymentMethod === 'creditCard'
-          ? 'Enter Card Details'
-          : 'Complete Your Payment'}
-      </DialogTitle>
-      <DialogDescription>
-        {selectedPaymentMethod === 'creditCard'
-          ? `Please provide your payment information for the amount of ₹${finalPrice.toFixed(2)}.`
-          : `Choose your preferred payment method to finalize your order for ₹${finalPrice.toFixed(2)}.`}
-      </DialogDescription>
-    </DialogHeader>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-2xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                        <Wallet />
+                        {selectedPaymentMethod === 'creditCard' ? 'Enter Card Details' : 'Complete Your Payment'}
+                    </DialogTitle>
+                     <DialogDescription>
+                        {selectedPaymentMethod === 'creditCard'
+                            ? `Please provide your payment information for the amount of ₹${finalPrice.toFixed(2)}.`
+                            : `Choose your preferred payment method to finalize your order for ₹${finalPrice.toFixed(2)}.`}
+                    </DialogDescription>
+                </DialogHeader>
 
-    {selectedPaymentMethod === 'creditCard' ? (
-      <div className="space-y-4 py-4">
-        <div className="space-y-2">
-          <Label htmlFor="card-number">Card Number</Label>
-          <Input id="card-number" placeholder="1234 5678 9101 1121" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="expiry">Expiry (MM/YY)</Label>
-            <Input id="expiry" placeholder="MM/YY" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="cvc">CVC</Label>
-            <Input id="cvc" placeholder="123" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="name-on-card">Name on Card</Label>
-          <Input id="name-on-card" placeholder="John Doe" />
-        </div>
-        <Button
-          className="w-full"
-          onClick={() => handlePaymentConfirmation('Credit Card')}
-        >
-          Pay Now
-        </Button>
-      </div>
-    ) : (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
-        {/* Credit Card */}
-        <Button
-          variant="outline"
-          className="w-full justify-center gap-3 py-4 text-base"
-          onClick={() => setSelectedPaymentMethod('creditCard')}
-        >
-          <CreditCardIcon />
-          Credit Card
-        </Button>
+                {selectedPaymentMethod === 'creditCard' ? (
+                     <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="card-number">Card Number</Label>
+                            <Input id="card-number" placeholder="1234 5678 9101 1121" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="expiry">Expiry (MM/YY)</Label>
+                                <Input id="expiry" placeholder="MM/YY" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="cvc">CVC</Label>
+                                <Input id="cvc" placeholder="123" />
+                            </div>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="name-on-card">Name on Card</Label>
+                            <Input id="name-on-card" placeholder="John Doe" />
+                        </div>
+                        <Button className="w-full" onClick={() => handlePaymentConfirmation('Credit Card')}>Pay Now</Button>
+                    </div>
+                ) : (
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => setSelectedPaymentMethod('creditCard')}>
+                            <CreditCardIcon />
+                            Credit Card
+                       </Button>
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Google Pay')}>
+                            <GooglePayIcon />
+                            Google Pay
+                       </Button>
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Apple Pay')}>
+                            <ApplePayIcon />
+                            Apple Pay
+                       </Button>
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Paypal')}>
+                            <PaypalIcon />
+                            Paypal
+                       </Button>
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Razorpay')}>
+                            <RazorpayIcon />
+                            Razorpay
+                       </Button>
+                       <div className="relative">
+                            <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" disabled>
+                                <PerfectPayIcon />
+                                PerfectPay
+                            </Button>
+                            <Badge variant="secondary" className="absolute -top-2 -right-2">Coming Soon</Badge>
+                       </div>
+                    </div>
+                )}
 
-        {/* Google Pay */}
-        <Button
-          variant="outline"
-          className="w-full justify-center gap-3 py-4 text-base"
-          onClick={() => window.open('https://pay.google.com', '_blank')}
-        >
-          <GooglePayIcon />
-          Google Pay
-        </Button>
-
-        {/* Apple Pay */}
-        <Button
-          variant="outline"
-          className="w-full justify-center gap-3 py-4 text-base"
-          onClick={() =>
-            window.open('https://www.apple.com/apple-pay/', '_blank')
-          }
-        >
-          <ApplePayIcon />
-          Apple Pay
-        </Button>
-
-        {/* PayPal */}
-        <Button
-          variant="outline"
-          className="w-full justify-center gap-3 py-4 text-base"
-          onClick={() =>
-            window.open('https://www.paypal.com/paypalme/yourusername', '_blank')
-          }
-        >
-          <PaypalIcon />
-          Paypal
-        </Button>
-
-        {/* Razorpay */}
-        <Button
-          variant="outline"
-          className="w-full justify-center gap-3 py-4 text-base"
-          onClick={() =>
-            window.open('https://razorpay.com/payment-link/yourlink', '_blank')
-          }
-        >
-          <RazorpayIcon />
-          Razorpay
-        </Button>
-
-        {/* PerfectPay - Coming Soon */}
-        <div className="relative">
-          <Button
-            variant="outline"
-            className="w-full justify-center gap-3 py-4 text-base"
-            disabled
-          >
-            <PerfectPayIcon />
-            PerfectPay
-          </Button>
-          <Badge
-            variant="secondary"
-            className="absolute -top-2 -right-2"
-          >
-            Coming Soon
-          </Badge>
-        </div>
-      </div>
-    )}
-
-    <DialogFooter>
-      {selectedPaymentMethod === 'creditCard' && (
-        <Button
-          variant="ghost"
-          onClick={() => setSelectedPaymentMethod(null)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
-      )}
-      <Button variant="ghost" onClick={closeDialog}>
-        Cancel
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
+                <DialogFooter>
+                    {selectedPaymentMethod === 'creditCard' && (
+                        <Button variant="ghost" onClick={() => setSelectedPaymentMethod(null)}>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back
+                        </Button>
+                    )}
+                    <Button variant="ghost" onClick={closeDialog}>Cancel</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
