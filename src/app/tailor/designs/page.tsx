@@ -83,7 +83,7 @@ export default function TailorDesignsPage() {
     <div className="space-y-8 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('My Designs')}</CardTitle>
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('My Designs')}</h1>
           <CardDescription>
             {t('Showcase your design portfolio to attract new clients.')}
           </CardDescription>

@@ -71,7 +71,7 @@ export default function OffersPage() {
             <CardHeader className="flex-row gap-4 items-center">
                 <offer.icon className="h-10 w-10 text-primary"/>
                 <div>
-                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{offer.title}</CardTitle>
+                    <CardTitle>{offer.title}</CardTitle>
                     <CardDescription>{offer.description}</CardDescription>
                 </div>
             </CardHeader>

@@ -118,7 +118,7 @@ export default function TailorAiAssistantPage() {
                 <div className="grid lg:grid-cols-3 gap-8 items-start">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl"><Lightbulb className="text-primary"/>{t('Fabric Suggestions')}</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Lightbulb/>{t('Fabric Suggestions')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {suggestions.fabricSuggestions.map((item, index) => (
@@ -131,7 +131,7 @@ export default function TailorAiAssistantPage() {
                     </Card>
                      <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl"><Scissors className="text-primary"/>{t('Design Elements')}</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Scissors/>{t('Design Elements')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                              {suggestions.designSuggestions.map((item, index) => (
@@ -144,7 +144,7 @@ export default function TailorAiAssistantPage() {
                     </Card>
                      <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl"><Check className="text-primary"/>{t('Customization Ideas')}</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Check/>{t('Customization Ideas')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                            <ul className="list-disc pl-5 text-muted-foreground">

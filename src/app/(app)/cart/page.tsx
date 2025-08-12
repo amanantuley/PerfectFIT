@@ -43,7 +43,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { addDays, format } from 'date-fns';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import Logo from '@/components/logo';
 
 const initialState = {
   message: '',
@@ -168,7 +167,7 @@ export default function CartPage() {
             `₹${originalPrice.toFixed(2)}`
         ]],
         theme: 'striped',
-        headStyles: { fillColor: [22, 163, 74] }, // A green color
+        headStyles: { fillColor: [143, 88, 240] },
     });
 
     // Totals

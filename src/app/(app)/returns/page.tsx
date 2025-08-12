@@ -7,6 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Accordion,
@@ -28,13 +29,17 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { returnsHistory, type ReturnEntry } from '@/lib/returns-data';
-import { Undo, Replace, Calendar, FileText, Banknote, HelpCircle } from 'lucide-react';
+import { Undo, Replace, Calendar, FileText, Banknote, HelpCircle, Download } from 'lucide-react';
 import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const getStatusConfig = (status: string): { variant: 'outline' | 'secondary', icon: React.ElementType } => {
   switch (status.toLowerCase()) {
@@ -47,7 +52,6 @@ const getStatusConfig = (status: string): { variant: 'outline' | 'secondary', ic
   }
 };
 
-
 export default function ReturnsPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<ReturnEntry | null>(null);
@@ -55,6 +59,93 @@ export default function ReturnsPage() {
   const handleOpenDetails = (item: ReturnEntry) => {
     setSelectedReturn(item);
     setIsDetailOpen(true);
+  };
+
+  const handleDownloadReturnInvoice = (item: ReturnEntry) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PerfectFit', 14, 22);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Navi Mumbai, Maharashtra, India', 14, 30);
+    doc.text('support@perfectfit.com', 14, 35);
+    doc.text('+91 9867408609', 14, 40);
+
+    doc.setFontSize(18);
+    doc.text('Credit Note / Return Invoice', pageWidth - 14, 22, { align: 'right' });
+    doc.setFontSize(10);
+    doc.text(`Return ID: ${item.id}`, pageWidth - 14, 30, { align: 'right' });
+    doc.text(`Date: ${item.date}`, pageWidth - 14, 35, { align: 'right' });
+
+    // Customer Info
+    doc.setLineWidth(0.5);
+    doc.line(14, 50, pageWidth - 14, 50);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Bill To:', 14, 58);
+    doc.setFont('helvetica', 'normal');
+    doc.text('User', 14, 64);
+    doc.text('user@example.com', 14, 69);
+    doc.text('123 Fashion Ave, Style City, 10001', 14, 74);
+
+    // Return Details Table
+    (doc as any).autoTable({
+        startY: 85,
+        head: [['Item Returned', 'Reason', 'Status']],
+        body: [[
+            item.item,
+            item.reason,
+            item.status
+        ]],
+        theme: 'striped',
+        headStyles: { fillColor: [143, 88, 240] },
+    });
+    
+    // Refund Summary
+    const finalY = (doc as any).lastAutoTable.finalY + 15;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Refund Summary', 14, finalY);
+
+    const refundBody = [
+        ['Original Item Price:', `₹${item.refundDetails.originalPrice.toFixed(2)}`],
+        ['Return Fee:', `-₹${item.refundDetails.returnFee.toFixed(2)}`],
+    ];
+    
+    (doc as any).autoTable({
+        startY: finalY + 5,
+        body: refundBody,
+        theme: 'plain',
+        styles: { cellPadding: 2 },
+    });
+
+    let lastY = (doc as any).lastAutoTable.finalY;
+    doc.setLineWidth(0.2);
+    doc.line(14, lastY, pageWidth - 14, lastY);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Net Refund Amount:', 14, lastY + 8);
+    doc.text(`₹${item.refundDetails.netRefund.toFixed(2)}`, pageWidth - 14, lastY + 8, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Status: ${item.refundDetails.refundStatus}`, 14, lastY + 14);
+    doc.text(`Transaction ID: ${item.refundDetails.transactionId}`, 14, lastY + 19);
+
+    // Footer
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setLineWidth(0.5);
+    doc.line(14, pageHeight - 30, pageWidth - 14, pageHeight - 30);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Thank you for your business!', pageWidth / 2, pageHeight - 22, { align: 'center' });
+    doc.text('If you have any questions, please contact support@perfectfit.com.', pageWidth / 2, pageHeight - 15, { align: 'center' });
+
+
+    doc.save(`PerfectFit-Return-${item.id}.pdf`);
   };
 
   return (
@@ -272,6 +363,12 @@ export default function ReturnsPage() {
                         <p className="text-sm text-muted-foreground italic">"{selectedReturn.reason}"</p>
                     </CardContent>
                   </Card>
+                  <DialogFooter>
+                      <Button variant="outline" onClick={() => handleDownloadReturnInvoice(selectedReturn)}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Invoice
+                      </Button>
+                  </DialogFooter>
               </div>
             )}
         </DialogContent>

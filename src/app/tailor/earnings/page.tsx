@@ -89,7 +89,7 @@ export default function TailorEarningsPage() {
         ['', '', 'Total Payout', `₹${payout.amount.toFixed(2)}`],
       ],
       theme: 'striped',
-      headStyles: { fillColor: [34, 34, 34] }, 
+      headStyles: { fillColor: [143, 88, 240] }, 
       footStyles: { fillColor: [230, 230, 230], textColor: [0,0,0] },
     });
 

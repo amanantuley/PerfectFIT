@@ -98,7 +98,7 @@ export default function TailorOrdersPage() {
     <>
     <Card className="animate-fade-in-up shadow-lg">
       <CardHeader>
-        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-teal-500">{t('Manage Orders')}</CardTitle>
+        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Manage Orders')}</CardTitle>
         <CardDescription>{t('View, update, and manage all incoming customer orders.')}</CardDescription>
       </CardHeader>
       <CardContent>

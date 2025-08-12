@@ -157,8 +157,8 @@ export default function SubscriptionPage() {
             <Card key={plan.name} className={`shadow-lg hover:shadow-xl transition-shadow flex flex-col ${plan.popular ? 'border-primary border-2' : ''}`}>
                 {plan.popular && <div className="text-center py-1 bg-primary text-primary-foreground text-sm font-bold">Most Popular</div>}
                 <CardHeader className="text-center">
-                <CardTitle className="text-3xl flex items-center justify-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
-                    <Gem className="h-7 w-7 text-accent" />
+                <CardTitle className="text-3xl flex items-center justify-center gap-2">
+                    <Gem className="h-7 w-7 text-primary" />
                     {plan.name}
                 </CardTitle>
                 <p className="text-4xl font-bold">{plan.price}<span className="text-lg font-normal text-muted-foreground">/{plan.period}</span></p>
