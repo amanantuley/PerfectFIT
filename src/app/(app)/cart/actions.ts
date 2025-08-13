@@ -18,7 +18,7 @@ export async function submitOrder(prevState: any, formData: FormData) {
     message: z.string().optional(),
   });
 
-  const parsed = schema.safeParse({
+  const data = {
     itemName: formData.get('itemName'),
     color: formData.get('color'),
     quality: formData.get('quality'),
@@ -27,16 +27,18 @@ export async function submitOrder(prevState: any, formData: FormData) {
     buttons: formData.get('buttons'),
     tailor: formData.get('tailor'),
     message: formData.get('message'),
-  });
+  };
+
+  const parsed = schema.safeParse(data);
 
   if (!parsed.success) {
     const error = parsed.error.issues.map(issue => issue.message).join(', ');
-    return { message: error, error: true };
+    return { message: error, error: true, data: null };
   }
   
   // In a real app, you would process the order, save to a DB, and charge the user.
   console.log('New custom order received:', parsed.data);
   console.log('Awarding 100 points for this purchase.'); // Simulating reward points
 
-  return { message: 'Your order has been placed successfully!', error: false };
+  return { message: 'Your order has been placed successfully!', error: false, data: parsed.data };
 }

@@ -276,8 +276,8 @@ export default function DashboardPage() {
 
   return (
     <div id="welcome-step" className="space-y-8 animate-fade-in-up">
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-5">
-        <div className="xl:col-span-2 h-fit space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="lg:col-span-2 h-fit space-y-8">
            <Tabs defaultValue="live" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="live">Live Camera</TabsTrigger>
@@ -413,8 +413,7 @@ export default function DashboardPage() {
             </Card>
         </div>
 
-        <div className="xl:col-span-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="lg:col-span-3 space-y-8">
             <Card id="your-measurements-card" className="shadow-lg">
               <CardHeader>
                 <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Your Measurements</CardTitle>
@@ -436,7 +435,7 @@ export default function DashboardPage() {
                   </div>
                 )}
                 {measurements && !isLoading &&(
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {measurementItems.map((item) => (
                       <div key={item.label} className="flex items-center gap-4 rounded-lg border p-3 bg-muted/30">
                         <item.icon className="h-6 w-6 text-primary" />
@@ -498,7 +497,6 @@ export default function DashboardPage() {
                     )}
                 </CardContent>
             </Card>
-          </div>
         </div>
       </div>
 
@@ -511,32 +509,34 @@ export default function DashboardPage() {
                 <CardDescription>View your past measurements and reuse them for recommendations.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Source</TableHead>
-                            <TableHead>Chest</TableHead>
-                            <TableHead>Waist</TableHead>
-                            <TableHead>Hip</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {measurementHistory.map((entry) => (
-                            <TableRow key={entry.id}>
-                                <TableCell>{entry.date}</TableCell>
-                                <TableCell>{entry.source}</TableCell>
-                                <TableCell>{entry.chest} cm</TableCell>
-                                <TableCell>{entry.waist} cm</TableCell>
-                                <TableCell>{entry.hip} cm</TableCell>
-                                <TableCell className="text-right">
-                                    <Button size="sm" variant="outline" onClick={() => reuseMeasurement(entry)}>Reuse</Button>
-                                </TableCell>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Source</TableHead>
+                                <TableHead>Chest</TableHead>
+                                <TableHead>Waist</TableHead>
+                                <TableHead>Hip</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {measurementHistory.map((entry) => (
+                                <TableRow key={entry.id}>
+                                    <TableCell>{entry.date}</TableCell>
+                                    <TableCell>{entry.source}</TableCell>
+                                    <TableCell>{entry.chest} cm</TableCell>
+                                    <TableCell>{entry.waist} cm</TableCell>
+                                    <TableCell>{entry.hip} cm</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button size="sm" variant="outline" onClick={() => reuseMeasurement(entry)}>Reuse</Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             </CardContent>
          </Card>
        )}

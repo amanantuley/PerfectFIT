@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { SubscriptionProvider, useSubscription } from '@/context/subscription-provider';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import { AppProvider } from '@/context/app-context';
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -235,9 +236,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <SubscriptionProvider>
-        <AppLayoutContent>{children}</AppLayoutContent>
-      </SubscriptionProvider>
+      <AppProvider>
+        <SubscriptionProvider>
+          <AppLayoutContent>{children}</AppLayoutContent>
+        </SubscriptionProvider>
+      </AppProvider>
     </SidebarProvider>
   );
 }

@@ -17,7 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CircleDollarSign, Save } from 'lucide-react';
+import { CircleDollarSign, Save, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/context/translation-provider';
 import { chargesData } from '@/lib/charges-data';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +27,7 @@ export default function TailorChargesPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   
-  // Initialize state with the default charges data
+  const [isLoading, setIsLoading] = useState(false);
   const [prices, setPrices] = useState(() => {
     const initialPrices: { [key: string]: number } = {};
     chargesData.forEach(category => {
@@ -46,12 +46,16 @@ export default function TailorChargesPage() {
   };
 
   const handleSaveChanges = () => {
+    setIsLoading(true);
     // In a real app, you would save this to a database.
-    console.log('Saving new prices:', prices);
-    toast({
-      title: t('Changes Saved!'),
-      description: t('Your new service charges have been updated.'),
-    });
+    setTimeout(() => {
+        console.log('Saving new prices:', prices);
+        setIsLoading(false);
+        toast({
+          title: t('Changes Saved!'),
+          description: t('Your new service charges have been updated.'),
+        });
+    }, 1500);
   };
 
   return (
@@ -68,8 +72,8 @@ export default function TailorChargesPage() {
                 {t('Manage your stitching charges. Prices are recommendations and can be adjusted.')}
               </CardDescription>
             </div>
-            <Button className="w-full sm:w-auto" onClick={handleSaveChanges}>
-              <Save className="mr-2 h-4 w-4" />
+            <Button className="w-full sm:w-auto" onClick={handleSaveChanges} disabled={isLoading}>
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               {t('Save All Changes')}
             </Button>
           </div>

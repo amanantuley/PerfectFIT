@@ -12,64 +12,18 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send } from 'lucide-react';
+import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-
-const orders = [
-  {
-    id: 'ORD015',
-    item: 'Navy Blue Suit',
-    image: 'https://placehold.co/64x64.png',
-    dataAiHint: 'blue suit',
-    type: 'Rent',
-    status: 'Processing',
-    date: '2025-07-15',
-  },
-  {
-    id: 'ORD014',
-    item: 'Classic White Shirt',
-    image: 'https://placehold.co/64x64.png',
-    dataAiHint: 'white shirt',
-    type: 'Buy',
-    status: 'Shipped',
-    date: '2025-07-12',
-  },
-  {
-    id: 'ORD012',
-    item: 'Charcoal Gray Suit',
-    image: 'https://placehold.co/64x64.png',
-    dataAiHint: 'gray suit',
-    type: 'Buy',
-    status: 'Delivered',
-    date: '2025-06-28',
-  },
-  {
-    id: 'ORD011',
-    item: 'Casual Checkered Shirt',
-    image: 'https://placehold.co/64x64.png',
-    dataAiHint: 'checkered shirt',
-    type: 'Rent',
-    status: 'Returned',
-    date: '2025-06-10',
-  },
-  {
-    id: 'ORD009',
-    item: 'Classic White Shirt',
-    image: 'https://placehold.co/64x64.png',
-    dataAiHint: 'white shirt',
-    type: 'Buy',
-    status: 'Canceled',
-    date: '2025-05-20',
-  },
-];
-
-type Order = (typeof orders)[0];
+import { useApp, Order } from '@/context/app-context';
+import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const initialConversation = [
     {
@@ -84,6 +38,14 @@ const initialConversation = [
         content: "Hello! Absolutely, consider it done. We'll add surgeon's cuffs to your suit jacket. Great choice!",
         avatar: "https://placehold.co/100x100.png",
     },
+];
+
+const returnReasons = [
+    "Size was too small",
+    "Size was too large",
+    "Didn't match description",
+    "Arrived damaged",
+    "Changed my mind",
 ];
 
 const getStatusConfig = (status: string) => {
@@ -104,12 +66,67 @@ const getStatusConfig = (status: string) => {
 };
 
 export default function OrdersPage() {
+    const { toast } = useToast();
+    const { orders, addReturn, updateOrderStatus } = useApp();
     const [isMessageOpen, setIsMessageOpen] = useState(false);
+    const [isReturnOpen, setIsReturnOpen] = useState(false);
+    const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
     const handleOpenMessageDialog = (order: Order) => {
         setSelectedOrder(order);
         setIsMessageOpen(true);
+    };
+
+    const handleOpenReturnDialog = (order: Order) => {
+        setSelectedOrder(order);
+        setIsReturnOpen(true);
+    };
+
+    const handleReturnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!selectedOrder) return;
+
+        const formData = new FormData(e.currentTarget);
+        const reason = formData.get('returnReason') as string;
+
+        if (!reason) {
+            toast({
+                variant: 'destructive',
+                title: 'No Reason Selected',
+                description: 'Please select a reason for the return.',
+            });
+            return;
+        }
+
+        setIsSubmittingReturn(true);
+        setTimeout(() => {
+            addReturn({
+                id: `RET${selectedOrder.id.replace('ORD', '')}`,
+                item: selectedOrder.item,
+                image: selectedOrder.image,
+                dataAiHint: selectedOrder.dataAiHint,
+                status: 'Returned',
+                date: new Date().toISOString().split('T')[0],
+                reason: reason,
+                refundDetails: {
+                    originalPrice: 450.00, // Example price
+                    returnFee: 15.00,
+                    netRefund: 435.00,
+                    refundStatus: 'Processing',
+                    transactionId: `PENDING-${Date.now()}`
+                }
+            });
+
+            updateOrderStatus(selectedOrder.id, 'Returned');
+
+            setIsSubmittingReturn(false);
+            setIsReturnOpen(false);
+            toast({
+                title: 'Return Requested',
+                description: `Your request to return "${selectedOrder.item}" has been submitted.`,
+            });
+        }, 1500);
     };
 
   return (
@@ -156,6 +173,12 @@ export default function OrdersPage() {
                         <statusConfig.icon className="h-4 w-4 mr-2" />
                         {statusConfig.text}
                     </Badge>
+                    {order.status === 'Delivered' && (
+                        <Button variant="outline" size="sm" className="w-full" onClick={() => handleOpenReturnDialog(order)}>
+                            <Undo className="mr-2 h-4 w-4" />
+                            Request Return
+                        </Button>
+                    )}
                     <Button variant="outline" size="sm" className="w-full" onClick={() => handleOpenMessageDialog(order)}>
                         <MessageCircle className="mr-2 h-4 w-4" />
                         Message Tailor
@@ -206,10 +229,16 @@ export default function OrdersPage() {
                                 </Badge>
                             </TableCell>
                             <TableCell>{order.date}</TableCell>
-                             <TableCell className="text-right">
+                             <TableCell className="text-right space-x-2">
+                                {order.status === 'Delivered' && (
+                                    <Button variant="outline" size="sm" onClick={() => handleOpenReturnDialog(order)}>
+                                        <Undo className="mr-2 h-4 w-4" />
+                                        Return
+                                    </Button>
+                                )}
                                 <Button variant="outline" size="sm" onClick={() => handleOpenMessageDialog(order)}>
                                     <MessageCircle className="mr-2 h-4 w-4" />
-                                    Message Tailor
+                                    Message
                                 </Button>
                             </TableCell>
                         </TableRow>
@@ -278,6 +307,34 @@ export default function OrdersPage() {
                     </Button>
                 </form>
             </div>
+        </DialogContent>
+    </Dialog>
+
+    <Dialog open={isReturnOpen} onOpenChange={setIsReturnOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Request a Return</DialogTitle>
+                <DialogDescription>
+                    You are requesting a return for "{selectedOrder?.item}". Please select a reason below.
+                </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleReturnSubmit} className="py-4 space-y-4">
+                <RadioGroup name="returnReason" className="space-y-2">
+                    {returnReasons.map(reason => (
+                        <Label key={reason} htmlFor={reason} className="flex items-center gap-2 cursor-pointer p-3 rounded-md border-2 border-transparent peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                            <RadioGroupItem value={reason} id={reason} />
+                            <span>{reason}</span>
+                        </Label>
+                    ))}
+                </RadioGroup>
+                <DialogFooter>
+                    <Button type="button" variant="ghost" onClick={() => setIsReturnOpen(false)}>Cancel</Button>
+                    <Button type="submit" disabled={isSubmittingReturn}>
+                        {isSubmittingReturn && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Submit Return
+                    </Button>
+                </DialogFooter>
+            </form>
         </DialogContent>
     </Dialog>
     </>

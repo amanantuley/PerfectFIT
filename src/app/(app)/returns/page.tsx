@@ -34,12 +34,12 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { returnsHistory, type ReturnEntry } from '@/lib/returns-data';
 import { Undo, Replace, Calendar, FileText, Banknote, HelpCircle, Download } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useApp, ReturnEntry } from '@/context/app-context';
 
 const getStatusConfig = (status: string): { variant: 'outline' | 'secondary', icon: React.ElementType } => {
   switch (status.toLowerCase()) {
@@ -53,6 +53,7 @@ const getStatusConfig = (status: string): { variant: 'outline' | 'secondary', ic
 };
 
 export default function ReturnsPage() {
+  const { returns } = useApp();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<ReturnEntry | null>(null);
 
@@ -221,7 +222,7 @@ export default function ReturnsPage() {
           <CardContent>
               {/* Mobile View */}
               <div className="md:hidden space-y-4">
-              {returnsHistory.map((item) => {
+              {returns.map((item) => {
                   const statusConfig = getStatusConfig(item.status);
                   return (
                   <Card key={item.id} className="overflow-hidden transition-all hover:shadow-md hover:bg-muted/50" onClick={() => handleOpenDetails(item)}>
@@ -267,7 +268,7 @@ export default function ReturnsPage() {
                   </TableRow>
               </TableHeader>
               <TableBody>
-                  {returnsHistory.map((item) => {
+                  {returns.map((item) => {
                       const statusConfig = getStatusConfig(item.status);
                       return (
                           <TableRow key={item.id} className="transition-colors hover:bg-muted/50 cursor-pointer" onClick={() => handleOpenDetails(item)}>

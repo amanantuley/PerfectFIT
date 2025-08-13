@@ -43,6 +43,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { addDays, format } from 'date-fns';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useApp } from '@/context/app-context';
+import { useRouter } from 'next/navigation';
 
 const initialState = {
   message: '',
@@ -112,12 +114,17 @@ const PerfectPayIcon = () => (
 
 export default function CartPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useFormState(submitOrder, initialState);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [submittedData, setSubmittedData] = useState<any>(null);
 
   const { activePlan, discount } = useSubscription();
+  const { addOrder } = useApp();
+
+  // In a real app, this would come from a cart context/state
   const itemInCart = garments[0];
 
   const originalPrice = itemInCart.price;
@@ -162,7 +169,7 @@ export default function CartPage() {
         head: [['Item Description', 'Customizations', 'Unit Price', 'Total']],
         body: [[
             itemInCart.name,
-            'Color: Navy Blue\nQuality: Premium\nFit: Slim Fit\nLapel: Notch',
+            `Color: ${submittedData?.color || 'N/A'}\nQuality: ${submittedData?.quality || 'N/A'}\nFit: ${submittedData?.fit || 'N/A'}\nLapel: ${submittedData?.lapel || 'N/A'}`,
             `₹${originalPrice.toFixed(2)}`,
             `₹${originalPrice.toFixed(2)}`
         ]],
@@ -200,6 +207,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (state.message && !state.error) {
+        setSubmittedData(state.data);
         setIsPaymentDialogOpen(true);
     } else if (state.message && state.error) {
         toast({
@@ -213,6 +221,19 @@ export default function CartPage() {
   const handlePaymentConfirmation = (method: string) => {
     setIsPaymentDialogOpen(false);
     setSelectedPaymentMethod(null);
+    
+    // Add to global order state
+    const newOrder = {
+        id: `ORD0${Math.floor(Math.random() * 90) + 10}`, // Random new ID
+        item: submittedData.itemName,
+        image: itemInCart.image,
+        dataAiHint: itemInCart.dataAiHint,
+        type: 'Buy',
+        status: 'Processing',
+        date: format(new Date(), 'yyyy-MM-dd'),
+    };
+    addOrder(newOrder);
+
     toast({
       title: 'Payment Successful!',
       description: method === 'PerfectPay'
@@ -226,6 +247,7 @@ export default function CartPage() {
       ),
     });
     formRef.current?.reset();
+    router.push('/orders');
   };
 
   const closeDialog = () => {
