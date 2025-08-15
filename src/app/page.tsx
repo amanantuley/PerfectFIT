@@ -138,7 +138,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
-              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                 <div className="mx-auto bg-primary/10 p-3 rounded-full mb-2">
                   <Camera className="h-8 w-8 text-primary" />
                 </div>
@@ -147,7 +147,7 @@ export default function LandingPage() {
                   Our advanced AI analyzes a photo to extract over 10 key body measurements with incredible accuracy. No measuring tape needed.
                 </p>
               </div>
-              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                  <div className="mx-auto bg-primary/10 p-3 rounded-full mb-2">
                   <Bot className="h-8 w-8 text-primary" />
                 </div>
@@ -156,7 +156,7 @@ export default function LandingPage() {
                   Based on your unique measurements, our style engine recommends garments that will fit you perfectly from our collection.
                 </p>
               </div>
-              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                 <div className="mx-auto bg-primary/10 p-3 rounded-full mb-2">
                   <Scissors className="h-8 w-8 text-primary" />
                 </div>
@@ -165,7 +165,7 @@ export default function LandingPage() {
                   Choose to buy or rent. Each purchased item is custom-made by expert tailors to your exact dimensions for a flawless fit.
                 </p>
               </div>
-              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                 <div className="mx-auto bg-primary/10 p-3 rounded-full mb-2">
                   <Shirt className="h-8 w-8 text-primary" />
                 </div>
@@ -174,7 +174,7 @@ export default function LandingPage() {
                   Enjoy the flexibility to either purchase timeless pieces for your wardrobe or rent outfits for special occasions.
                 </p>
               </div>
-              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                  <div className="mx-auto bg-primary/10 p-3 rounded-full mb-2">
                   <Award className="h-8 w-8 text-primary" />
                 </div>
@@ -183,7 +183,7 @@ export default function LandingPage() {
                   Join our subscription plans to unlock exclusive discounts, rental credits, and members-only benefits.
                 </p>
               </div>
-              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="grid gap-2 text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                 <div className="mx-auto bg-primary/10 p-3 rounded-full mb-2">
                   <Ruler className="h-8 w-8 text-primary" />
                 </div>
@@ -210,17 +210,17 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="mx-auto w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 relative">
-              <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                 <div className="p-4 bg-primary rounded-full text-primary-foreground font-bold text-2xl w-16 h-16 flex items-center justify-center">1</div>
                 <h3 className="text-xl font-bold">Scan</h3>
                 <p className="text-muted-foreground">Take a full-body photo using your smartphone. Our AI does the rest.</p>
               </div>
-              <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                  <div className="p-4 bg-primary rounded-full text-primary-foreground font-bold text-2xl w-16 h-16 flex items-center justify-center">2</div>
                 <h3 className="text-xl font-bold">Shop</h3>
                 <p className="text-muted-foreground">Browse styles and receive personalized recommendations that are guaranteed to fit.</p>
               </div>
-              <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+              <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                  <div className="p-4 bg-primary rounded-full text-primary-foreground font-bold text-2xl w-16 h-16 flex items-center justify-center">3</div>
                 <h3 className="text-xl font-bold">Wear</h3>
                 <p className="text-muted-foreground">Receive your custom-made garments and enjoy the confidence of a perfect fit.</p>
@@ -244,19 +244,19 @@ export default function LandingPage() {
                     </p>
                 </div>
                 <div className="mx-auto grid max-w-5xl grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+                    <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                         <Image className="rounded-full mb-4 object-cover h-40 w-40" src="/aman-image.png" alt="Team member" width={160} height={160} />
                         <h3 className="text-xl font-bold">Aman Antuley</h3>
                         <p className="text-sm text-muted-foreground">Software Developer</p>
                         <p className="mt-2 text-sm text-muted-foreground">The architect of our seamless user experience and robust application logic.</p>
                     </div>
-                    <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+                    <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                          <Image className="rounded-full mb-4 object-cover h-40 w-40" src="/alamin.jpg" alt="Team member" width={160} height={160} />
                         <h3 className="text-xl font-bold">Alamin Mondal</h3>
                         <p className="text-sm text-muted-foreground">AI/ML Engineer</p>
                          <p className="mt-2 text-sm text-muted-foreground">The mastermind behind our powerful AI, ensuring our core technology is always learning and improving.</p>
                     </div>
-                    <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-xl" >
+                    <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                          <Image className="rounded-full mb-4 object-cover h-40 w-40 object-center" src="/iqra.jpg" alt="Team member" width={160} height={160} />
                         <h3 className="text-xl font-bold">Iqra Shaikh</h3>
                         <p className="text-sm text-muted-foreground">App Developer</p>
@@ -280,7 +280,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-xl hover:-translate-y-1" >
+                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-glow hover:-translate-y-1" >
                     <div className="flex items-center gap-2 mb-4">
                         <Star className="w-5 h-5 fill-primary text-primary" />
                         <Star className="w-5 h-5 fill-primary text-primary" />
@@ -294,7 +294,7 @@ export default function LandingPage() {
                        <p className="font-semibold">- Alex J.</p>
                     </div>
                 </div>
-                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-xl hover:-translate-y-1" >
+                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-glow hover:-translate-y-1" >
                      <div className="flex items-center gap-2 mb-4">
                         <Star className="w-5 h-5 fill-primary text-primary" />
                         <Star className="w-5 h-5 fill-primary text-primary" />
@@ -308,7 +308,7 @@ export default function LandingPage() {
                        <p className="font-semibold">- Sarah K.</p>
                     </div>
                 </div>
-                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-xl hover:-translate-y-1" >
+                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-glow hover:-translate-y-1" >
                      <div className="flex items-center gap-2 mb-4">
                         <Star className="w-5 h-5 fill-primary text-primary" />
                         <Star className="w-5 h-5 fill-primary text-primary" />
@@ -393,3 +393,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
+    

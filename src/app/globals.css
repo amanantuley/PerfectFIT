@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --background: 240 10% 99%;
+    --background: 0 0% 98%;
     --foreground: 240 10% 3.9%;
-    --card: 240 10% 100%;
+    --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
-    --popover: 240 10% 100%;
+    --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 20% 98%;
@@ -33,7 +33,7 @@
     --sidebar-foreground: 240 10% 3.9%;
     --sidebar-primary: 262.1 83.3% 57.8%;
     --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 240 10% 100%;
+    --sidebar-accent: 0 0% 100%;
     --sidebar-accent-foreground: 240 10% 3.9%;
     --sidebar-border: 240 5.9% 90%;
     --sidebar-ring: 262.1 83.3% 57.8%;
@@ -79,6 +79,14 @@
   }
 }
 
+@layer components {
+  .card {
+    background-color: hsla(var(--card), 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid hsla(0, 0%, 100%, 0.1);
+  }
+}
+
 @layer utilities {
   .bg-size-200 {
     background-size: 200% auto;
@@ -92,3 +100,5 @@
     100% { background-position: 0% 50%; }
   }
 }
+
+    

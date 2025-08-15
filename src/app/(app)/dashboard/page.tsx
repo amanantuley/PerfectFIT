@@ -285,7 +285,7 @@ export default function DashboardPage() {
                 <TabsTrigger value="manual">Manual Input</TabsTrigger>
               </TabsList>
               <TabsContent value="live">
-                <Card id="live-measurement-card" className="shadow-lg mt-2">
+                <Card id="live-measurement-card" className="shadow-glow mt-2">
                   <CardHeader>
                     <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Live Measurement</CardTitle>
                     <CardDescription>Use your camera for instant results.</CardDescription>
@@ -316,7 +316,7 @@ export default function DashboardPage() {
                 </Card>
               </TabsContent>
               <TabsContent value="upload">
-                <Card id="upload-photo-card" className="shadow-lg mt-2">
+                <Card id="upload-photo-card" className="shadow-glow mt-2">
                   <CardHeader>
                     <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">AI Measurement</CardTitle>
                     <CardDescription>Upload a full-body photo to get your measurements.</CardDescription>
@@ -345,7 +345,7 @@ export default function DashboardPage() {
                 </Card>
               </TabsContent>
               <TabsContent value="manual">
-                 <Card className="shadow-lg mt-2">
+                 <Card className="shadow-glow mt-2">
                     <CardHeader>
                         <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Manual Input</CardTitle>
                         <CardDescription>Enter your measurements directly.</CardDescription>
@@ -399,7 +399,7 @@ export default function DashboardPage() {
                  </Card>
               </TabsContent>
             </Tabs>
-            <Card className="shadow-lg">
+            <Card className="shadow-glow">
                 <CardHeader>
                     <CardTitle>Need Help?</CardTitle>
                     <CardDescription>Get one-on-one help with your measurements.</CardDescription>
@@ -414,7 +414,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-3 space-y-8">
-            <Card id="your-measurements-card" className="shadow-lg">
+            <Card id="your-measurements-card" className="shadow-glow">
               <CardHeader>
                 <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Your Measurements</CardTitle>
                 <CardDescription>Results from our AI analysis.</CardDescription>
@@ -450,7 +450,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg">
+            <Card className="shadow-glow">
                 <CardHeader>
                     <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Digital Mannequin</CardTitle>
                     <CardDescription>A visual guide to your measurements.</CardDescription>
@@ -501,7 +501,7 @@ export default function DashboardPage() {
       </div>
 
        {measurementHistory.length > 0 && (
-         <Card className="shadow-lg">
+         <Card className="shadow-glow">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
                     <History /> Measurement History
@@ -569,7 +569,7 @@ export default function DashboardPage() {
         {!isRecommending && garmentsToShow.length > 0 && (
           <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {garmentsToShow.map((garment) => (
-              <Card key={garment.name} className="overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
+              <Card key={garment.name} className="overflow-hidden transition-all hover:shadow-glow hover:-translate-y-1">
                 <CardContent className="p-0">
                   <div className="relative aspect-square w-full">
                     <Image src={garment.image} alt={garment.name} fill className="object-cover" data-ai-hint={garment.dataAiHint} />
@@ -652,3 +652,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

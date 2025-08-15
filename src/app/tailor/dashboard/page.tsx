@@ -93,7 +93,7 @@ export default function TailorDashboard() {
     <div className="space-y-6 animate-fade-in-up">
       <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Dashboard')}</h1>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="shadow-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("Today's Earnings")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -105,7 +105,7 @@ export default function TailorDashboard() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('Orders this Week')}</CardTitle>
             <ClipboardList className="h-4 w-4 text-muted-foreground" />
@@ -117,7 +117,7 @@ export default function TailorDashboard() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('New Customers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -129,7 +129,7 @@ export default function TailorDashboard() {
             </p>
           </CardContent>
         </Card>
-         <Card>
+         <Card className="shadow-glow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('Upcoming Fittings')}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -144,7 +144,7 @@ export default function TailorDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-3 shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Earnings Overview')}</CardTitle>
             <CardDescription>
@@ -177,7 +177,7 @@ export default function TailorDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">{t('Recent Orders')}</CardTitle>
             <CardDescription>
@@ -227,3 +227,5 @@ export default function TailorDashboard() {
     </div>
   );
 }
+
+    
