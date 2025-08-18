@@ -1,0 +1,73 @@
+
+export const designs = [
+  {
+    name: 'Classic Two-Piece Suit',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'classic suit',
+    price: 1800,
+    timeToCreate: '5 days',
+  },
+  {
+    name: 'Embroidered Sherwani',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'sherwani clothing',
+    price: 2000,
+    timeToCreate: '10 days',
+  },
+  {
+    name: 'Linen Summer Shirt',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'linen shirt',
+    price: 800,
+    timeToCreate: '2 days',
+  },
+  {
+    name: 'Formal Evening Gown',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'evening gown',
+    price: 1900,
+    timeToCreate: '14 days',
+  },
+  {
+    name: 'Custom Denim Jacket',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'denim jacket',
+    price: 1500,
+    timeToCreate: '4 days',
+  },
+  {
+    name: 'Silk Blend Kurta',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'kurta clothing',
+    price: 1600,
+    timeToCreate: '3 days',
+  },
+  {
+    name: 'High-Waisted Trousers',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'trousers fashion',
+    price: 1200,
+    timeToCreate: '3 days',
+  },
+  {
+    name: 'Tweed Blazer',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'tweed blazer',
+    price: 1750,
+    timeToCreate: '6 days',
+  },
+  {
+    name: 'Flowy Maxi Dress',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'maxi dress',
+    price: 1800,
+    timeToCreate: '4 days',
+  },
+  {
+    name: 'Wool Peacoat',
+    image: 'https://placehold.co/600x400.png',
+    dataAiHint: 'peacoat winter',
+    price: 1950,
+    timeToCreate: '8 days',
+  },
+];
