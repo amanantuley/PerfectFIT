@@ -5,9 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';
-import { Camera, Scissors, Ruler, Bot, Users, Star, Shirt, Award, Facebook, Twitter, Instagram, Linkedin, Sparkles, Wand2, Lightbulb, Quote, LogIn, Download } from 'lucide-react';
+import { Camera, Scissors, Ruler, Bot, Users, Star, Shirt, Award, Facebook, Twitter, Instagram, Linkedin, Sparkles, Wand2, Lightbulb, Quote, LogIn, Download, Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { submitNewsletter } from './actions';
+import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
 
 function PreLoader() {
   return (
@@ -31,7 +35,7 @@ const FacebookIcon = () => (
 
 const InstagramIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.947s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"></path>
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664 4.771 4.919 4.919 1.266-.057 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.947s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"></path>
     </svg>
 );
 
@@ -41,8 +45,43 @@ const LinkedinIcon = () => (
     </svg>
 );
 
+const initialState = {
+  message: '',
+  error: false,
+};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? <Loader2 className="animate-spin" /> : 'Subscribe'}
+    </Button>
+  );
+}
+
 export default function LandingPage() {
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction] = useActionState(submitNewsletter, initialState);
+
+  useEffect(() => {
+    if (state.message) {
+      if (state.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: state.message,
+        });
+      } else {
+        toast({
+          title: 'Subscribed!',
+          description: state.message,
+        });
+        formRef.current?.reset();
+      }
+    }
+  }, [state, toast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -77,7 +116,7 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full py-16 md:py-24 lg:py-32 xl:py-48 text-center overflow-x-hidden animate-fade-in-up">
+        <section className="relative w-full py-20 md:py-24 text-center overflow-x-hidden animate-fade-in-up">
           <div className="absolute inset-0 z-0">
              <Image src="/landbcck.png" alt="Tailoring background" fill className="object-cover" />
              <div className="absolute inset-0 bg-black/50"></div>
@@ -336,9 +375,9 @@ export default function LandingPage() {
                     </p>
                 </div>
                 <div className="mx-auto w-full max-w-sm space-y-2" >
-                    <form className="flex space-x-2">
-                        <input className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 max-w-lg flex-1" placeholder="Enter your email" type="email" />
-                        <Button type="submit">Subscribe</Button>
+                    <form ref={formRef} action={formAction} className="flex space-x-2">
+                        <Input name="email" className="max-w-lg flex-1" placeholder="Enter your email" type="email" required />
+                        <SubmitButton />
                     </form>
                     <p className="text-xs text-muted-foreground">
                         We respect your privacy. Unsubscribe at any time.
@@ -380,9 +419,9 @@ export default function LandingPage() {
             <div>
                 <h4 className="font-semibold mb-4 text-foreground">Legal</h4>
                 <ul className="space-y-2">
-                    <li><Link href="#" className="text-sm hover:text-primary transition-colors">Terms of Service</Link></li>
-                    <li><Link href="#" className="text-sm hover:text-primary transition-colors">Privacy Policy</Link></li>
-                    <li><Link href="#" className="text-sm hover:text-primary transition-colors">Return Policy</Link></li>
+                    <li><Link href="/terms-of-service" className="text-sm hover:text-primary transition-colors">Terms of Service</Link></li>
+                    <li><Link href="/privacy-policy" className="text-sm hover:text-primary transition-colors">Privacy Policy</Link></li>
+                    <li><Link href="/return-policy" className="text-sm hover:text-primary transition-colors">Return Policy</Link></li>
                 </ul>
             </div>
         </div>
@@ -393,5 +432,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-    

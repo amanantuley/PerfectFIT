@@ -146,6 +146,16 @@ function TailorLayoutContent({ children }: { children: React.ReactNode }) {
                 {t('Earnings')}
               </SidebarMenuButton>
             </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() => handleNavigation('/tailor/charges')}
+                isActive={isActive('/tailor/charges')}
+                tooltip={t('Service Charges' as any)}
+              >
+                <CircleDollarSign />
+                {t('Service Charges' as any)}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4">

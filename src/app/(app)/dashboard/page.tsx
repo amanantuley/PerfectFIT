@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { extractBodyMeasurements, type ExtractBodyMeasurementsOutput } from '@/ai/flows/extract-body-measurements';
 import { recommendGarments } from '@/ai/flows/recommend-garments';
-import { garments } from '@/lib/garments';
-import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb, PlayCircle, PlusCircle, History, Video } from 'lucide-react';
+import { garments, Garment } from '@/lib/garments';
+import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb, PlayCircle, PlusCircle, History, Video, Tag, Repeat } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,6 +18,8 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+import { useApp } from '@/context/app-context';
 
 // Using an inline SVG for the scale icon as it's not in lucide-react
 const ScaleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -56,6 +58,7 @@ type MeasurementEntry = ExtractBodyMeasurementsOutput & {
 export default function DashboardPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const { addToCart } = useApp();
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -115,6 +118,15 @@ export default function DashboardPage() {
       }
     };
   }, [toast]);
+
+  const handleAddToCart = (garment: Garment, purchaseType: 'Buy' | 'Rent') => {
+    addToCart(garment, purchaseType);
+    toast({
+      title: `Added for ${purchaseType}!`,
+      description: `${garment.name} has been added to your cart.`,
+      action: <Button variant="outline" size="sm" onClick={() => router.push('/cart')}>View Cart</Button>
+    });
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -251,7 +263,7 @@ export default function DashboardPage() {
         setShowConsultationDialog(false);
         toast({
             title: "Request Submitted!",
-            description: "Our team will get back to you within 24 hours to schedule your consultation.",
+            description: "We've sent an email with a Google Meet link to schedule your consultation.",
         });
     }, 1500);
   };
@@ -462,34 +474,37 @@ export default function DashboardPage() {
                         </div>
                     )}
                     {measurements && !isLoading && (
-                        <div className="relative h-[350px] w-full flex justify-center items-center">
-                            <MannequinIcon className="h-full text-muted-foreground" />
+                        <div className={cn(
+                            "relative w-full mx-auto",
+                            "h-[250px] sm:h-[300px] md:h-[350px]"
+                        )}>
+                            <MannequinIcon className="h-full text-muted-foreground mx-auto" />
                              {/* Annotations */}
-                            <div className="absolute top-[8%] left-[20%] text-right text-xs">
+                            <div className="absolute top-[8%] left-[20%] text-right text-xs sm:text-sm">
                                 <p className="font-bold">Neck</p>
                                 <p>{measurements.neckSize} cm</p>
                             </div>
-                            <div className="absolute top-[18%] left-[5%] text-right text-xs">
+                            <div className="absolute top-[18%] left-[5%] text-right text-xs sm:text-sm">
                                 <p className="font-bold">Shoulder</p>
                                 <p>{measurements.shoulder} cm</p>
                             </div>
-                            <div className="absolute top-[25%] right-[5%] text-left text-xs">
+                            <div className="absolute top-[25%] right-[5%] text-left text-xs sm:text-sm">
                                 <p className="font-bold">Chest</p>
                                 <p>{measurements.chest} cm</p>
                             </div>
-                            <div className="absolute top-[40%] right-[10%] text-left text-xs">
+                            <div className="absolute top-[40%] right-[10%] text-left text-xs sm:text-sm">
                                 <p className="font-bold">Sleeve</p>
                                 <p>{measurements.sleeveLength} cm</p>
                             </div>
-                            <div className="absolute top-[45%] left-[10%] text-right text-xs">
+                            <div className="absolute top-[45%] left-[10%] text-right text-xs sm:text-sm">
                                 <p className="font-bold">Waist</p>
                                 <p>{measurements.waist} cm</p>
                             </div>
-                             <div className="absolute top-[60%] right-[15%] text-left text-xs">
+                             <div className="absolute top-[60%] right-[15%] text-left text-xs sm:text-sm">
                                 <p className="font-bold">Hip</p>
                                 <p>{measurements.hip} cm</p>
                             </div>
-                            <div className="absolute bottom-[10%] left-[15%] text-right text-xs">
+                            <div className="absolute bottom-[10%] left-[15%] text-right text-xs sm:text-sm">
                                 <p className="font-bold">Inseam</p>
                                 <p>{measurements.inseam} cm</p>
                             </div>
@@ -569,7 +584,7 @@ export default function DashboardPage() {
         {!isRecommending && garmentsToShow.length > 0 && (
           <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {garmentsToShow.map((garment) => (
-              <Card key={garment.name} className="overflow-hidden transition-all hover:shadow-glow hover:-translate-y-1">
+              <Card key={garment.name} className="overflow-hidden transition-all hover:shadow-glow hover:-translate-y-1 flex flex-col">
                 <CardContent className="p-0">
                   <div className="relative aspect-square w-full">
                     <Image src={garment.image} alt={garment.name} fill className="object-cover" data-ai-hint={garment.dataAiHint} />
@@ -582,12 +597,12 @@ export default function DashboardPage() {
                     <span className="capitalize">{garment.type}</span>
                   </CardDescription>
                 </CardHeader>
-                <CardFooter className="flex gap-2">
-                  <Button className="w-full" onClick={() => router.push('/cart')}>
-                    <ShoppingCart className="mr-2 h-4 w-4" /> Customize & Buy
+                <CardFooter className="flex flex-col gap-2 mt-auto">
+                  <Button className="w-full" onClick={() => handleAddToCart(garment, 'Buy')}>
+                    <Tag className="mr-2 h-4 w-4" /> Buy for ₹{garment.price.toFixed(2)}
                   </Button>
-                  <Button variant="secondary" className="w-full" onClick={() => toast({ title: `${garment.name} added for rent!` })}>
-                    Rent
+                  <Button variant="secondary" className="w-full" onClick={() => handleAddToCart(garment, 'Rent')}>
+                    <Repeat className="mr-2 h-4 w-4" /> Rent for ₹{garment.rentPrice.toFixed(2)}
                   </Button>
                 </CardFooter>
               </Card>

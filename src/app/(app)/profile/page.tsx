@@ -6,12 +6,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Camera } from 'lucide-react';
+import { Loader2, Camera, Trash2 } from 'lucide-react';
 import { useFormState, useFormStatus } from 'react-dom';
-import { submitProfile } from './actions';
+import { submitProfile, deleteAccount } from './actions';
 import React, { useEffect, useRef, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 const initialState = {
   message: '',
@@ -21,7 +35,7 @@ const initialState = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full mt-6" disabled={pending}>
+    <Button type="submit" className="w-full" disabled={pending}>
       {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       Update Profile
     </Button>
@@ -30,6 +44,7 @@ function SubmitButton() {
 
 export default function ProfilePage() {
     const { toast } = useToast();
+    const router = useRouter();
     const formRef = useRef<HTMLFormElement>(null);
     const [state, formAction] = useFormState(submitProfile, initialState);
     const [avatarPreview, setAvatarPreview] = useState("https://placehold.co/100x100.png");
@@ -43,6 +58,16 @@ export default function ProfilePage() {
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handleDeleteAccount = async () => {
+        const result = await deleteAccount();
+        await signOut(auth);
+        toast({
+            title: 'Account Deleted',
+            description: result.message,
+        });
+        router.push('/');
     };
 
     useEffect(() => {
@@ -88,11 +113,11 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                         <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>
-                            <Input id="name" name="name" defaultValue="User" required/>
+                            <Input id="name" name="name" defaultValue="User" readOnly className="cursor-not-allowed bg-muted/50"/>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" name="email" type="email" defaultValue="user@example.com" required/>
+                            <Input id="email" name="email" type="email" defaultValue="user@example.com" readOnly className="cursor-not-allowed bg-muted/50"/>
                         </div>
                     </div>
                 </div>
@@ -157,8 +182,43 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <SubmitButton />
+                <div className="flex justify-end">
+                    <SubmitButton />
+                </div>
             </form>
+
+            <Separator className="my-8" />
+            
+            <div className="space-y-4 rounded-lg border border-destructive/50 p-4">
+                <h3 className="text-lg font-semibold text-destructive">Danger Zone</h3>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-muted-foreground">
+                        Deleting your account is permanent and cannot be undone. All your data will be removed.
+                    </p>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Account
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAccount}>
+                                    Yes, delete my account
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </div>
         </CardContent>
        </Card>
     </div>

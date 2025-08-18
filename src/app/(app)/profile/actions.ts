@@ -5,8 +5,9 @@ import { z } from 'zod';
 
 export async function submitProfile(prevState: any, formData: FormData) {
   const schema = z.object({
-    name: z.string().min(1, { message: "Name is required." }),
-    email: z.string().email({ message: "Invalid email address." }),
+    // Name and email are no longer part of the form submission for updates
+    // name: z.string().min(1, { message: "Name is required." }),
+    // email: z.string().email({ message: "Invalid email address." }),
     currentPassword: z.string().optional(),
     newPassword: z.string().optional(),
     street: z.string().optional(),
@@ -28,8 +29,8 @@ export async function submitProfile(prevState: any, formData: FormData) {
   });
 
   const parsed = schema.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email'),
+    // name: formData.get('name'),
+    // email: formData.get('email'),
     currentPassword: formData.get('currentPassword'),
     newPassword: formData.get('newPassword'),
     street: formData.get('street'),
@@ -54,4 +55,12 @@ export async function submitProfile(prevState: any, formData: FormData) {
   console.log('Profile update received:', parsed.data);
 
   return { message: 'Your profile has been updated successfully!', error: false };
+}
+
+export async function deleteAccount() {
+    // In a real app, you would handle the account deletion logic here.
+    // This would involve deleting the user from your database,
+    // revoking authentication tokens, and performing any cleanup.
+    console.log('User account deletion requested.');
+    return { message: 'Your account has been successfully deleted.' };
 }

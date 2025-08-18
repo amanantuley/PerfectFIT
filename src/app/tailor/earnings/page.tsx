@@ -55,53 +55,56 @@ export default function TailorEarningsPage() {
 
   const handleDownloadInvoice = (payout: Payout) => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
 
+    // Header
     doc.setFontSize(20);
-    doc.text('PerfectFit Invoice', 14, 22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PerfectFit Payout Statement', 14, 22);
+    
     doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
     doc.text('PerfectFit Inc.', 14, 30);
     doc.text('Navi Mumbai, Maharashtra, India', 14, 35);
     doc.text('support@perfectfit.com', 14, 40);
 
     doc.setFontSize(12);
-    doc.text('Payout Details', 14, 60);
-    doc.setFontSize(10);
-    doc.text(`Payout ID: ${payout.payoutId}`, 14, 70);
-    doc.text(`Date: ${payout.date}`, 14, 75);
-    doc.text(`Status: ${payout.status}`, 14, 80);
-    doc.setFontSize(12);
-    doc.text(`Amount: ₹${payout.amount.toFixed(2)}`, 140, 70);
-    
-    doc.setLineWidth(0.5);
-    doc.line(14, 90, 196, 90);
+    doc.text('To: John "The Stitch" Doe', pageWidth - 14, 30, { align: 'right' });
+    doc.text('tailor.doe@example.com', pageWidth - 14, 35, { align: 'right' });
 
+
+    doc.setLineWidth(0.5);
+    doc.line(14, 50, pageWidth - 14, 50);
+
+    // Payout Details
+    doc.setFontSize(10);
+    doc.text(`Payout ID: ${payout.payoutId}`, 14, 60);
+    doc.text(`Date Issued: ${payout.date}`, 14, 65);
+    doc.text(`Status: ${payout.status}`, 14, 70);
+    
+    // Summary Table
     (doc as any).autoTable({
-      startY: 100,
-      head: [['Description', 'Quantity', 'Rate', 'Amount']],
+      startY: 80,
+      head: [['Description', 'Amount']],
       body: [
-        ['Suit Stitching Orders', '10', '₹800.00', '₹8000.00'],
-        ['Shirt Stitching Orders', '15', '₹400.00', '₹6000.00'],
-        ['Alterations', '5', '₹150.00', '₹750.00'],
-        ['Platform Fee', '', '', '-₹2250.00'],
+        ['Total value of completed orders', `₹${(payout.amount / 0.85).toFixed(2)}`], // Example calculation
+        ['PerfectFit Platform Fee (15%)', `-₹${(payout.amount / 0.85 * 0.15).toFixed(2)}`],
       ],
-      foot: [
-        ['', '', 'Subtotal', `₹${(payout.amount * 1.2).toFixed(2)}`],
-        ['', '', 'Total Payout', `₹${payout.amount.toFixed(2)}`],
-      ],
+      foot: [['Total Payout Amount', `₹${payout.amount.toFixed(2)}`]],
       theme: 'striped',
-      headStyles: { fillColor: [143, 88, 240] }, 
-      footStyles: { fillColor: [230, 230, 230], textColor: [0,0,0] },
+      headStyles: { fillColor: [143, 88, 240] },
+      footStyles: { fillColor: [230, 230, 230], textColor: [0,0,0], fontStyle: 'bold' },
     });
 
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.text('Thank you for your partnership with PerfectFit!', 14, doc.internal.pageSize.height - 15);
-        doc.text(`Page ${i} of ${pageCount}`, 190, doc.internal.pageSize.height - 15);
-    }
+    const finalY = (doc as any).lastAutoTable.finalY + 20;
+
+    // Footer
+    doc.setFontSize(10);
+    doc.text('Notes:', 14, finalY);
+    doc.text('This is an auto-generated statement. For any queries, please contact our support team.', 14, finalY + 5);
+    doc.text('Thank you for your partnership with PerfectFit!', pageWidth / 2, doc.internal.pageSize.height - 15, { align: 'center' });
     
-    doc.save(`Invoice-${payout.payoutId}.pdf`);
+    doc.save(`Payout-Statement-${payout.payoutId}.pdf`);
   };
 
   return (

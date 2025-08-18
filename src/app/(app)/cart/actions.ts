@@ -3,28 +3,19 @@
 
 import { z } from 'zod';
 import { tailors } from '@/lib/tailors';
+import { garments } from '@/lib/garments';
 
 export async function submitOrder(prevState: any, formData: FormData) {
   const tailorIds = tailors.map(t => t.id) as [string, ...string[]];
 
   const schema = z.object({
-    itemName: z.string(),
-    color: z.string().min(1, { message: "Please select a color." }),
-    quality: z.string().min(1, { message: "Please select a cloth quality." }),
-    fit: z.string().min(1, { message: "Please select a fit style." }),
-    lapel: z.string().min(1, { message: "Please select a lapel style." }),
-    buttons: z.string().min(1, { message: "Please select a button stance." }),
+    items: z.string().min(1, { message: "Cart is empty." }),
     tailor: z.enum(tailorIds, { errorMap: () => ({ message: "Please select a tailor." }) }),
     message: z.string().optional(),
   });
 
   const data = {
-    itemName: formData.get('itemName'),
-    color: formData.get('color'),
-    quality: formData.get('quality'),
-    fit: formData.get('fit'),
-    lapel: formData.get('lapel'),
-    buttons: formData.get('buttons'),
+    items: formData.get('items'),
     tailor: formData.get('tailor'),
     message: formData.get('message'),
   };
@@ -35,10 +26,20 @@ export async function submitOrder(prevState: any, formData: FormData) {
     const error = parsed.error.issues.map(issue => issue.message).join(', ');
     return { message: error, error: true, data: null };
   }
-  
-  // In a real app, you would process the order, save to a DB, and charge the user.
-  console.log('New custom order received:', parsed.data);
-  console.log('Awarding 100 points for this purchase.'); // Simulating reward points
 
-  return { message: 'Your order has been placed successfully!', error: false, data: parsed.data };
+  try {
+    const items = JSON.parse(parsed.data.items as string);
+    // In a real app, you would process the order, save to a DB, and charge the user.
+    console.log('New custom order received for multiple items:', {
+      items: items,
+      tailor: parsed.data.tailor,
+      message: parsed.data.message
+    });
+    console.log('Awarding 100 points for this purchase.'); // Simulating reward points
+
+    return { message: 'Your order has been placed successfully!', error: false, data: { items: items } };
+
+  } catch (e) {
+    return { message: 'Invalid items data.', error: true, data: null };
+  }
 }

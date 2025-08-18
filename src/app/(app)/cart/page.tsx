@@ -29,32 +29,32 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Loader2, Wallet, ArrowLeft, Wand2, CalendarDays, Download } from 'lucide-react';
+import { ShoppingCart, Loader2, Wallet, ArrowLeft, Download, Trash2, CalendarDays, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { useFormState, useFormStatus } from 'react-dom';
 import React, { useEffect, useRef, useState } from 'react';
 import { submitOrder } from './actions';
-import { garments } from '@/lib/garments';
 import { tailors } from '@/lib/tailors';
 import { Separator } from '@/components/ui/separator';
 import { useSubscription } from '@/context/subscription-provider';
 import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { addDays, format } from 'date-fns';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { useApp } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { CartItem } from '@/context/app-context';
 
 const initialState = {
   message: '',
   error: false,
 };
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full" size="lg" disabled={pending}>
+    <Button type="submit" className="w-full" size="lg" disabled={pending || disabled}>
       {pending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -120,24 +120,41 @@ export default function CartPage() {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [submittedData, setSubmittedData] = useState<any>(null);
+  const [isCustomizeDialogOpen, setIsCustomizeDialogOpen] = useState(false);
+  const [currentItemToCustomize, setCurrentItemToCustomize] = useState<CartItem | null>(null);
 
   const { activePlan, discount } = useSubscription();
-  const { addOrder } = useApp();
+  const { addMultipleOrders, cart, removeFromCart, clearCart, updateCartItemNote } = useApp();
 
-  // In a real app, this would come from a cart context/state
-  const itemInCart = garments[0];
-
-  const originalPrice = itemInCart.price;
-  const discountAmount = (originalPrice * discount) / 100;
-  const finalPrice = originalPrice - discountAmount;
-
+  const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
+  const discountAmount = (subtotal * discount) / 100;
+  const finalPrice = subtotal - discountAmount;
   const estimatedDeliveryDate = format(addDays(new Date(), 10), 'PPP');
+
+  const openCustomizeDialog = (item: CartItem) => {
+    setCurrentItemToCustomize(item);
+    setIsCustomizeDialogOpen(true);
+  };
+
+  const handleSaveCustomization = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!currentItemToCustomize) return;
+
+    const formData = new FormData(e.currentTarget);
+    const note = formData.get('customizationNote') as string;
+    
+    updateCartItemNote(currentItemToCustomize.id, note);
+    setIsCustomizeDialogOpen(false);
+    toast({
+        title: 'Customization Saved',
+        description: `Your notes for ${currentItemToCustomize.name} have been updated.`
+    });
+  };
   
   const handleDownloadInvoice = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Header
     doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
     doc.text('PerfectFit', 14, 22);
@@ -153,7 +170,6 @@ export default function CartPage() {
     doc.text(`Invoice #: INV-${new Date().getTime()}`, pageWidth - 14, 30, { align: 'right' });
     doc.text(`Date: ${format(new Date(), 'PPP')}`, pageWidth - 14, 35, { align: 'right' });
 
-    // Customer Info
     doc.setLineWidth(0.5);
     doc.line(14, 50, pageWidth - 14, 50);
     doc.setFont('helvetica', 'bold');
@@ -163,25 +179,23 @@ export default function CartPage() {
     doc.text('user@example.com', 14, 69);
     doc.text('123 Fashion Ave, Style City, 10001', 14, 74);
     
-    // Order Details
     (doc as any).autoTable({
         startY: 85,
-        head: [['Item Description', 'Customizations', 'Unit Price', 'Total']],
-        body: [[
-            itemInCart.name,
-            `Color: ${submittedData?.color || 'N/A'}\nQuality: ${submittedData?.quality || 'N/A'}\nFit: ${submittedData?.fit || 'N/A'}\nLapel: ${submittedData?.lapel || 'N/A'}`,
-            `₹${originalPrice.toFixed(2)}`,
-            `₹${originalPrice.toFixed(2)}`
-        ]],
+        head: [['Item', 'Type', 'Price', 'Customization']],
+        body: submittedData?.items.map((item: CartItem) => [
+            item.name, 
+            item.purchaseType, 
+            `₹${item.price.toFixed(2)}`,
+            item.customizationNote || 'N/A'
+        ]),
         theme: 'striped',
         headStyles: { fillColor: [143, 88, 240] },
     });
 
-    // Totals
     const finalY = (doc as any).lastAutoTable.finalY + 10;
     doc.setFontSize(10);
     doc.text('Subtotal:', pageWidth - 60, finalY);
-    doc.text(`₹${originalPrice.toFixed(2)}`, pageWidth - 14, finalY, { align: 'right' });
+    doc.text(`₹${subtotal.toFixed(2)}`, pageWidth - 14, finalY, { align: 'right' });
 
     if(discount > 0) {
         doc.text(`Discount (${discount}%):`, pageWidth - 60, finalY + 7);
@@ -193,7 +207,6 @@ export default function CartPage() {
     doc.text('Total Amount:', pageWidth - 60, finalY + 14);
     doc.text(`₹${finalPrice.toFixed(2)}`, pageWidth - 14, finalY + 14, { align: 'right' });
     
-    // Footer
     const pageHeight = doc.internal.pageSize.getHeight();
     doc.setLineWidth(0.5);
     doc.line(14, pageHeight - 30, pageWidth - 14, pageHeight - 30);
@@ -202,7 +215,7 @@ export default function CartPage() {
     doc.text('Thank you for your business!', pageWidth / 2, pageHeight - 22, { align: 'center' });
     doc.text('If you have any questions, please contact support@perfectfit.com.', pageWidth / 2, pageHeight - 15, { align: 'center' });
 
-    doc.save(`PerfectFit-Invoice-${itemInCart.name.replace(/\s+/g, '-')}.pdf`);
+    doc.save(`PerfectFit-Invoice-Order.pdf`);
   };
 
   useEffect(() => {
@@ -222,17 +235,17 @@ export default function CartPage() {
     setIsPaymentDialogOpen(false);
     setSelectedPaymentMethod(null);
     
-    // Add to global order state
-    const newOrder = {
-        id: `ORD0${Math.floor(Math.random() * 90) + 10}`, // Random new ID
-        item: submittedData.itemName,
-        image: itemInCart.image,
-        dataAiHint: itemInCart.dataAiHint,
-        type: 'Buy',
+    const newOrders = submittedData.items.map((item: CartItem) => ({
+        id: `ORD0${Math.floor(Math.random() * 900) + 100}`,
+        item: item.name,
+        image: item.image,
+        dataAiHint: item.dataAiHint,
+        type: item.purchaseType,
         status: 'Processing',
         date: format(new Date(), 'yyyy-MM-dd'),
-    };
-    addOrder(newOrder);
+    }));
+    addMultipleOrders(newOrders);
+    clearCart();
 
     toast({
       title: 'Payment Successful!',
@@ -257,6 +270,22 @@ export default function CartPage() {
 
   return (
     <div className="animate-fade-in-up">
+        {cart.length === 0 ? (
+            <Card className="shadow-lg text-center py-20">
+                <CardHeader>
+                    <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
+                        <ShoppingCart className="h-12 w-12 text-primary" />
+                    </div>
+                    <CardTitle className="text-3xl">Your Cart is Empty</CardTitle>
+                    <CardDescription className="text-lg">Looks like you haven't added anything to your cart yet.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild>
+                        <Link href="/dashboard">Start Shopping</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        ) : (
         <form ref={formRef} action={formAction}>
             <div className="grid lg:grid-cols-3 gap-8 items-start">
                 <div className="lg:col-span-2 space-y-8">
@@ -264,157 +293,68 @@ export default function CartPage() {
                         <CardHeader>
                             <CardTitle className="text-3xl flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
                                 <ShoppingCart className="h-8 w-8" />
-                                Customize Your Order
+                                Your Shopping Cart
                             </CardTitle>
                             <CardDescription>
-                                Select your preferences for the {itemInCart.name}.
+                                Review and customize your items before purchase.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center gap-4 border-b pb-4">
-                                <Image
-                                    src={itemInCart.image}
-                                    alt={itemInCart.name}
-                                    width={80}
-                                    height={80}
-                                    className="rounded-md object-cover"
-                                    data-ai-hint={itemInCart.dataAiHint}
-                                />
-                                <div className="flex-1">
-                                    <h3 className="text-lg font-semibold">{itemInCart.name}</h3>
-                                    <p className="text-muted-foreground">Custom Tailored</p>
+                            {cart.map((item) => (
+                                <div key={item.id} className="flex items-start gap-4 border-b pb-4">
+                                    <Image
+                                        src={item.image}
+                                        alt={item.name}
+                                        width={80}
+                                        height={80}
+                                        className="rounded-md object-cover"
+                                        data-ai-hint={item.dataAiHint}
+                                    />
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-semibold">{item.name}</h3>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-muted-foreground capitalize">{item.type}</p>
+                                            <Badge variant={item.purchaseType === 'Buy' ? 'default' : 'secondary'} className="capitalize">{item.purchaseType}</Badge>
+                                        </div>
+                                        {item.customizationNote && <p className="text-xs text-muted-foreground italic mt-1 line-clamp-1">Note: {item.customizationNote}</p>}
+                                    </div>
+                                    <div className="text-right flex flex-col items-end gap-2">
+                                        <p className="text-xl font-bold">₹{item.price.toFixed(2)}</p>
+                                        <div className="flex items-center gap-1">
+                                            <Button variant="outline" size="sm" onClick={() => openCustomizeDialog(item)}>
+                                                <Edit className="h-3 w-3" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    {activePlan && (
-                                        <p className="text-muted-foreground line-through">₹{originalPrice.toFixed(2)}</p>
-                                    )}
-                                    <p className="text-xl font-bold">₹{finalPrice.toFixed(2)}</p>
-                                </div>
-                                <input type="hidden" name="itemName" value={itemInCart.name} />
+                            ))}
+                             <input type="hidden" name="items" value={JSON.stringify(cart)} />
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle>Tailor Selection</CardTitle>
+                            <CardDescription>Select a tailor for your custom-fit items.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="tailor">Nearby Tailor</Label>
+                                <Select name="tailor" required>
+                                    <SelectTrigger id="tailor">
+                                        <SelectValue placeholder="Select a tailor" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tailors.map(tailor => (
+                                            <SelectItem key={tailor.id} value={tailor.id}>
+                                                {tailor.name} - {tailor.location}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            
-                           <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
-                                <AccordionItem value="item-1">
-                                    <AccordionTrigger className="text-lg font-semibold">Fabric & Quality</AccordionTrigger>
-                                    <AccordionContent className="pt-4">
-                                        <div className="grid sm:grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="color">Color</Label>
-                                                <Select name="color" required>
-                                                    <SelectTrigger id="color">
-                                                        <SelectValue placeholder="Select a color" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="navy-blue">Navy Blue</SelectItem>
-                                                        <SelectItem value="charcoal-gray">Charcoal Gray</SelectItem>
-                                                        <SelectItem value="classic-white">Classic White</SelectItem>
-                                                        <SelectItem value="black">Black</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="quality">Cloth Quality</Label>
-                                                <Select name="quality" required>
-                                                    <SelectTrigger id="quality">
-                                                        <SelectValue placeholder="Select quality" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="standard">Standard (Wool Blend)</SelectItem>
-                                                        <SelectItem value="premium">Premium (100% Merino Wool)</SelectItem>
-                                                        <SelectItem value="luxury">Luxury (Cashmere Blend)</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-2">
-                                    <AccordionTrigger className="text-lg font-semibold">Style & Fit</AccordionTrigger>
-                                    <AccordionContent className="pt-4">
-                                        <div className="grid sm:grid-cols-3 gap-6">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="fit">Fit Style</Label>
-                                                <Select name="fit" required>
-                                                    <SelectTrigger id="fit">
-                                                        <SelectValue placeholder="Select a fit" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="slim-fit">Slim Fit</SelectItem>
-                                                        <SelectItem value="modern-fit">Modern Fit</SelectItem>
-                                                        <SelectItem value="classic-fit">Classic Fit</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="lapel">Lapel Style</Label>
-                                                <Select name="lapel" required>
-                                                    <SelectTrigger id="lapel">
-                                                        <SelectValue placeholder="Select a lapel" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="notch">Notch Lapel</SelectItem>
-                                                        <SelectItem value="peak">Peak Lapel</SelectItem>
-                                                        <SelectItem value="shawl">Shawl Lapel</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="buttons">Button Stance</Label>
-                                                <Select name="buttons" required>
-                                                    <SelectTrigger id="buttons">
-                                                        <SelectValue placeholder="Select buttons" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="one-button">One-Button</SelectItem>
-                                                        <SelectItem value="two-button">Two-Button</SelectItem>
-                                                        <SelectItem value="double-breasted">Double-Breasted</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-3">
-                                    <AccordionTrigger className="text-lg font-semibold">Tailor & Notes</AccordionTrigger>
-                                    <AccordionContent className="pt-4 space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="tailor">Nearby Tailor</Label>
-                                            <Select name="tailor" required>
-                                                <SelectTrigger id="tailor">
-                                                    <SelectValue placeholder="Select a tailor" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {tailors.map(tailor => (
-                                                        <SelectItem key={tailor.id} value={tailor.id}>
-                                                            {tailor.name} - {tailor.location}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="message">Customization Message (Optional)</Label>
-                                            <Textarea id="message" name="message" placeholder="e.g., 'I'd like slightly shorter sleeves and a modern, slim fit.'"/>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-4">
-                                    <AccordionTrigger className="text-lg font-semibold">
-                                        <div className='flex items-center gap-2'><Wand2/> Replicate a Design</div>
-                                    </AccordionTrigger>
-                                    <AccordionContent className="pt-4 space-y-4">
-                                        <p className='text-sm text-muted-foreground'>Have a design in mind? Upload an image and we'll create it for you.</p>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="design-upload">Upload Your Design</Label>
-                                            <Input id="design-upload" type="file" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="design-notes">Replication Notes (Optional)</Label>
-                                            <Textarea id="design-notes" placeholder="e.g., 'I want the fabric from this image, but the color from my selection above.'" />
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
                         </CardContent>
                     </Card>
                 </div>
@@ -427,8 +367,8 @@ export default function CartPage() {
                         <CardContent className="space-y-4">
                              <div className="w-full space-y-2">
                                 <div className="flex justify-between items-center text-muted-foreground">
-                                    <span>Subtotal</span>
-                                    <span>₹{originalPrice.toFixed(2)}</span>
+                                    <span>Subtotal ({cart.length} items)</span>
+                                    <span>₹{subtotal.toFixed(2)}</span>
                                 </div>
                                 {activePlan && (
                                     <div className="flex justify-between items-center text-primary font-medium">
@@ -448,22 +388,13 @@ export default function CartPage() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                             <SubmitButton />
+                             <SubmitButton disabled={cart.length === 0} />
                         </CardFooter>
-                    </Card>
-
-                     <Card className="shadow-lg">
-                        <CardHeader>
-                            <CardTitle>Virtual Try-On</CardTitle>
-                        </CardHeader>
-                        <CardContent className="relative aspect-square w-full">
-                            <Image src="https://placehold.co/600x600.png" alt="3D Model Preview" fill className="rounded-md object-cover" data-ai-hint="mannequin fashion" />
-                            <Badge variant="secondary" className="absolute top-2 right-2">Coming Soon</Badge>
-                        </CardContent>
                     </Card>
                 </div>
             </div>
         </form>
+        )}
 
         <Dialog open={isPaymentDialogOpen} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-md">
@@ -544,6 +475,33 @@ export default function CartPage() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        <Dialog open={isCustomizeDialogOpen} onOpenChange={setIsCustomizeDialogOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Customize {currentItemToCustomize?.name}</DialogTitle>
+                    <DialogDescription>
+                        Add any special instructions for the tailor for this item.
+                    </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSaveCustomization}>
+                    <div className="py-4">
+                        <Label htmlFor="customizationNote">Customization Notes</Label>
+                        <Textarea 
+                            id="customizationNote" 
+                            name="customizationNote"
+                            defaultValue={currentItemToCustomize?.customizationNote}
+                            placeholder="e.g., 'For the suit, I'd like slightly shorter sleeves.'"/>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="ghost" onClick={() => setIsCustomizeDialogOpen(false)}>Cancel</Button>
+                        <Button type="submit">Save Note</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
+
+    

@@ -227,5 +227,3 @@ export default function TailorDashboard() {
     </div>
   );
 }
-
-    
