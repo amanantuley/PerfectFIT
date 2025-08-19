@@ -56,24 +56,32 @@ export default function TailorReportsPage() {
     const pageWidth = doc.internal.pageSize.getWidth();
     
     // Header
-    doc.setFontSize(20);
-    doc.text('Business Performance Report', pageWidth / 2, 20, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text(`Date Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 28, { align: 'center' });
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PerfectFit', 14, 22);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Business Performance Report', 14, 30);
     
+    doc.setFontSize(12);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 14, 22, { align: 'right' });
+    
+    doc.setLineWidth(0.5);
+    doc.line(14, 40, pageWidth - 14, 40);
+
     // Key Metrics
     doc.setFontSize(16);
-    doc.text('Key Metrics Summary', 14, 45);
-    doc.setFontSize(10);
+    doc.text('Key Metrics Summary', 14, 50);
     (doc as any).autoTable({
-        startY: 50,
+        startY: 55,
         head: [['Metric', 'Value', 'Comparison']],
         body: [
             [t('Total Revenue'), '₹1,25,430', t('+15.2% from last month')],
             [t('Total Orders'), '+210', t('+12.1% from last month')],
             [t('Average Order Value'), '₹597.28', t('+3.1% from last month')],
         ],
-        theme: 'grid',
+        theme: 'striped',
+        headStyles: { fillColor: [143, 88, 240] },
     });
     
     let lastY = (doc as any).lastAutoTable.finalY + 15;
@@ -86,19 +94,28 @@ export default function TailorReportsPage() {
         head: [[t('Design Name'), t('Category'), t('Units Sold'), t('Total Revenue')]],
         body: topDesigns.map(d => [t(d.name as any), t(d.category as any), d.unitsSold, `₹${d.totalRevenue.toLocaleString()}`]),
         theme: 'striped',
+        headStyles: { fillColor: [143, 88, 240] },
     });
     
      lastY = (doc as any).lastAutoTable.finalY + 15;
     
     // Monthly Sales
     doc.setFontSize(16);
-    doc.text(t('Monthly Sales'), 14, lastY);
+    doc.text(t('Monthly Sales Breakdown'), 14, lastY);
     (doc as any).autoTable({
         startY: lastY + 5,
         head: [['Month', 'Sales (₹)']],
         body: salesData.map(d => [d.month, `₹${d.sales.toLocaleString()}`]),
-        theme: 'striped'
+        theme: 'striped',
+        headStyles: { fillColor: [143, 88, 240] },
     });
+
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for(let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+    }
     
     doc.save('PerfectFit-Business-Report.pdf');
   };
@@ -225,28 +242,30 @@ export default function TailorReportsPage() {
           <CardDescription>{t('Your most popular designs by sales volume.')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('Design Name')}</TableHead>
-                <TableHead>{t('Category')}</TableHead>
-                <TableHead className="text-right">{t('Units Sold')}</TableHead>
-                <TableHead className="text-right">{t('Total Revenue')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {topDesigns.map((design) => (
-                <TableRow key={design.name}>
-                  <TableCell className="font-medium">{t(design.name as any)}</TableCell>
-                  <TableCell>{t(design.category as any)}</TableCell>
-                  <TableCell className="text-right">{design.unitsSold}</TableCell>
-                  <TableCell className="text-right">
-                    ₹{design.totalRevenue.toLocaleString()}
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('Design Name')}</TableHead>
+                  <TableHead>{t('Category')}</TableHead>
+                  <TableHead className="text-right">{t('Units Sold')}</TableHead>
+                  <TableHead className="text-right">{t('Total Revenue')}</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {topDesigns.map((design) => (
+                  <TableRow key={design.name}>
+                    <TableCell className="font-medium">{t(design.name as any)}</TableCell>
+                    <TableCell>{t(design.category as any)}</TableCell>
+                    <TableCell className="text-right">{design.unitsSold}</TableCell>
+                    <TableCell className="text-right">
+                      ₹{design.totalRevenue.toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

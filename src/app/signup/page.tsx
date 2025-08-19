@@ -50,11 +50,11 @@ function PreLoader() {
 }
 
 // Placeholder function to simulate subscribing a new user to daily emails
-const subscribeToDailyNotifications = (email: string) => {
+const subscribeToNotifications = (email: string) => {
   console.log(`Subscribing ${email} to daily shopping and fitness notifications. In a real app, this would trigger a backend process.`);
   // In a real application, you would make an API call here to your backend.
   // Example:
-  // fetch('/api/subscribe-daily-notifications', {
+  // fetch('/api/subscribe-notifications', {
   //   method: 'POST',
   //   headers: { 'Content-Type': 'application/json' },
   //   body: JSON.stringify({ email }),
@@ -84,7 +84,7 @@ export default function SignupPage() {
         try {
           await createUserWithEmailAndPassword(auth, email, password);
           // This is a new user, so subscribe them to emails
-          subscribeToDailyNotifications(email);
+          subscribeToNotifications(email);
         } catch (signupErr: any) {
           setError(signupErr.message || 'Signup failed');
           setIsLoading(false);
@@ -115,7 +115,7 @@ export default function SignupPage() {
       
       // If it's the user's first time signing in, subscribe them.
       if (isNewUser && result.user.email) {
-          subscribeToDailyNotifications(result.user.email);
+          subscribeToNotifications(result.user.email);
       }
 
       if (userType === 'tailor') {
@@ -241,5 +241,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
-    

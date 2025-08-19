@@ -35,12 +35,14 @@ import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 const allOrders = [
-  { orderId: '#T302', customer: 'Liam Johnson', item: 'Navy Blue Suit', date: '2025-07-20', dueDate: '2025-08-05', status: 'In Progress', amount: 4500 },
-  { orderId: '#T301', customer: 'Olivia Smith', item: 'Classic White Shirt', date: '2025-07-18', dueDate: '2025-07-25', status: 'Completed', amount: 800 },
-  { orderId: '#T300', customer: 'Noah Williams', item: 'Charcoal Gray Suit', date: '2025-07-15', dueDate: '2025-07-30', status: 'Shipped', amount: 4200 },
-  { orderId: '#T299', customer: 'Emma Brown', item: 'Casual Checkered Shirt', date: '2025-07-14', dueDate: '2025-07-21', status: 'Completed', amount: 950 },
-  { orderId: '#T298', customer: 'James Jones', item: 'Black Tuxedo', date: '2025-07-12', dueDate: '2025-08-01', status: 'In Progress', amount: 5500 },
-  { orderId: '#T297', customer: 'Sophia Garcia', item: 'Linen Trousers', date: '2025-07-11', dueDate: '2025-07-18', status: 'New', amount: 1200 },
+  { orderId: '#T302', customer: 'Priya Patel', item: 'Navy Blue Suit', date: '2025-07-20', dueDate: '2025-08-05', status: 'In Progress', amount: 4500 },
+  { orderId: '#T301', customer: 'Rohan Sharma', item: 'Classic White Shirt', date: '2025-07-18', dueDate: '2025-07-25', status: 'Completed', amount: 800 },
+  { orderId: '#T300', customer: 'Amit Singh', item: 'Charcoal Gray Suit', date: '2025-07-15', dueDate: '2025-07-30', status: 'Shipped', amount: 4200 },
+  { orderId: '#T299', customer: 'Sneha Reddy', item: 'Casual Checkered Shirt', date: '2025-07-14', dueDate: '2025-07-21', status: 'Completed', amount: 950 },
+  { orderId: '#T298', customer: 'Vikram Mehta', item: 'Black Tuxedo', date: '2025-07-12', dueDate: '2025-08-01', status: 'In Progress', amount: 5500 },
+  { orderId: '#T297', customer: 'Anjali Verma', item: 'Linen Trousers', date: '2025-07-11', dueDate: '2025-07-18', status: 'New', amount: 1200 },
+  { orderId: '#T296', customer: 'Karan Malhotra', item: 'Embroidered Sherwani', date: '2025-07-10', dueDate: '2025-08-10', status: 'New', amount: 12500 },
+  { orderId: '#T295', customer: 'Sunita Rao', item: 'Silk Blend Kurta', date: '2025-07-09', dueDate: '2025-07-20', status: 'Shipped', amount: 1600 },
 ];
 
 type Order = typeof allOrders[0];

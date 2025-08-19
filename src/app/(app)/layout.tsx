@@ -26,13 +26,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Package, User, LogOut, Undo2, Info, Mail, Percent, Crown, MessageSquare, HeartPulse, HelpCircle, ShoppingCart, Settings, Gem, Award, Wallet, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Package, User, LogOut, Undo2, Info, Mail, Percent, Crown, MessageSquare, HeartPulse, HelpCircle, ShoppingCart, Settings, Gem, Award, Wallet } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SubscriptionProvider, useSubscription } from '@/context/subscription-provider';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { AppProvider } from '@/context/app-context';
+
+const pageTitles: { [key: string]: string } = {
+  '/dashboard': 'Dashboard',
+  '/orders': 'My Orders',
+  '/cart': 'My Cart',
+  '/wallet': 'My Wallet',
+  '/returns': 'Returns & Refunds',
+  '/fitness': 'Fitness Tracking',
+  '/feedback': 'Feedback',
+  '/rewards': 'Rewards',
+  '/subscription': 'Subscription',
+  '/offers': 'Offers',
+  '/about': 'About Us',
+  '/contact': 'Contact Us',
+  '/faq': 'FAQ',
+  '/profile': 'My Profile',
+  '/settings': 'Settings',
+};
+
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -55,6 +74,8 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   const isActive = (path: string) => pathname === path;
+  const pageTitle = pageTitles[pathname] || 'Dashboard';
+
 
   return (
     <>
@@ -221,13 +242,17 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-16 items-center border-b bg-background/80 backdrop-blur-sm px-4 sm:px-6">
-           <SidebarTrigger className="md:hidden" />
-           {/* Can add breadcrumbs or other header content here */}
+      <div className="flex flex-col flex-1">
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 sm:px-6">
+           <div className="flex items-center gap-4">
+             <SidebarTrigger className="md:hidden" />
+             <h1 className="text-xl font-semibold tracking-tight">{pageTitle}</h1>
+           </div>
         </header>
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
-      </SidebarInset>
+        <SidebarInset>
+            <main className="flex-1 p-4 sm:p-6">{children}</main>
+        </SidebarInset>
+      </div>
     </>
   );
 }
@@ -244,5 +269,3 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    

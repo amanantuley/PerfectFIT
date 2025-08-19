@@ -12,7 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send, Loader2 } from 'lucide-react';
+import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -24,6 +24,7 @@ import { useApp, Order } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useRouter } from 'next/navigation';
 
 const initialConversation = [
     {
@@ -67,6 +68,7 @@ const getStatusConfig = (status: string) => {
 
 export default function OrdersPage() {
     const { toast } = useToast();
+    const router = useRouter();
     const { orders, addReturn, updateOrderStatus } = useApp();
     const [isMessageOpen, setIsMessageOpen] = useState(false);
     const [isReturnOpen, setIsReturnOpen] = useState(false);
@@ -139,7 +141,7 @@ export default function OrdersPage() {
       <CardContent>
         {/* Mobile View */}
         <div className="md:hidden space-y-4">
-          {orders.map((order) => {
+          {orders && orders.map((order) => {
             const statusConfig = getStatusConfig(order.status);
             return (
               <Card key={order.id} className="overflow-hidden transition-all hover:shadow-md hover:bg-muted/50">
@@ -173,6 +175,12 @@ export default function OrdersPage() {
                         <statusConfig.icon className="h-4 w-4 mr-2" />
                         {statusConfig.text}
                     </Badge>
+                     {order.status === 'Shipped' && (
+                        <Button variant="outline" size="sm" className="w-full" onClick={() => router.push(`/track/${order.id}`)}>
+                            <MapPin className="mr-2 h-4 w-4" />
+                            Track Order
+                        </Button>
+                    )}
                     {order.status === 'Delivered' && (
                         <Button variant="outline" size="sm" className="w-full" onClick={() => handleOpenReturnDialog(order)}>
                             <Undo className="mr-2 h-4 w-4" />
@@ -203,7 +211,7 @@ export default function OrdersPage() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {orders.map((order) => {
+                {orders && orders.map((order) => {
                     const statusConfig = getStatusConfig(order.status);
                     return (
                         <TableRow key={order.id} className="transition-colors hover:bg-muted/50">
@@ -230,6 +238,12 @@ export default function OrdersPage() {
                             </TableCell>
                             <TableCell>{order.date}</TableCell>
                              <TableCell className="text-right space-x-2">
+                                {order.status === 'Shipped' && (
+                                    <Button variant="outline" size="sm" onClick={() => router.push(`/track/${order.id}`)}>
+                                        <MapPin className="mr-2 h-4 w-4" />
+                                        Track
+                                    </Button>
+                                )}
                                 {order.status === 'Delivered' && (
                                     <Button variant="outline" size="sm" onClick={() => handleOpenReturnDialog(order)}>
                                         <Undo className="mr-2 h-4 w-4" />

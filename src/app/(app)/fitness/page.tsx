@@ -19,11 +19,12 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { LineChart, CartesianGrid, XAxis, YAxis, Legend, Tooltip, Line } from 'recharts';
-import { PlusCircle, Dumbbell, Utensils, Target, Loader2, Bot } from 'lucide-react';
+import { PlusCircle, Dumbbell, Utensils, Target, Loader2, Bot, Info, BarChart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { generateFitnessPlan, type GenerateFitnessPlanInput } from '@/ai/flows/generate-fitness-plan';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const chartConfig = {
   chest: { label: 'Chest (cm)', color: 'hsl(var(--chart-1))' },
@@ -31,19 +32,18 @@ const chartConfig = {
   hip: { label: 'Hip (cm)', color: 'hsl(var(--chart-3))' },
 };
 
-const goals = [
-  { name: 'Weight Loss', value: 'loss' as const, description: "Generate a plan to help you shed pounds and get leaner." },
-  { name: 'Muscle Gain', value: 'gain' as const, description: "Generate a plan to build strength and increase muscle mass." },
-  { name: 'Maintain', value: 'maintain' as const, description: "Generate a plan to maintain your current physique and fitness level." },
-]
-
 export default function FitnessTrackingPage() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [aiPlan, setAiPlan] = useState<any | null>(null);
+  
+  // Form state
+  const [goal, setGoal] = useState<'loss' | 'gain' | 'maintain'>('loss');
+  const [fitnessLevel, setFitnessLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
+  const [dietaryPreferences, setDietaryPreferences] = useState<'none' | 'vegetarian' | 'vegan'>('none');
   const [weightLossGoal, setWeightLossGoal] = useState<number>(5);
   const [timeframe, setTimeframe] = useState<number>(8);
-  const [showLossInputs, setShowLossInputs] = useState<boolean>(false);
+  
 
   const handleAddMeasurement = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,21 +54,11 @@ export default function FitnessTrackingPage() {
     (e.target as HTMLFormElement).reset();
   };
   
-  const handleGeneratePlan = async (goal: 'loss' | 'gain' | 'maintain') => {
-    setIsLoading(goal);
+  const handleGeneratePlan = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
     setAiPlan(null);
 
-    if (goal === 'loss') {
-        setShowLossInputs(true);
-        setIsLoading(null); // Don't show loader yet, wait for final submit
-        return;
-    }
-
-    await generatePlan({ goal });
-  }
-
-  const generatePlan = async (input: Partial<GenerateFitnessPlanInput>) => {
-    setIsLoading(input.goal || 'loss');
     try {
         const latestMeasurements = fitnessHistory[fitnessHistory.length - 1];
         if (!latestMeasurements) {
@@ -81,20 +71,26 @@ export default function FitnessTrackingPage() {
         }
 
         const planInput: GenerateFitnessPlanInput = {
-            goal: input.goal || 'loss',
+            goal,
+            fitnessLevel,
+            dietaryPreferences,
             measurements: {
                 chest: latestMeasurements.chest,
                 waist: latestMeasurements.waist,
                 hip: latestMeasurements.hip,
             },
-            ...input
         };
+
+        if (goal === 'loss') {
+            planInput.weightLossGoal = weightLossGoal;
+            planInput.timeframe = timeframe;
+        }
 
         const plan = await generateFitnessPlan(planInput);
         setAiPlan(plan);
         toast({
             title: 'AI Plan Generated!',
-            description: `Your new plan is ready.`
+            description: `Your new personalized plan is ready.`
         });
     } catch(e) {
         console.error(e);
@@ -104,14 +100,8 @@ export default function FitnessTrackingPage() {
             description: 'There was an issue creating your plan. Please try again.',
         });
     } finally {
-        setIsLoading(null);
-        setShowLossInputs(false);
+        setIsLoading(false);
     }
-  }
-
-  const handleLossSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    generatePlan({ goal: 'loss', weightLossGoal, timeframe });
   }
 
   return (
@@ -243,69 +233,80 @@ export default function FitnessTrackingPage() {
        <div className="space-y-8">
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Target />Fitness Goals</CardTitle>
-            <CardDescription>Select a goal to receive an AI-generated fitness and diet plan based on your latest measurements.</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Target />AI Fitness Planner</CardTitle>
+            <CardDescription>Fill in your details to receive a personalized fitness and diet plan based on your latest measurements.</CardDescription>
           </CardHeader>
-          <CardContent className="grid md:grid-cols-3 gap-4">
-            {goals.map(goal => (
-                 <Card key={goal.value} className="bg-muted/30">
-                    <CardHeader>
-                        <CardTitle className="text-xl">{goal.name}</CardTitle>
-                        <CardDescription>{goal.description}</CardDescription>
-                    </CardHeader>
-                    <CardFooter>
-                         <Button className="w-full" onClick={() => handleGeneratePlan(goal.value)} disabled={!!isLoading}>
-                            {isLoading === goal.value ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-                            Generate Plan
-                        </Button>
-                    </CardFooter>
-                </Card>
-            ))}
+          <CardContent>
+            <form onSubmit={handleGeneratePlan} className="space-y-6">
+                <div className="grid md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="goal">Primary Goal</Label>
+                        <Select value={goal} onValueChange={(v) => setGoal(v as any)}>
+                            <SelectTrigger id="goal"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="loss">Weight Loss</SelectItem>
+                                <SelectItem value="gain">Muscle Gain</SelectItem>
+                                <SelectItem value="maintain">Maintain</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="fitnessLevel">Fitness Level</Label>
+                        <Select value={fitnessLevel} onValueChange={(v) => setFitnessLevel(v as any)}>
+                            <SelectTrigger id="fitnessLevel"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="beginner">Beginner</SelectItem>
+                                <SelectItem value="intermediate">Intermediate</SelectItem>
+                                <SelectItem value="advanced">Advanced</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="dietaryPreferences">Dietary Preferences</Label>
+                        <Select value={dietaryPreferences} onValueChange={(v) => setDietaryPreferences(v as any)}>
+                            <SelectTrigger id="dietaryPreferences"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">None</SelectItem>
+                                <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                                <SelectItem value="vegan">Vegan</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                {goal === 'loss' && (
+                    <div className="grid sm:grid-cols-2 gap-6 p-4 border rounded-md bg-muted/30">
+                        <div className="space-y-2">
+                            <Label htmlFor="weightLossGoal">How much weight do you want to lose? (kg)</Label>
+                            <Input 
+                                id="weightLossGoal" 
+                                type="number" 
+                                value={weightLossGoal} 
+                                onChange={(e) => setWeightLossGoal(Number(e.target.value))}
+                                placeholder="e.g., 5"
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="timeframe">In how many weeks?</Label>
+                            <Input 
+                                id="timeframe" 
+                                type="number" 
+                                value={timeframe} 
+                                onChange={(e) => setTimeframe(Number(e.target.value))} 
+                                placeholder="e.g., 8"
+                            />
+                        </div>
+                    </div>
+                )}
+                
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                    Generate My Personalized Plan
+                </Button>
+            </form>
           </CardContent>
         </Card>
         
-        {showLossInputs && (
-             <Card className="shadow-lg">
-                <CardHeader>
-                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Weight Loss Details</CardTitle>
-                    <CardDescription>Help us tailor your weight loss plan.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleLossSubmit} className="space-y-4">
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="weightLossGoal">How much weight do you want to lose? (kg)</Label>
-                                <Input 
-                                    id="weightLossGoal" 
-                                    type="number" 
-                                    value={weightLossGoal} 
-                                    onChange={(e) => setWeightLossGoal(Number(e.target.value))}
-                                    placeholder="e.g., 5"
-                                />
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="timeframe">In how many weeks?</Label>
-                                <Input 
-                                    id="timeframe" 
-                                    type="number" 
-                                    value={timeframe} 
-                                    onChange={(e) => setTimeframe(Number(e.target.value))} 
-                                    placeholder="e.g., 8"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-end gap-2">
-                            <Button variant="ghost" onClick={() => setShowLossInputs(false)}>Cancel</Button>
-                             <Button type="submit" disabled={isLoading === 'loss'}>
-                                {isLoading === 'loss' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-                                Get My Plan
-                            </Button>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
-        )}
-
         {isLoading && !aiPlan && (
             <div className="flex flex-col items-center justify-center text-center gap-2 h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -318,17 +319,21 @@ export default function FitnessTrackingPage() {
             <div className="grid md:grid-cols-2 gap-8 items-start">
                  <Card className="shadow-lg">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Dumbbell /> AI-Suggested Fitness Plan</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Dumbbell /> AI Fitness Plan</CardTitle>
                         <CardDescription>{aiPlan.fitnessPlan.title}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Accordion type="single" collapsible className="w-full">
+                        <div className="mb-4 p-3 rounded-md bg-muted/50">
+                            <h4 className="font-semibold">Cardio Suggestion</h4>
+                            <p className="text-sm text-muted-foreground">{aiPlan.fitnessPlan.cardioSuggestion}</p>
+                        </div>
+                        <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
                             {aiPlan.fitnessPlan.weeklySplit.map((day: any, index: number) => (
                                 <AccordionItem value={`item-${index}`} key={index}>
                                     <AccordionTrigger>
                                         <div className="flex flex-col items-start text-left">
                                             <span className="font-bold">{day.day}</span>
-                                            <span className="text-sm text-muted-foreground">{day.focus}</span>
+                                            <span className="text-sm text-muted-foreground">{day.focus} &bull; {day.duration}</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent>
@@ -345,27 +350,47 @@ export default function FitnessTrackingPage() {
 
                  <Card className="shadow-lg">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Utensils /> AI-Suggested Diet Plan</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Utensils /> AI Diet Plan</CardTitle>
                         <CardDescription>{aiPlan.dietPlan.title}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                           <h4 className="font-semibold">Breakfast</h4>
-                           <p className="text-muted-foreground">{aiPlan.dietPlan.dailyPlan.breakfast}</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                            <div className="p-3 rounded-md bg-muted/50">
+                                <p className="text-sm text-muted-foreground">Calories</p>
+                                <p className="text-lg font-bold">{aiPlan.dietPlan.calorieTarget} kcal</p>
+                            </div>
+                            <div className="p-3 rounded-md bg-muted/50">
+                                <p className="text-sm text-muted-foreground">Protein</p>
+                                <p className="text-lg font-bold">{aiPlan.dietPlan.macronutrientSplit.protein}</p>
+                            </div>
+                            <div className="p-3 rounded-md bg-muted/50">
+                                <p className="text-sm text-muted-foreground">Carbs</p>
+                                <p className="text-lg font-bold">{aiPlan.dietPlan.macronutrientSplit.carbs}</p>
+                            </div>
+                            <div className="p-3 rounded-md bg-muted/50">
+                                <p className="text-sm text-muted-foreground">Fats</p>
+                                <p className="text-lg font-bold">{aiPlan.dietPlan.macronutrientSplit.fats}</p>
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                           <h4 className="font-semibold">Lunch</h4>
-                           <p className="text-muted-foreground">{aiPlan.dietPlan.dailyPlan.lunch}</p>
-                        </div>
-                        <div className="space-y-2">
-                           <h4 className="font-semibold">Dinner</h4>
-                           <p className="text-muted-foreground">{aiPlan.dietPlan.dailyPlan.dinner}</p>
-                        </div>
-                        <div className="space-y-2">
-                           <h4 className="font-semibold">Snacks</h4>
-                           <ul className="list-disc pl-5 text-muted-foreground">
-                            {aiPlan.dietPlan.dailyPlan.snacks.map((snack: string, i: number) => <li key={i}>{snack}</li>)}
-                           </ul>
+                        <div className="space-y-3 pt-2">
+                           <div>
+                               <h4 className="font-semibold text-lg border-b pb-1 mb-1">Breakfast</h4>
+                               <p className="text-muted-foreground">{aiPlan.dietPlan.dailyPlan.breakfast}</p>
+                           </div>
+                           <div>
+                               <h4 className="font-semibold text-lg border-b pb-1 mb-1">Lunch</h4>
+                               <p className="text-muted-foreground">{aiPlan.dietPlan.dailyPlan.lunch}</p>
+                           </div>
+                           <div>
+                               <h4 className="font-semibold text-lg border-b pb-1 mb-1">Dinner</h4>
+                               <p className="text-muted-foreground">{aiPlan.dietPlan.dailyPlan.dinner}</p>
+                           </div>
+                           <div>
+                               <h4 className="font-semibold text-lg border-b pb-1 mb-1">Snacks</h4>
+                               <ul className="list-disc pl-5 text-muted-foreground">
+                                {aiPlan.dietPlan.dailyPlan.snacks.map((snack: string, i: number) => <li key={i}>{snack}</li>)}
+                               </ul>
+                           </div>
                         </div>
                          {aiPlan.dietPlan.notes && <p className="mt-4 text-sm text-muted-foreground italic border-l-4 pl-3">{aiPlan.dietPlan.notes}</p>}
                     </CardContent>

@@ -36,17 +36,10 @@ import {
 import { AreaChart, Area, CartesianGrid, XAxis, Tooltip } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/context/translation-provider';
+import React, { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
-const earningsData = [
-    { month: 'Jan', earnings: 18000 },
-    { month: 'Feb', earnings: 22000 },
-    { month: 'Mar', earnings: 19000 },
-    { month: 'Apr', earnings: 25000 },
-    { month: 'May', earnings: 23000 },
-    { month: 'Jun', earnings: 28000 },
-];
-
-const recentOrders = [
+const initialRecentOrders = [
   {
     orderId: 'ORD002',
     customer: 'Priya Patel',
@@ -73,6 +66,15 @@ const recentOrders = [
   },
 ];
 
+const earningsData = [
+    { month: 'Jan', earnings: 18000 },
+    { month: 'Feb', earnings: 22000 },
+    { month: 'Mar', earnings: 19000 },
+    { month: 'Apr', earnings: 25000 },
+    { month: 'May', earnings: 23000 },
+    { month: 'Jun', earnings: 28000 },
+];
+
 const getStatusConfig = (status: string) => {
   switch (status) {
     case 'Ready':
@@ -88,6 +90,36 @@ const getStatusConfig = (status: string) => {
 
 export default function TailorDashboard() {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [recentOrders, setRecentOrders] = useState(initialRecentOrders);
+
+  useEffect(() => {
+    // Simulate receiving a new order every 15 seconds
+    const intervalId = setInterval(() => {
+      const newOrderId = `ORD0${Math.floor(Math.random() * 90) + 10}`;
+      const newCustomer = ['Alice Johnson', 'Bob Williams', 'Charlie Brown'][Math.floor(Math.random() * 3)];
+      const newAmount = Math.floor(Math.random() * 2000) + 1000;
+      
+      const newOrder = {
+        orderId: newOrderId,
+        customer: newCustomer,
+        amount: newAmount,
+        status: 'Pending',
+        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        isPriority: Math.random() > 0.7,
+      };
+
+      setRecentOrders(prevOrders => [newOrder, ...prevOrders.slice(0, 4)]);
+      
+      toast({
+        title: t('New Order Received!'),
+        description: `${t('Order')} ${newOrderId} ${t('from')} ${newCustomer} ${t('for')} ₹${newAmount}.`,
+      });
+
+    }, 15000);
+
+    return () => clearInterval(intervalId); // Cleanup on component unmount
+  }, [t, toast]);
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -198,7 +230,7 @@ export default function TailorDashboard() {
                 {recentOrders.map((order) => {
                   const { className: statusClassName } = getStatusConfig(order.status);
                   return (
-                    <TableRow key={order.orderId}>
+                    <TableRow key={order.orderId} className="transition-opacity duration-500">
                       <TableCell>
                         <div className="font-medium flex items-center">
                             {order.customer} 

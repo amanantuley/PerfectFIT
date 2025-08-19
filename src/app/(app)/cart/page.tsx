@@ -29,7 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Loader2, Wallet, ArrowLeft, Download, Trash2, CalendarDays, Edit } from 'lucide-react';
+import { ShoppingCart, Loader2, Wallet, ArrowLeft, Download, Trash2, CalendarDays, Edit, Zap, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { useFormState, useFormStatus } from 'react-dom';
 import React, { useEffect, useRef, useState } from 'react';
@@ -45,12 +45,16 @@ import { useApp } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CartItem } from '@/context/app-context';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { cn } from '@/lib/utils';
 
 const initialState = {
   message: '',
   error: false,
   data: null
 };
+
+const EXPRESS_DELIVERY_FEE = 250;
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
@@ -123,14 +127,34 @@ export default function CartPage() {
   const [submittedData, setSubmittedData] = useState<any>(null);
   const [isCustomizeDialogOpen, setIsCustomizeDialogOpen] = useState(false);
   const [currentItemToCustomize, setCurrentItemToCustomize] = useState<CartItem | null>(null);
+  const [deliveryOption, setDeliveryOption] = useState<'standard' | 'express'>('standard');
+  const [nearbyTailors, setNearbyTailors] = useState<any[]>([]);
+  const [isLocating, setIsLocating] = useState(true);
+
 
   const { activePlan, discount } = useSubscription();
   const { addMultipleOrders, cart, removeFromCart, clearCart, updateCartItemNote } = useApp();
 
+  // Simulate fetching user's location and sorting tailors
+  useEffect(() => {
+    setIsLocating(true);
+    // Simulate a delay for fetching location
+    setTimeout(() => {
+      // In a real app, you'd use Geolocation API. Here we just shuffle for simulation.
+      const sortedTailors = [...tailors].sort(() => Math.random() - 0.5);
+      setNearbyTailors(sortedTailors);
+      setIsLocating(false);
+    }, 1500);
+  }, []);
+
   const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
   const discountAmount = (subtotal * discount) / 100;
-  const finalPrice = subtotal - discountAmount;
-  const estimatedDeliveryDate = format(addDays(new Date(), 10), 'PPP');
+  const deliveryFee = deliveryOption === 'express' ? EXPRESS_DELIVERY_FEE : 0;
+  const finalPrice = subtotal - discountAmount + deliveryFee;
+  
+  const standardDeliveryDate = format(addDays(new Date(), 10), 'PPP');
+  const expressDeliveryDate = format(addDays(new Date(), 5), 'PPP');
+  const estimatedDeliveryDate = deliveryOption === 'standard' ? standardDeliveryDate : expressDeliveryDate;
 
   const openCustomizeDialog = (item: CartItem) => {
     setCurrentItemToCustomize(item);
@@ -142,8 +166,13 @@ export default function CartPage() {
     if (!currentItemToCustomize) return;
 
     const formData = new FormData(e.currentTarget);
-    const note = formData.get('customizationNote') as string;
+    const sleeveLength = formData.get('sleeveLength') as string;
+    const fit = formData.get('fit') as string;
+    const collarStyle = formData.get('collarStyle') as string;
+    const additionalNotes = formData.get('additionalNotes') as string;
     
+    const note = `Sleeves: ${sleeveLength}, Fit: ${fit}, Collar: ${collarStyle}. Notes: ${additionalNotes}`;
+
     updateCartItemNote(currentItemToCustomize.id, note);
     setIsCustomizeDialogOpen(false);
     toast({
@@ -202,11 +231,18 @@ export default function CartPage() {
         doc.text(`Discount (${discount}%):`, pageWidth - 60, finalY + 7);
         doc.text(`-₹${discountAmount.toFixed(2)}`, pageWidth - 14, finalY + 7, { align: 'right' });
     }
+    
+    if(deliveryFee > 0) {
+        doc.text('Express Delivery Fee:', pageWidth - 60, finalY + 14);
+        doc.text(`₹${deliveryFee.toFixed(2)}`, pageWidth - 14, finalY + 14, { align: 'right' });
+    }
+
+    const totalYPosition = finalY + (deliveryFee > 0 ? 21 : 14);
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('Total Amount:', pageWidth - 60, finalY + 14);
-    doc.text(`₹${finalPrice.toFixed(2)}`, pageWidth - 14, finalY + 14, { align: 'right' });
+    doc.text('Total Amount:', pageWidth - 60, totalYPosition);
+    doc.text(`₹${finalPrice.toFixed(2)}`, pageWidth - 14, totalYPosition, { align: 'right' });
     
     const pageHeight = doc.internal.pageSize.getHeight();
     doc.setLineWidth(0.5);
@@ -302,7 +338,7 @@ export default function CartPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {cart.map((item) => (
-                                <div key={item.id} className="flex items-start gap-4 border-b pb-4">
+                                <div key={item.id} className="flex items-start gap-4 border-b pb-4 last:border-b-0 last:pb-0">
                                     <Image
                                         src={item.image}
                                         alt={item.name}
@@ -322,10 +358,10 @@ export default function CartPage() {
                                     <div className="text-right flex flex-col items-end gap-2">
                                         <p className="text-xl font-bold">₹{item.price.toFixed(2)}</p>
                                         <div className="flex items-center gap-1">
-                                            <Button variant="outline" size="sm" onClick={() => openCustomizeDialog(item)}>
-                                                <Edit className="h-3 w-3" />
+                                            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => openCustomizeDialog(item)}>
+                                                <Edit className="h-4 w-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeFromCart(item.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -342,19 +378,30 @@ export default function CartPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div className="space-y-2">
-                                <Label htmlFor="tailor">Nearby Tailor</Label>
+                                <Label htmlFor="tailor">Nearby Tailors</Label>
+                                {isLocating ? (
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>Finding tailors near you...</span>
+                                    </div>
+                                ) : (
                                 <Select name="tailor" required>
                                     <SelectTrigger id="tailor">
                                         <SelectValue placeholder="Select a tailor" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {tailors.map(tailor => (
+                                        {nearbyTailors.map((tailor, index) => (
                                             <SelectItem key={tailor.id} value={tailor.id}>
-                                                {tailor.name} - {tailor.location}
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                                                    <span>{tailor.name} - {tailor.location}</span>
+                                                    {index === 0 && <Badge variant="secondary">Nearest</Badge>}
+                                                </div>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
@@ -377,12 +424,38 @@ export default function CartPage() {
                                         <span>-₹{discountAmount.toFixed(2)}</span>
                                     </div>
                                 )}
+                                <div className="flex justify-between items-center text-muted-foreground">
+                                    <span>Delivery Fee</span>
+                                    <span>{deliveryFee > 0 ? `₹${deliveryFee.toFixed(2)}` : 'Free'}</span>
+                                </div>
                                 <Separator className="my-2" />
                                 <div className="flex justify-between items-center font-bold text-xl">
                                     <span>Total</span>
                                     <span>₹{finalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
+                             <Separator className="my-2"/>
+                             <RadioGroup defaultValue="standard" value={deliveryOption} onValueChange={(value) => setDeliveryOption(value as 'standard' | 'express')}>
+                                <Label htmlFor="standard-delivery" className={cn("flex justify-between items-center p-3 rounded-md border-2 cursor-pointer", deliveryOption === 'standard' && "border-primary")}>
+                                    <div>
+                                        <p className="font-semibold">Standard Delivery</p>
+                                        <p className="text-sm text-muted-foreground">Est. {standardDeliveryDate}</p>
+                                    </div>
+                                    <p className="font-semibold">Free</p>
+                                    <RadioGroupItem value="standard" id="standard-delivery" className="sr-only"/>
+                                </Label>
+                                <Label htmlFor="express-delivery" className={cn("flex justify-between items-center p-3 rounded-md border-2 cursor-pointer", deliveryOption === 'express' && "border-primary")}>
+                                    <div className="flex items-center gap-2">
+                                        <Zap className="h-5 w-5 text-primary" />
+                                        <div>
+                                            <p className="font-semibold">Express Delivery</p>
+                                            <p className="text-sm text-muted-foreground">Est. {expressDeliveryDate}</p>
+                                        </div>
+                                    </div>
+                                    <p className="font-semibold">₹{EXPRESS_DELIVERY_FEE.toFixed(2)}</p>
+                                    <RadioGroupItem value="express" id="express-delivery" className="sr-only"/>
+                                </Label>
+                             </RadioGroup>
                              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
                                 <CalendarDays className="h-4 w-4"/>
                                 <span>Estimated Delivery: {estimatedDeliveryDate}</span>
@@ -482,21 +555,64 @@ export default function CartPage() {
                 <DialogHeader>
                     <DialogTitle>Customize {currentItemToCustomize?.name}</DialogTitle>
                     <DialogDescription>
-                        Add any special instructions for the tailor for this item.
+                        Specify your preferences for this item.
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSaveCustomization}>
-                    <div className="py-4">
-                        <Label htmlFor="customizationNote">Customization Notes</Label>
-                        <Textarea 
-                            id="customizationNote" 
-                            name="customizationNote"
-                            defaultValue={currentItemToCustomize?.customizationNote}
-                            placeholder="e.g., 'For the suit, I'd like slightly shorter sleeves.'"/>
+                    <div className="py-4 space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="sleeveLength">Sleeve Length</Label>
+                                <Select name="sleeveLength" defaultValue="standard">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="standard">Standard</SelectItem>
+                                        <SelectItem value="short">Shorter (-1 inch)</SelectItem>
+                                        <SelectItem value="long">Longer (+1 inch)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="fit">Fit</Label>
+                                <Select name="fit" defaultValue="standard">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="slim">Slim Fit</SelectItem>
+                                        <SelectItem value="standard">Standard Fit</SelectItem>
+                                        <SelectItem value="loose">Loose Fit</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="collarStyle">Collar Style</Label>
+                            <Select name="collarStyle" defaultValue="standard">
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="standard">Standard Collar</SelectItem>
+                                    <SelectItem value="spread">Spread Collar</SelectItem>
+                                    <SelectItem value="button-down">Button-Down</SelectItem>
+                                    <SelectItem value="mandarin">Mandarin</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="additionalNotes">Additional Notes</Label>
+                           <Textarea 
+                                id="additionalNotes" 
+                                name="additionalNotes"
+                                placeholder="e.g., 'Please use mother-of-pearl buttons.'"/>
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="ghost" onClick={() => setIsCustomizeDialogOpen(false)}>Cancel</Button>
-                        <Button type="submit">Save Note</Button>
+                        <Button type="submit">Save Customizations</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
