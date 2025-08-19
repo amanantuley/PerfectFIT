@@ -447,7 +447,7 @@ export default function DashboardPage() {
                   </div>
                 )}
                 {measurements && !isLoading &&(
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {measurementItems.map((item) => (
                       <div key={item.label} className="flex items-center gap-4 rounded-lg border p-3 bg-muted/30">
                         <item.icon className="h-6 w-6 text-primary" />

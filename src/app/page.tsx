@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';
 import { Camera, Scissors, Ruler, Bot, Users, Star, Shirt, Award, Facebook, Twitter, Instagram, Linkedin, Sparkles, Wand2, Lightbulb, Quote, LogIn, Download, Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import React, { useEffect, useState, useRef, useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { submitNewsletter } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -63,7 +63,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction] = useActionState(submitNewsletter, initialState);
+  const [state, formAction] = useFormState(submitNewsletter, initialState);
 
   useEffect(() => {
     if (state.message) {
@@ -116,7 +116,7 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full py-20 md:py-24 text-center overflow-x-hidden animate-fade-in-up">
+        <section className="relative w-full py-32 md:py-48 text-center overflow-x-hidden animate-fade-in-up">
           <div className="absolute inset-0 z-0">
              <Image src="/landbcck.png" alt="Tailoring background" fill className="object-cover" />
              <div className="absolute inset-0 bg-black/50"></div>

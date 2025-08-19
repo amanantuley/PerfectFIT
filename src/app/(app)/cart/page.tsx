@@ -49,6 +49,7 @@ import { CartItem } from '@/context/app-context';
 const initialState = {
   message: '',
   error: false,
+  data: null
 };
 
 function SubmitButton({ disabled }: { disabled: boolean }) {

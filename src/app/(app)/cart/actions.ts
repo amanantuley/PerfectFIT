@@ -3,7 +3,6 @@
 
 import { z } from 'zod';
 import { tailors } from '@/lib/tailors';
-import { garments } from '@/lib/garments';
 
 export async function submitOrder(prevState: any, formData: FormData) {
   const tailorIds = tailors.map(t => t.id) as [string, ...string[]];
@@ -11,15 +10,13 @@ export async function submitOrder(prevState: any, formData: FormData) {
   const schema = z.object({
     items: z.string().min(1, { message: "Cart is empty." }),
     tailor: z.enum(tailorIds, { errorMap: () => ({ message: "Please select a tailor." }) }),
-    message: z.string().optional(),
   });
 
   const data = {
     items: formData.get('items'),
     tailor: formData.get('tailor'),
-    message: formData.get('message'),
   };
-
+  
   const parsed = schema.safeParse(data);
 
   if (!parsed.success) {
@@ -33,7 +30,6 @@ export async function submitOrder(prevState: any, formData: FormData) {
     console.log('New custom order received for multiple items:', {
       items: items,
       tailor: parsed.data.tailor,
-      message: parsed.data.message
     });
     console.log('Awarding 100 points for this purchase.'); // Simulating reward points
 
