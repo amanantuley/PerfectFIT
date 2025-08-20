@@ -117,6 +117,18 @@ export default {
           to: {
             transform: 'rotate(360deg)',
           },
+        },
+        'route-shipped': {
+          '0%': { offsetDistance: '0%' },
+          '100%': { offsetDistance: '50%' },
+        },
+        'route-out-for-delivery': {
+          '0%': { offsetDistance: '0%' },
+          '100%': { offsetDistance: '80%' },
+        },
+        'route-delivered': {
+          '0%': { offsetDistance: '0%' },
+          '100%': { offsetDistance: '100%' },
         }
       },
       animation: {
@@ -125,6 +137,9 @@ export default {
         'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
         'text-rainbow': 'text-rainbow 3s ease-in-out infinite',
         'spin': 'spin 1.5s linear infinite',
+        'route-shipped': 'route-shipped 2s ease-out forwards',
+        'route-out-for-delivery': 'route-out-for-delivery 2s ease-out forwards',
+        'route-delivered': 'route-delivered 2s ease-out forwards',
       },
     },
   },
