@@ -100,9 +100,16 @@
     100% { background-position: 0% 50%; }
   }
   
-  .truck-path {
-      animation: move-truck 4s ease-in-out forwards;
+  .truck-icon {
       offset-path: path("M 20 250 C 150 100, 250 100, 380 220");
+      offset-distance: 0%;
+      animation-fill-mode: forwards;
+  }
+  .truck-icon.in-progress {
+      animation: move-truck 4s ease-in-out forwards;
+  }
+  .truck-icon.complete {
+      offset-distance: 100%;
   }
 
   @keyframes move-truck {
