@@ -169,15 +169,27 @@ export default function CartPage() {
     const sleeveLength = formData.get('sleeveLength') as string;
     const fit = formData.get('fit') as string;
     const collarStyle = formData.get('collarStyle') as string;
+    const cuffStyle = formData.get('cuffStyle') as string;
+    const pocketStyle = formData.get('pocketStyle') as string;
+    const monogram = formData.get('monogram') as string;
     const additionalNotes = formData.get('additionalNotes') as string;
     
-    const note = `Sleeves: ${sleeveLength}, Fit: ${fit}, Collar: ${collarStyle}. Notes: ${additionalNotes}`;
+    let noteParts = [];
+    if (sleeveLength) noteParts.push(`Sleeves: ${sleeveLength}`);
+    if (fit) noteParts.push(`Fit: ${fit}`);
+    if (collarStyle) noteParts.push(`Collar: ${collarStyle}`);
+    if (cuffStyle) noteParts.push(`Cuffs: ${cuffStyle}`);
+    if (pocketStyle) noteParts.push(`Pocket: ${pocketStyle}`);
+    if (monogram) noteParts.push(`Monogram: "${monogram}"`);
+    if (additionalNotes) noteParts.push(`Notes: ${additionalNotes}`);
+
+    const note = noteParts.join(', ');
 
     updateCartItemNote(currentItemToCustomize.id, note);
     setIsCustomizeDialogOpen(false);
     toast({
         title: 'Customization Saved',
-        description: `Your notes for ${currentItemToCustomize.name} have been updated.`
+        description: `Your preferences for ${currentItemToCustomize.name} have been updated.`
     });
   };
   
@@ -237,7 +249,7 @@ export default function CartPage() {
         doc.text(`₹${deliveryFee.toFixed(2)}`, pageWidth - 14, finalY + 14, { align: 'right' });
     }
 
-    const totalYPosition = finalY + (deliveryFee > 0 ? 21 : 14);
+    const totalYPosition = finalY + (deliveryFee > 0 ? 21 : (discount > 0 ? 14 : 7));
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -280,6 +292,8 @@ export default function CartPage() {
         type: item.purchaseType,
         status: 'Processing',
         date: format(new Date(), 'yyyy-MM-dd'),
+        customizationNote: item.customizationNote,
+        price: item.price,
     }));
     addMultipleOrders(newOrders);
     clearCart();
@@ -568,9 +582,9 @@ export default function CartPage() {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="standard">Standard</SelectItem>
-                                        <SelectItem value="short">Shorter (-1 inch)</SelectItem>
-                                        <SelectItem value="long">Longer (+1 inch)</SelectItem>
+                                        <SelectItem value="Standard">Standard</SelectItem>
+                                        <SelectItem value="Shorter (-1 inch)">Shorter (-1 inch)</SelectItem>
+                                        <SelectItem value="Longer (+1 inch)">Longer (+1 inch)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -581,26 +595,60 @@ export default function CartPage() {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="slim">Slim Fit</SelectItem>
-                                        <SelectItem value="standard">Standard Fit</SelectItem>
-                                        <SelectItem value="loose">Loose Fit</SelectItem>
+                                        <SelectItem value="Slim Fit">Slim Fit</SelectItem>
+                                        <SelectItem value="Standard Fit">Standard Fit</SelectItem>
+                                        <SelectItem value="Loose Fit">Loose Fit</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
-                        <div className="space-y-2">
-                           <Label htmlFor="collarStyle">Collar Style</Label>
-                            <Select name="collarStyle" defaultValue="standard">
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="standard">Standard Collar</SelectItem>
-                                    <SelectItem value="spread">Spread Collar</SelectItem>
-                                    <SelectItem value="button-down">Button-Down</SelectItem>
-                                    <SelectItem value="mandarin">Mandarin</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-2">
+                               <Label htmlFor="collarStyle">Collar Style</Label>
+                                <Select name="collarStyle" defaultValue="standard">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Standard Collar">Standard Collar</SelectItem>
+                                        <SelectItem value="Spread Collar">Spread Collar</SelectItem>
+                                        <SelectItem value="Button-Down">Button-Down</SelectItem>
+                                        <SelectItem value="Mandarin">Mandarin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                               <Label htmlFor="cuffStyle">Cuff Style</Label>
+                                <Select name="cuffStyle" defaultValue="one-button">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="One-Button Barrel">One-Button Barrel</SelectItem>
+                                        <SelectItem value="Two-Button Barrel">Two-Button Barrel</SelectItem>
+                                        <SelectItem value="French Cuff">French Cuff</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                         <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                               <Label htmlFor="pocketStyle">Pocket Style</Label>
+                                <Select name="pocketStyle" defaultValue="none">
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="None">None</SelectItem>
+                                        <SelectItem value="Standard Left Pocket">Standard Left Pocket</SelectItem>
+                                        <SelectItem value="Both Sides">Pockets on Both Sides</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                             <div className="space-y-2">
+                               <Label htmlFor="monogram">Monogram (Optional)</Label>
+                               <Input id="monogram" name="monogram" placeholder="e.g., JD"/>
+                            </div>
                         </div>
                         <div className="space-y-2">
                            <Label htmlFor="additionalNotes">Additional Notes</Label>

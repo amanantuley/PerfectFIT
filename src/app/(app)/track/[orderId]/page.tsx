@@ -13,23 +13,42 @@ import { Separator } from '@/components/ui/separator';
 import { addDays, format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-progress' | 'out-for-delivery' | 'complete' }) => (
+const MapPlaceholder = ({ status }: { status: Order['status'] }) => {
+    const routePath = "M 100 300 C 250 100, 550 100, 700 300";
+
+    const animationClass = useMemo(() => {
+        switch (status) {
+            case 'Shipped':
+                return 'animate-route-shipped';
+            case 'Out for Delivery':
+                return 'animate-route-out-for-delivery';
+            case 'Delivered':
+                return 'animate-route-delivered';
+            default:
+                return 'hidden';
+        }
+    }, [status]);
+
+
+    return (
     <div className="relative w-full h-64 md:h-96 bg-muted rounded-lg overflow-hidden border">
         <svg
             width="100%"
             height="100%"
+            viewBox="0 0 800 400"
+            preserveAspectRatio="xMidYMid meet"
             xmlns="http://www.w3.org/2000/svg"
             className="absolute inset-0"
         >
             <defs>
                 <pattern
                     id="smallGrid"
-                    width="8"
-                    height="8"
+                    width="10"
+                    height="10"
                     patternUnits="userSpaceOnUse"
                 >
                     <path
-                        d="M 8 0 L 0 0 0 8"
+                        d="M 10 0 L 0 0 0 10"
                         fill="none"
                         stroke="hsl(var(--border))"
                         strokeWidth="0.5"
@@ -37,13 +56,13 @@ const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-pr
                 </pattern>
                 <pattern
                     id="grid"
-                    width="40"
-                    height="40"
+                    width="50"
+                    height="50"
                     patternUnits="userSpaceOnUse"
                 >
-                    <rect width="40" height="40" fill="url(#smallGrid)" />
+                    <rect width="50" height="50" fill="url(#smallGrid)" />
                     <path
-                        d="M 40 0 L 0 0 0 40"
+                        d="M 50 0 L 0 0 0 50"
                         fill="none"
                         stroke="hsl(var(--border))"
                         strokeWidth="1"
@@ -51,38 +70,59 @@ const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-pr
                 </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
+            
             <path
                 id="routePath"
-                d="M 50 250 C 150 100, 350 100, 450 220"
+                d={routePath}
                 stroke="hsl(var(--primary))"
-                strokeWidth="4"
+                strokeWidth="6"
                 fill="none"
-                strokeDasharray="10 5"
+                strokeDasharray="15 8"
                 className="opacity-50"
             />
+            
+            {/* Start and End Points */}
+            <g transform="translate(100, 300)">
+                <circle cx="0" cy="0" r="15" fill="hsl(var(--primary))" opacity="0.3" />
+                <circle cx="0" cy="0" r="8" fill="hsl(var(--primary))" />
+            </g>
+             <g transform="translate(700, 300)">
+                <circle cx="0" cy="0" r="15" fill="hsl(var(--primary))" opacity="0.3" />
+                <circle cx="0" cy="0" r="8" fill="hsl(var(--primary))" />
+            </g>
         </svg>
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-muted-foreground p-4 bg-background/80 rounded-md">
-             <p className="font-bold">Live Tracking Simulation</p>
-             <p className="text-xs">Visualizing your order's journey from our workshop to you.</p>
+        {/* Truck animation */}
+         <div 
+            className={cn(
+                "absolute",
+                animationClass
+            )}
+            style={{
+                offsetPath: `path('${routePath}')`,
+            } as React.CSSProperties}
+         >
+            <Truck
+                className="text-primary drop-shadow-lg -translate-x-1/2 -translate-y-1/2"
+                width="40"
+                height="40"
+            />
         </div>
 
-        {/* Start and End Points */}
-        <div className="absolute top-[240px] left-[40px] text-center">
+
+        {/* Start and End Point Icons, placed with divs for easier responsive text */}
+        <div className="absolute top-[calc(75%-28px)] left-[12.5%] -translate-x-1/2 text-center">
             <Package className="h-8 w-8 text-primary mx-auto" />
             <span className="text-xs font-semibold">Workshop</span>
         </div>
-        <div className="absolute top-[210px] right-[40px] text-center">
+        <div className="absolute top-[calc(75%-28px)] left-[87.5%] -translate-x-1/2 text-center">
             <Home className="h-8 w-8 text-primary mx-auto" />
             <span className="text-xs font-semibold">Your Address</span>
         </div>
         
-        {/* Animated truck icon */}
-        <div className="absolute top-0 left-0 w-full h-full">
-            <Truck className={cn("h-6 w-6 text-primary drop-shadow-lg truck-icon", animationState)} />
-        </div>
     </div>
-);
+)};
+
 
 const trackingSteps = [
     { status: 'Confirmed', description: 'Your order has been confirmed and sent to the tailor.', icon: CheckCircle },
@@ -96,6 +136,7 @@ const getStepIndex = (status: Order['status']): number => {
     switch (status) {
         case 'Processing': return 1;
         case 'Shipped': return 2;
+        case 'Out for Delivery': return 3; // Added this step for better granularity
         case 'Delivered': return 4;
         default: return 0; // Confirmed is the default starting point
     }
@@ -116,14 +157,6 @@ export default function TrackOrderPage() {
             setCurrentStep(getStepIndex(foundOrder.status));
         }
     }, [orderId, orders]);
-
-    const animationState = useMemo(() => {
-        if (!order) return 'pending';
-        if (currentStep === 2) return 'in-progress';
-        if (currentStep === 3) return 'out-for-delivery';
-        if (currentStep >= 4) return 'complete';
-        return 'pending';
-    }, [order, currentStep]);
 
     const getStepDate = (orderDate: string, stepIndex: number): string => {
         const baseDate = new Date(orderDate);
@@ -155,7 +188,7 @@ export default function TrackOrderPage() {
         return (
             <Card className="shadow-lg animate-fade-in-up">
                  <CardHeader>
-                    <CardTitle className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Order Status</CardTitle>
+                    <CardTitle className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 bg-size-200 animate-text-rainbow">Order Status</CardTitle>
                     <CardDescription>Order ID: {order.id}</CardDescription>
                 </CardHeader>
                  <CardContent>
@@ -178,11 +211,11 @@ export default function TrackOrderPage() {
         <div className="animate-fade-in-up space-y-8">
             <Card className="shadow-lg">
                 <CardHeader>
-                    <CardTitle className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Track Your Order</CardTitle>
+                    <CardTitle className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 bg-size-200 animate-text-rainbow">Track Your Order</CardTitle>
                     <CardDescription>Order ID: {order.id} | Estimated Delivery: {format(addDays(new Date(order.date), 10), 'PPP')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                    <MapPlaceholder animationState={animationState} />
+                    <MapPlaceholder status={order.status} />
                     <Separator />
                     <div>
                         <h3 className="text-xl font-bold mb-6">Delivery Status</h3>

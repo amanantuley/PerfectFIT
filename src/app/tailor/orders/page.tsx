@@ -27,7 +27,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, RefreshCw, Truck, Package, MoreHorizontal, FileText, Calendar, DollarSign, Loader2, Users } from 'lucide-react';
+import { CheckCircle, RefreshCw, Truck, Package, MoreHorizontal, FileText, Calendar, DollarSign, Loader2, Users, Edit } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useTranslation } from '@/context/translation-provider';
 import { useRouter } from 'next/navigation';
@@ -35,14 +35,14 @@ import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 const allOrders = [
-  { orderId: '#T302', customer: 'Priya Patel', item: 'Navy Blue Suit', date: '2025-07-20', dueDate: '2025-08-05', status: 'In Progress', amount: 4500 },
-  { orderId: '#T301', customer: 'Rohan Sharma', item: 'Classic White Shirt', date: '2025-07-18', dueDate: '2025-07-25', status: 'Completed', amount: 800 },
-  { orderId: '#T300', customer: 'Amit Singh', item: 'Charcoal Gray Suit', date: '2025-07-15', dueDate: '2025-07-30', status: 'Shipped', amount: 4200 },
-  { orderId: '#T299', customer: 'Sneha Reddy', item: 'Casual Checkered Shirt', date: '2025-07-14', dueDate: '2025-07-21', status: 'Completed', amount: 950 },
-  { orderId: '#T298', customer: 'Vikram Mehta', item: 'Black Tuxedo', date: '2025-07-12', dueDate: '2025-08-01', status: 'In Progress', amount: 5500 },
-  { orderId: '#T297', customer: 'Anjali Verma', item: 'Linen Trousers', date: '2025-07-11', dueDate: '2025-07-18', status: 'New', amount: 1200 },
-  { orderId: '#T296', customer: 'Karan Malhotra', item: 'Embroidered Sherwani', date: '2025-07-10', dueDate: '2025-08-10', status: 'New', amount: 12500 },
-  { orderId: '#T295', customer: 'Sunita Rao', item: 'Silk Blend Kurta', date: '2025-07-09', dueDate: '2025-07-20', status: 'Shipped', amount: 1600 },
+  { orderId: '#T302', customer: 'Priya Patel', item: 'Navy Blue Suit', date: '2025-07-20', dueDate: '2025-08-05', status: 'In Progress', amount: 4500, customizationNote: 'Fit: Slim Fit, Cuffs: French Cuff, Monogram: "PP"' },
+  { orderId: '#T301', customer: 'Rohan Sharma', item: 'Classic White Shirt', date: '2025-07-18', dueDate: '2025-07-25', status: 'Completed', amount: 800, customizationNote: 'Sleeves: Longer (+1 inch), Collar: Spread' },
+  { orderId: '#T300', customer: 'Amit Singh', item: 'Charcoal Gray Suit', date: '2025-07-15', dueDate: '2025-07-30', status: 'Shipped', amount: 4200, customizationNote: 'Standard customization.' },
+  { orderId: '#T299', customer: 'Sneha Reddy', item: 'Casual Checkered Shirt', date: '2025-07-14', dueDate: '2025-07-21', status: 'Completed', amount: 950, customizationNote: 'Pocket: None' },
+  { orderId: '#T298', customer: 'Vikram Mehta', item: 'Black Tuxedo', date: '2025-07-12', dueDate: '2025-08-01', status: 'In Progress', amount: 5500, customizationNote: 'Lapel: Peak Lapel, Buttons: Satin' },
+  { orderId: '#T297', customer: 'Anjali Verma', item: 'Linen Trousers', date: '2025-07-11', dueDate: '2025-07-18', status: 'New', amount: 1200, customizationNote: 'Fit: Loose Fit' },
+  { orderId: '#T296', customer: 'Karan Malhotra', item: 'Embroidered Sherwani', date: '2025-07-10', dueDate: '2025-08-10', status: 'New', amount: 12500, customizationNote: 'Custom embroidery pattern provided.' },
+  { orderId: '#T295', customer: 'Sunita Rao', item: 'Silk Blend Kurta', date: '2025-07-09', dueDate: '2025-07-20', status: 'Shipped', amount: 1600, customizationNote: 'Sleeve Length: Standard' },
 ];
 
 type Order = typeof allOrders[0];
@@ -151,7 +151,6 @@ export default function TailorOrdersPage() {
                 <TableHead>{t('Order ID')}</TableHead>
                 <TableHead>{t('Customer')}</TableHead>
                 <TableHead>{t('Item')}</TableHead>
-                <TableHead>{t('Order Date')}</TableHead>
                 <TableHead>{t('Due Date')}</TableHead>
                 <TableHead>{t('Status')}</TableHead>
                 <TableHead className="text-right">{t('Actions')}</TableHead>
@@ -165,7 +164,6 @@ export default function TailorOrdersPage() {
                     <TableCell className="font-medium">{order.orderId}</TableCell>
                     <TableCell>{order.customer}</TableCell>
                     <TableCell>{t(order.item as any)}</TableCell>
-                    <TableCell>{order.date}</TableCell>
                     <TableCell>{order.dueDate}</TableCell>
                     <TableCell>
                         <Badge variant={variant} className="gap-1.5">
@@ -212,6 +210,12 @@ export default function TailorOrdersPage() {
                 <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Due Date')}:</b> {selectedOrder?.dueDate}</span></div>
                 <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Amount')}:</b> ₹{selectedOrder?.amount.toFixed(2)}</span></div>
                 <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Status')}:</b> {t(selectedOrder?.status as any)}</span></div>
+                <div className="flex items-start gap-2"><Edit className="h-4 w-4 text-muted-foreground mt-1" /> 
+                    <div>
+                        <b>{t('Customizations' as any)}:</b> 
+                        <p className="text-sm text-muted-foreground pl-2">{selectedOrder?.customizationNote}</p>
+                    </div>
+                </div>
             </div>
         </DialogContent>
     </Dialog>
@@ -230,7 +234,7 @@ export default function TailorOrdersPage() {
                     <SelectContent>
                         <SelectItem value="New">{t('New')}</SelectItem>
                         <SelectItem value="In Progress">{t('In Progress')}</SelectItem>
-                        <SelectItem value="Shipped">{t('Shipped')}</SelectItem>
+                        <SelectItem value="Shipped">{t('Shipped' as any)}</SelectItem>
                         <SelectItem value="Completed">{t('Completed')}</SelectItem>
                     </SelectContent>
                 </Select>

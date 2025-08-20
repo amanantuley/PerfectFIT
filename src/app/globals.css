@@ -4,39 +4,39 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    --background: 240 10% 97%;
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --card: 240 10% 100%;
     --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
+    --popover: 240 10% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 262.1 83.3% 57.8%;
+    --primary: 262 82% 57%;
     --primary-foreground: 210 20% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 262 82% 96%;
+    --accent-foreground: 262 82% 40%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 262 82% 57%;
     --radius: 0.75rem;
-    --chart-1: 262.1 83.3% 57.8%;
+    --chart-1: 262 82% 57%;
     --chart-2: 168 76% 42%;
     --chart-3: 28 92% 53%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --sidebar-background: 240 4.8% 95.9%;
     --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 262.1 83.3% 57.8%;
+    --sidebar-primary: 262 82% 57%;
     --sidebar-primary-foreground: 210 20% 98%;
     --sidebar-accent: 0 0% 100%;
     --sidebar-accent-foreground: 240 10% 3.9%;
     --sidebar-border: 240 5.9% 90%;
-    --sidebar-ring: 262.1 83.3% 57.8%;
+    --sidebar-ring: 262 82% 57%;
   }
 
   .dark {
@@ -46,19 +46,19 @@
     --card-foreground: 210 20% 98%;
     --popover: 266 25% 6%;
     --popover-foreground: 210 20% 98%;
-    --primary: 262.1 83.3% 57.8%;
+    --primary: 262 82% 67%;
     --primary-foreground: 210 20% 98%;
     --secondary: 264 20% 16%;
     --secondary-foreground: 210 20% 98%;
     --muted: 264 20% 16%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 264 20% 16%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 262 82% 16%;
+    --accent-foreground: 262 82% 85%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
     --border: 264 20% 16%;
     --input: 264 20% 16%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 262 82% 67%;
     --sidebar-background: 266 25% 6%;
     --sidebar-foreground: 210 20% 98%;
     --sidebar-primary: 210 20% 98%;
@@ -98,39 +98,6 @@
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
-  }
-  
-  .truck-icon {
-      offset-path: path("M 50 250 C 150 100, 350 100, 450 220");
-      offset-distance: 0%;
-      animation-fill-mode: forwards;
-  }
-  .truck-icon.in-progress {
-      animation: move-truck-start 4s ease-in-out forwards;
-  }
-   .truck-icon.out-for-delivery {
-      animation: move-truck-end 4s ease-in-out forwards;
-      animation-delay: 1s;
-  }
-  .truck-icon.complete {
-      offset-distance: 100%;
-  }
-
-  @keyframes move-truck-start {
-      0% {
-          offset-distance: 0%;
-      }
-      100% {
-          offset-distance: 50%;
-      }
-  }
-   @keyframes move-truck-end {
-      0% {
-          offset-distance: 50%;
-      }
-      100% {
-          offset-distance: 100%;
-      }
   }
 }
     

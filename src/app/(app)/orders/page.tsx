@@ -12,7 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send, Loader2, MapPin } from 'lucide-react';
+import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send, Loader2, MapPin, DollarSign, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useRouter } from 'next/navigation';
+import { Separator } from '@/components/ui/separator';
 
 const initialConversation = [
     {
@@ -160,6 +161,10 @@ export default function OrdersPage() {
                       <FileText className="h-4 w-4 mr-1.5"/>
                       <p>{order.id}</p>
                     </div>
+                     <div className="flex items-center text-sm text-muted-foreground">
+                        <DollarSign className="h-4 w-4 mr-1.5" />
+                        <p>₹{order.price.toFixed(2)}</p>
+                    </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Tag className="h-4 w-4 mr-1.5"/>
                       <p>{order.type}</p>
@@ -168,6 +173,12 @@ export default function OrdersPage() {
                       <Calendar className="h-4 w-4 mr-1.5"/>
                       <p>{order.date}</p>
                     </div>
+                    {order.customizationNote && (
+                        <div className="flex items-start text-sm text-muted-foreground">
+                            <Edit className="h-4 w-4 mr-1.5 mt-0.5 shrink-0" />
+                            <p className="line-clamp-2">{order.customizationNote}</p>
+                        </div>
+                    )}
                   </div>
                 </CardContent>
                 <CardFooter className="px-4 pb-3 flex flex-col sm:flex-row gap-2">
@@ -202,11 +213,10 @@ export default function OrdersPage() {
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead className="w-[100px]">Order ID</TableHead>
                 <TableHead>Item</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>Details</TableHead>
+                <TableHead>Customizations</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
@@ -215,7 +225,6 @@ export default function OrdersPage() {
                     const statusConfig = getStatusConfig(order.status);
                     return (
                         <TableRow key={order.id} className="transition-colors hover:bg-muted/50">
-                            <TableCell className="font-medium">{order.id}</TableCell>
                             <TableCell>
                             <div className="flex items-center gap-3">
                                 <Image
@@ -229,14 +238,23 @@ export default function OrdersPage() {
                                 <span className="font-medium">{order.item}</span>
                             </div>
                             </TableCell>
-                            <TableCell>{order.type}</TableCell>
+                            <TableCell className="text-muted-foreground text-xs">
+                                <p><b>ID:</b> {order.id}</p>
+                                <p><b>Date:</b> {order.date}</p>
+                                <p><b>Type:</b> {order.type}</p>
+                                <p><b>Price:</b> ₹{order.price.toFixed(2)}</p>
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                    {order.customizationNote || 'No customizations'}
+                                </p>
+                            </TableCell>
                             <TableCell>
                                 <Badge variant={statusConfig.variant} className="gap-1.5">
                                     <statusConfig.icon className="h-3.5 w-3.5" />
                                     {statusConfig.text}
                                 </Badge>
                             </TableCell>
-                            <TableCell>{order.date}</TableCell>
                              <TableCell className="text-right space-x-2">
                                 {order.status === 'Shipped' && (
                                     <Button variant="outline" size="sm" onClick={() => router.push(`/track/${order.id}`)}>

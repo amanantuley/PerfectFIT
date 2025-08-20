@@ -7,7 +7,10 @@ import { orders as initialOrders } from '@/lib/orders-data';
 import { Garment } from '@/lib/garments';
 import { v4 as uuidv4 } from 'uuid';
 
-export type Order = (typeof initialOrders)[0];
+export type Order = (typeof initialOrders)[0] & {
+    customizationNote?: string;
+    price: number;
+};
 export type ReturnEntry = (typeof initialReturns)[0];
 export type CartItem = Garment & {
   id: string;
@@ -33,7 +36,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>(initialOrders.map(o => ({...o, price: 4500, customizationNote: 'Sleeves: Longer (+1 inch), Fit: Slim Fit, Collar: Spread Collar, Cuffs: French Cuff, Pocket: None, Monogram: "JD"'})));
   const [returns, setReturns] = useState<ReturnEntry[]>(initialReturns);
   const [cart, setCart] = useState<CartItem[]>([]);
 

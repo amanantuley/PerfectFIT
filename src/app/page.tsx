@@ -148,7 +148,7 @@ export default function LandingPage() {
         
         {/* Our Vision Section */}
         <section id="vision" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
-            <Image src="/dots.svg" alt="" aria-hidden="true" width={500} height={500} className="absolute -top-1/4 -left-24 opacity-20" />
+            <Image src="/pattern.svg" alt="" aria-hidden="true" width={500} height={500} className="absolute -top-1/4 -left-24 opacity-20" />
             <div className="container px-4 md:px-6 relative">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -270,7 +270,7 @@ export default function LandingPage() {
         
         {/* Team Section */}
         <section id="team" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '1.0s' }}>
-            <Image src="/circles.svg" alt="" aria-hidden="true" width={700} height={700} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15" />
+            <Image src="/pattern-circles.svg" alt="" aria-hidden="true" width={700} height={700} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-15" />
             <div className="container px-4 md:px-6 relative">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
