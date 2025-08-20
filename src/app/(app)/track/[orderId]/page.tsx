@@ -3,15 +3,17 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Package, Truck, Home, Hourglass } from 'lucide-react';
+import { CheckCircle, Package, Truck, Home, Hourglass, Scissors, Info } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useApp, Order } from '@/context/app-context';
 import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
+import { addDays, format } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-progress' | 'complete' }) => (
+const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-progress' | 'out-for-delivery' | 'complete' }) => (
     <div className="relative w-full h-64 md:h-96 bg-muted rounded-lg overflow-hidden border">
         <svg
             width="100%"
@@ -51,7 +53,7 @@ const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-pr
             <rect width="100%" height="100%" fill="url(#grid)" />
             <path
                 id="routePath"
-                d="M 20 250 C 150 100, 250 100, 380 220"
+                d="M 50 250 C 150 100, 350 100, 450 220"
                 stroke="hsl(var(--primary))"
                 strokeWidth="4"
                 fill="none"
@@ -60,17 +62,17 @@ const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-pr
             />
         </svg>
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-muted-foreground">
-             <p className="font-bold">Map View Unavailable</p>
-             <p className="text-xs">This is a visual simulation of your order's journey.</p>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-muted-foreground p-4 bg-background/80 rounded-md">
+             <p className="font-bold">Live Tracking Simulation</p>
+             <p className="text-xs">Visualizing your order's journey from our workshop to you.</p>
         </div>
 
         {/* Start and End Points */}
-        <div className="absolute top-[240px] left-[10px] text-center">
+        <div className="absolute top-[240px] left-[40px] text-center">
             <Package className="h-8 w-8 text-primary mx-auto" />
             <span className="text-xs font-semibold">Workshop</span>
         </div>
-        <div className="absolute top-[210px] right-[10px] text-center">
+        <div className="absolute top-[210px] right-[40px] text-center">
             <Home className="h-8 w-8 text-primary mx-auto" />
             <span className="text-xs font-semibold">Your Address</span>
         </div>
@@ -83,27 +85,19 @@ const MapPlaceholder = ({ animationState }: { animationState: 'pending' | 'in-pr
 );
 
 const trackingSteps = [
-    { status: 'Processing', description: 'Your order has been confirmed and is being prepared by the tailor.', icon: Hourglass },
-    { status: 'Shipped', description: 'Your order has been shipped and is on its way to you.', icon: Truck },
-    { status: 'Delivered', description: 'Your order has been successfully delivered.', icon: Home },
-    { status: 'Returned', description: 'Your order has been returned.', icon: CheckCircle },
-    { status: 'Canceled', description: 'Your order has been canceled.', icon: CheckCircle },
+    { status: 'Confirmed', description: 'Your order has been confirmed and sent to the tailor.', icon: CheckCircle },
+    { status: 'Processing', description: 'The tailor is meticulously crafting your garment.', icon: Scissors },
+    { status: 'Shipped', description: 'Your order has been dispatched from our workshop.', icon: Truck },
+    { status: 'Out for Delivery', description: 'The package is on its final journey to your doorstep.', icon: Home },
+    { status: 'Delivered', description: 'Your order has been successfully delivered. Enjoy!', icon: Package },
 ];
 
 const getStepIndex = (status: Order['status']): number => {
     switch (status) {
-        case 'Processing':
-            return 0;
-        case 'Shipped':
-            return 1;
-        case 'Delivered':
-            return 2;
-        case 'Returned':
-            return 3;
-        case 'Canceled':
-            return 4;
-        default:
-            return -1;
+        case 'Processing': return 1;
+        case 'Shipped': return 2;
+        case 'Delivered': return 4;
+        default: return 0; // Confirmed is the default starting point
     }
 };
 
@@ -125,11 +119,18 @@ export default function TrackOrderPage() {
 
     const animationState = useMemo(() => {
         if (!order) return 'pending';
-        if (order.status === 'Shipped') return 'in-progress';
-        if (order.status === 'Delivered') return 'complete';
+        if (currentStep === 2) return 'in-progress';
+        if (currentStep === 3) return 'out-for-delivery';
+        if (currentStep >= 4) return 'complete';
         return 'pending';
-    }, [order]);
+    }, [order, currentStep]);
 
+    const getStepDate = (orderDate: string, stepIndex: number): string => {
+        const baseDate = new Date(orderDate);
+        if (isNaN(baseDate.getTime())) return 'Pending';
+        // Simulate progress: each step takes 1-2 days.
+        return format(addDays(baseDate, stepIndex * 2), 'PPP, p');
+    };
 
     if (!order) {
         return (
@@ -149,12 +150,36 @@ export default function TrackOrderPage() {
         )
     }
 
+    // Special handling for non-trackable statuses
+    if (order.status === 'Returned' || order.status === 'Canceled') {
+        return (
+            <Card className="shadow-lg animate-fade-in-up">
+                 <CardHeader>
+                    <CardTitle className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Order Status</CardTitle>
+                    <CardDescription>Order ID: {order.id}</CardDescription>
+                </CardHeader>
+                 <CardContent>
+                     <Alert variant={order.status === 'Canceled' ? 'destructive' : 'default'}>
+                        <Info className="h-4 w-4" />
+                        <AlertTitle>Order {order.status}</AlertTitle>
+                        <AlertDescription>
+                            This order has been {order.status.toLowerCase()} and is no longer being tracked for delivery.
+                        </AlertDescription>
+                    </Alert>
+                     <Button asChild className="mt-6">
+                        <Link href="/orders">Back to My Orders</Link>
+                    </Button>
+                 </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <div className="animate-fade-in-up space-y-8">
             <Card className="shadow-lg">
                 <CardHeader>
                     <CardTitle className="text-3xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Track Your Order</CardTitle>
-                    <CardDescription>Order ID: {order.id}</CardDescription>
+                    <CardDescription>Order ID: {order.id} | Estimated Delivery: {format(addDays(new Date(order.date), 10), 'PPP')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
                     <MapPlaceholder animationState={animationState} />
@@ -174,6 +199,9 @@ export default function TrackOrderPage() {
                                     <div>
                                         <p className={cn("font-bold", index <= currentStep ? "text-foreground" : "text-muted-foreground")}>{step.status}</p>
                                         <p className="text-sm text-muted-foreground">{step.description}</p>
+                                        {index <= currentStep && (
+                                            <p className="text-xs text-muted-foreground mt-1">{getStepDate(order.date, index)}</p>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -184,4 +212,3 @@ export default function TrackOrderPage() {
         </div>
     );
 }
-

@@ -101,20 +101,32 @@
   }
   
   .truck-icon {
-      offset-path: path("M 20 250 C 150 100, 250 100, 380 220");
+      offset-path: path("M 50 250 C 150 100, 350 100, 450 220");
       offset-distance: 0%;
       animation-fill-mode: forwards;
   }
   .truck-icon.in-progress {
-      animation: move-truck 4s ease-in-out forwards;
+      animation: move-truck-start 4s ease-in-out forwards;
+  }
+   .truck-icon.out-for-delivery {
+      animation: move-truck-end 4s ease-in-out forwards;
+      animation-delay: 1s;
   }
   .truck-icon.complete {
       offset-distance: 100%;
   }
 
-  @keyframes move-truck {
+  @keyframes move-truck-start {
       0% {
           offset-distance: 0%;
+      }
+      100% {
+          offset-distance: 50%;
+      }
+  }
+   @keyframes move-truck-end {
+      0% {
+          offset-distance: 50%;
       }
       100% {
           offset-distance: 100%;
