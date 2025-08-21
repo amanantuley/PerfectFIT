@@ -123,7 +123,7 @@ export default {
         },
         'route-progress': {
           '0%': { offsetDistance: '0%' },
-          '100%': { offsetDistance: 'var(--route-progress-end)' },
+          '100%': { offsetDistance: '50%' },
         }
       },
       animation: {
@@ -132,7 +132,7 @@ export default {
         'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
         'text-rainbow': 'text-rainbow 3s ease-in-out infinite',
         'spin': 'spin 1.5s linear infinite',
-        'route-progress': 'route-progress 2s ease-out forwards',
+        'route-progress': 'route-progress 2s ease-out',
       },
     },
   },

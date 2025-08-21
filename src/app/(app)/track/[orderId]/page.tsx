@@ -14,114 +14,94 @@ import { addDays, format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const MapPlaceholder = ({ status }: { status: Order['status'] }) => {
-    const routePath = "M 100 300 C 250 100, 550 100, 700 300";
-
-    const animationClass = useMemo(() => {
+    const progressPercentage = useMemo(() => {
         switch (status) {
-            case 'Shipped':
-                return 'animate-route-shipped';
-            case 'Out for Delivery':
-                return 'animate-route-out-for-delivery';
-            case 'Delivered':
-                return 'animate-route-delivered';
-            default:
-                return 'hidden';
+            case 'Shipped': return 50;
+            case 'Out for Delivery': return 80;
+            case 'Delivered': return 100;
+            default: return 0;
         }
     }, [status]);
+    
+    // The total length of the SVG path. This needs to be measured if the path changes.
+    // For "M 50 150 C 150 50, 350 50, 450 150", the length is approximately 530.
+    const pathLength = 530;
+    const strokeDashoffset = pathLength - (pathLength * progressPercentage) / 100;
 
+    const routePath = "M 50 150 C 150 50, 350 50, 450 150";
 
     return (
-    <div className="relative w-full h-64 md:h-96 bg-muted rounded-lg overflow-hidden border">
-        <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 800 400"
-            preserveAspectRatio="xMidYMid meet"
-            xmlns="http://www.w3.org/2000/svg"
-            className="absolute inset-0"
-        >
-            <defs>
-                <pattern
-                    id="smallGrid"
-                    width="10"
-                    height="10"
-                    patternUnits="userSpaceOnUse"
-                >
-                    <path
-                        d="M 10 0 L 0 0 0 10"
-                        fill="none"
-                        stroke="hsl(var(--border))"
-                        strokeWidth="0.5"
-                    />
-                </pattern>
-                <pattern
-                    id="grid"
-                    width="50"
-                    height="50"
-                    patternUnits="userSpaceOnUse"
-                >
-                    <rect width="50" height="50" fill="url(#smallGrid)" />
-                    <path
-                        d="M 50 0 L 0 0 0 50"
-                        fill="none"
-                        stroke="hsl(var(--border))"
-                        strokeWidth="1"
-                    />
-                </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-            
-            <path
-                id="routePath"
-                d={routePath}
-                stroke="hsl(var(--primary))"
-                strokeWidth="6"
-                fill="none"
-                strokeDasharray="15 8"
-                className="opacity-50"
-            />
-            
-            {/* Start and End Points */}
-            <g transform="translate(100, 300)">
-                <circle cx="0" cy="0" r="15" fill="hsl(var(--primary))" opacity="0.3" />
-                <circle cx="0" cy="0" r="8" fill="hsl(var(--primary))" />
-            </g>
-             <g transform="translate(700, 300)">
-                <circle cx="0" cy="0" r="15" fill="hsl(var(--primary))" opacity="0.3" />
-                <circle cx="0" cy="0" r="8" fill="hsl(var(--primary))" />
-            </g>
-        </svg>
+        <div className="relative w-full h-64 md:h-96 bg-muted rounded-lg overflow-hidden border">
+            <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 500 200"
+                preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* Grid */}
+                <defs>
+                    <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" />
+                    </pattern>
+                    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                        <rect width="50" height="50" fill="url(#smallGrid)" />
+                        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="hsl(var(--border))" strokeWidth="1" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
 
-        {/* Truck animation */}
-         <div 
-            className={cn(
-                "absolute",
-                animationClass
-            )}
-            style={{
-                offsetPath: `path('${routePath}')`,
-            } as React.CSSProperties}
-         >
-            <Truck
-                className="text-primary drop-shadow-lg -translate-x-1/2 -translate-y-1/2"
-                width="40"
-                height="40"
-            />
-        </div>
+                {/* Route Path (Dotted Background) */}
+                 <path
+                    id="routePath"
+                    d={routePath}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeDasharray="5 5"
+                    className="opacity-40"
+                />
+                
+                 {/* Progress Path (Solid, Animated) */}
+                <path
+                    d={routePath}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeDasharray={pathLength}
+                    style={{
+                        strokeDashoffset: strokeDashoffset,
+                        transition: 'stroke-dashoffset 1.5s ease-in-out',
+                    }}
+                />
 
+                {/* Truck */}
+                {progressPercentage > 0 && (
+                    <g style={{ offsetPath: `path('${routePath}')`, offsetDistance: `${progressPercentage}%`, transition: 'offset-distance 1.5s ease-in-out' }}>
+                        <Truck
+                            className="text-primary drop-shadow-lg"
+                            width="20"
+                            height="20"
+                            transform="translate(-10, -10)"
+                        />
+                    </g>
+                )}
 
-        {/* Start and End Point Icons, placed with divs for easier responsive text */}
-        <div className="absolute top-[calc(75%-28px)] left-[12.5%] -translate-x-1/2 text-center">
-            <Package className="h-8 w-8 text-primary mx-auto" />
-            <span className="text-xs font-semibold">Workshop</span>
+                {/* Start and End Icons */}
+                <g transform="translate(50, 150)">
+                    <circle cx="0" cy="0" r="10" fill="hsl(var(--primary))" opacity="0.2" />
+                    <circle cx="0" cy="0" r="5" fill="hsl(var(--primary))" />
+                    <Package x="-8" y="-22" width="16" height="16" className="text-primary" />
+                </g>
+                <g transform="translate(450, 150)">
+                    <circle cx="0" cy="0" r="10" fill="hsl(var(--primary))" opacity="0.2" />
+                    <circle cx="0" cy="0" r="5" fill="hsl(var(--primary))" />
+                    <Home x="-8" y="-22" width="16" height="16" className="text-primary" />
+                </g>
+            </svg>
         </div>
-        <div className="absolute top-[calc(75%-28px)] left-[87.5%] -translate-x-1/2 text-center">
-            <Home className="h-8 w-8 text-primary mx-auto" />
-            <span className="text-xs font-semibold">Your Address</span>
-        </div>
-        
-    </div>
-)};
+    );
+};
 
 
 const trackingSteps = [
