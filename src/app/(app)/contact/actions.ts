@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod';
+import { sendContactMail } from '@/lib/mailer';
 
 export async function submitContact(prevState: any, formData: FormData) {
   const schema = z.object({
@@ -19,9 +20,12 @@ export async function submitContact(prevState: any, formData: FormData) {
     const error = parsed.error.issues[0].message;
     return { message: error, error: true };
   }
-  
-  // In a real app, you would send an email or save to a DB
-  console.log('New contact message received:', parsed.data);
 
-  return { message: 'Message sent successfully!', error: false };
+  try {
+    await sendContactMail(parsed.data); // ✅ send email
+    return { message: 'Message sent successfully!', error: false };
+  } catch (err) {
+    console.error("❌ Email sending failed:", err);
+    return { message: 'Failed to send message. Try again later.', error: true };
+  }
 }

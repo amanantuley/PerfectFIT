@@ -29,7 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Loader2, Wallet, ArrowLeft, Download, Trash2, CalendarDays, Edit, Zap, MapPin } from 'lucide-react';
+import { ShoppingCart, Loader2, Wallet, ArrowLeft, Download, Trash2, CalendarDays, Edit, Zap, MapPin, Tag } from 'lucide-react';
 import Image from 'next/image';
 import { useFormState, useFormStatus } from 'react-dom';
 import React, { useEffect, useRef, useState } from 'react';
@@ -55,6 +55,8 @@ const initialState = {
 };
 
 const EXPRESS_DELIVERY_FEE = 250;
+const VALID_COUPON = 'PERFECT10';
+const COUPON_DISCOUNT_PERCENTAGE = 10;
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
@@ -98,7 +100,7 @@ const CreditCardIcon = () => (
 const PaypalIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
         <path d="M8.32,18.18,8,19.89a.57.57,0,0,0,.6.63h3.33a.56.56,0,0,0,.55-.42l.52-2.73a.83.83,0,0,1,.81-.67h.17c3.12,0,5.75-2.31,6-5.43.22-2.86-1.63-5-4.25-5.38a.56.56,0,0,0-.61.59l-.31,1.87a.82.82,0,0,1-.79.66H14c-1.51,0-2.82.68-3.48,1.87L9,15.11A.83.83,0,0,1,8.32,18.18Z" fill="#253b80"></path>
-        <path d="M12.39,3.23h-4a.56.56,0,0,0-.55.42L4.36,18.82a.56.56,0,0,0,.55,.7H8.87a.56.56,0,0,0,.55-.42L10,15.63a.82.82,0,0,1,.8-.66h.17c3.84,0,6.67-2.67,6.91-6.2.22-3.32-2.11-5.89-5.35-6.16A.56.56,0,0,0,12.39,3.23Z" fill="#179bd7"></path>
+        <path d="M12.39,3.23h-4a.56.56,0,0,0-.55.42L4.36,18.82a.56.56,0,0,0,.55.7H8.87a.56.56,0,0,0,.55-.42L10,15.63a.82.82,0,0,1,.8-.66h.17c3.84,0,6.67-2.67,6.91-6.2.22-3.32-2.11-5.89-5.35-6.16A.56.56,0,0,0,12.39,3.23Z" fill="#179bd7"></path>
         <path d="M4.36,18.82,2,4.27A.56.56,0,0,0,1.41,3.7L1.13,3.84a.56.56,0,0,0-.41.67L4,19.51a.57.57,0,0,0,.56.41H8.87a.56.56,0,0,0,.55-.42L9.84,17a.84.84,0,0,1-.74-1,.82.82,0,0,0-.73.13L4.91,18.4a.56.56,0,0,1-.55.42Z" fill="#222d65"></path>
     </svg>
 );
@@ -130,9 +132,11 @@ export default function CartPage() {
   const [deliveryOption, setDeliveryOption] = useState<'standard' | 'express'>('standard');
   const [nearbyTailors, setNearbyTailors] = useState<any[]>([]);
   const [isLocating, setIsLocating] = useState(true);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
 
 
-  const { activePlan, discount } = useSubscription();
+  const { activePlan, discount: subscriptionDiscount } = useSubscription();
   const { addMultipleOrders, cart, removeFromCart, clearCart, updateCartItemNote } = useApp();
 
   // Simulate fetching user's location and sorting tailors
@@ -148,13 +152,32 @@ export default function CartPage() {
   }, []);
 
   const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
-  const discountAmount = (subtotal * discount) / 100;
+  const subscriptionDiscountAmount = (subtotal * subscriptionDiscount) / 100;
+  const couponDiscountAmount = (subtotal * couponDiscount) / 100;
+  const totalDiscount = subscriptionDiscountAmount + couponDiscountAmount;
   const deliveryFee = deliveryOption === 'express' ? EXPRESS_DELIVERY_FEE : 0;
-  const finalPrice = subtotal - discountAmount + deliveryFee;
+  const finalPrice = subtotal - totalDiscount + deliveryFee;
   
   const standardDeliveryDate = format(addDays(new Date(), 10), 'PPP');
   const expressDeliveryDate = format(addDays(new Date(), 5), 'PPP');
   const estimatedDeliveryDate = deliveryOption === 'standard' ? standardDeliveryDate : expressDeliveryDate;
+
+  const handleApplyCoupon = () => {
+    if (couponCode.toUpperCase() === VALID_COUPON) {
+        setCouponDiscount(COUPON_DISCOUNT_PERCENTAGE);
+        toast({
+            title: 'Coupon Applied!',
+            description: `You've received a ${COUPON_DISCOUNT_PERCENTAGE}% discount.`,
+        });
+    } else {
+        setCouponDiscount(0);
+        toast({
+            variant: 'destructive',
+            title: 'Invalid Coupon',
+            description: 'The coupon code you entered is not valid.',
+        });
+    }
+  };
 
   const openCustomizeDialog = (item: CartItem) => {
     setCurrentItemToCustomize(item);
@@ -239,17 +262,24 @@ export default function CartPage() {
     doc.text('Subtotal:', pageWidth - 60, finalY);
     doc.text(`₹${subtotal.toFixed(2)}`, pageWidth - 14, finalY, { align: 'right' });
 
-    if(discount > 0) {
-        doc.text(`Discount (${discount}%):`, pageWidth - 60, finalY + 7);
-        doc.text(`-₹${discountAmount.toFixed(2)}`, pageWidth - 14, finalY + 7, { align: 'right' });
+    if(subscriptionDiscount > 0) {
+        doc.text(`Subscription Discount (${subscriptionDiscount}%):`, pageWidth - 60, finalY + 7);
+        doc.text(`-₹${subscriptionDiscountAmount.toFixed(2)}`, pageWidth - 14, finalY + 7, { align: 'right' });
     }
     
-    if(deliveryFee > 0) {
-        doc.text('Express Delivery Fee:', pageWidth - 60, finalY + 14);
-        doc.text(`₹${deliveryFee.toFixed(2)}`, pageWidth - 14, finalY + 14, { align: 'right' });
+    if(couponDiscount > 0) {
+        const yOffset = subscriptionDiscount > 0 ? 14 : 7;
+        doc.text(`Coupon Discount (${couponDiscount}%):`, pageWidth - 60, finalY + yOffset);
+        doc.text(`-₹${couponDiscountAmount.toFixed(2)}`, pageWidth - 14, finalY + yOffset, { align: 'right' });
     }
 
-    const totalYPosition = finalY + (deliveryFee > 0 ? 21 : (discount > 0 ? 14 : 7));
+    if(deliveryFee > 0) {
+        const yOffset = (subscriptionDiscount > 0 ? 7 : 0) + (couponDiscount > 0 ? 7 : 0) + 7;
+        doc.text('Express Delivery Fee:', pageWidth - 60, finalY + yOffset);
+        doc.text(`₹${deliveryFee.toFixed(2)}`, pageWidth - 14, finalY + yOffset, { align: 'right' });
+    }
+
+    const totalYPosition = finalY + (deliveryFee > 0 ? 7 : 0) + (subscriptionDiscount > 0 ? 7 : 0) + (couponDiscount > 0 ? 7 : 0) + 7;
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -427,6 +457,19 @@ export default function CartPage() {
                             <CardTitle>Order Summary</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="coupon">Have a coupon?</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        id="coupon" 
+                                        placeholder="Enter coupon code" 
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value)}
+                                    />
+                                    <Button type="button" variant="secondary" onClick={handleApplyCoupon}>Apply</Button>
+                                </div>
+                             </div>
+                             <Separator />
                              <div className="w-full space-y-2">
                                 <div className="flex justify-between items-center text-muted-foreground">
                                     <span>Subtotal ({cart.length} items)</span>
@@ -434,8 +477,14 @@ export default function CartPage() {
                                 </div>
                                 {activePlan && (
                                     <div className="flex justify-between items-center text-primary font-medium">
-                                        <span>{activePlan} Discount ({discount}%)</span>
-                                        <span>-₹{discountAmount.toFixed(2)}</span>
+                                        <span>{activePlan} Discount ({subscriptionDiscount}%)</span>
+                                        <span>-₹{subscriptionDiscountAmount.toFixed(2)}</span>
+                                    </div>
+                                )}
+                                {couponDiscount > 0 && (
+                                     <div className="flex justify-between items-center text-primary font-medium">
+                                        <span className='flex items-center gap-1.5'><Tag className="h-4 w-4"/>Coupon '{VALID_COUPON}' ({couponDiscount}%)</span>
+                                        <span>-₹{couponDiscountAmount.toFixed(2)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center text-muted-foreground">
