@@ -2,16 +2,27 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';
-import { Camera, Scissors, Ruler, Bot, Users, Star, Shirt, Award, Facebook, Twitter, Instagram, Linkedin, Sparkles, Wand2, Lightbulb, Quote, LogIn, Download, Loader2 } from 'lucide-react';
+import { Camera, Scissors, Ruler, Bot, Users, Star, Shirt, Award, Facebook, Twitter, Instagram, Linkedin, Sparkles, Wand2, Lightbulb, Quote, LogIn, Download, Loader2, Check } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import React, { useEffect, useState, useRef } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
 import { submitNewsletter } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import Image from 'next/image';
+import { useFormStatus } from 'react-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import Autoplay from "embla-carousel-autoplay";
 
 function PreLoader() {
   return (
@@ -45,8 +56,8 @@ const LinkedinIcon = () => (
     </svg>
 );
 
-const initialState = {
-  message: '',
+const initialState: { message: string | null; error: boolean } = {
+  message: null,
   error: false,
 };
 
@@ -59,11 +70,79 @@ function SubmitButton() {
   );
 }
 
+const plans = [
+    {
+        name: 'Basic',
+        price: '₹1999',
+        period: 'month',
+        description: 'Perfect for occasional rentals and trying out our service.',
+        features: [
+            '1 Rental Credit per Month',
+            'Access to Casual Wear',
+            'Standard Delivery',
+            'Basic Fit Guarantee',
+            '10% Discount on Purchases',
+        ],
+        popular: false,
+    },
+    {
+        name: 'Pro',
+        price: '₹3999',
+        period: 'month',
+        description: 'For the fashion-forward individual who loves variety.',
+        features: [
+            '4 Rental Credits per Month',
+            'Access to All Collections',
+            'Express Delivery',
+            'Perfect Fit Guarantee with Free Alterations',
+            '25% Discount on Purchases',
+        ],
+        popular: true,
+    },
+    {
+        name: 'Ultimate',
+        price: '₹6999',
+        period: 'month',
+        description: 'The ultimate wardrobe solution for any occasion.',
+        features: [
+            'Unlimited Rental Credits',
+            'Access to All Collections, including Premium',
+            'Same-Day Delivery (in select cities)',
+            '40% Discount on Purchases',
+        ],
+        popular: false,
+    }
+];
+
+const testimonials = [
+  {
+    quote: "I was skeptical about the AI measurements, but the suit I received fits better than anything I've ever owned. Magic!",
+    name: "Alex J.",
+  },
+  {
+    quote: "The convenience is a game-changer. I rented a perfect-fitting dress for a wedding without ever leaving my house.",
+    name: "Sarah K.",
+  },
+  {
+    quote: "Finally, a service that understands that one size does not fit all. The quality of the fabric and tailoring is top-notch.",
+    name: "Michael P.",
+  },
+  {
+    quote: "The AI fitness plan was a great bonus! It's amazing how it's tailored to my measurements. Highly recommend.",
+    name: "Jessica D.",
+  },
+  {
+    quote: "Customer service is fantastic. They helped me with a return and made the process so easy and stress-free.",
+    name: "David L.",
+  },
+];
+
 export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction] = useFormState(submitNewsletter, initialState);
+  const [state, formAction] = useActionState(submitNewsletter, initialState);
+  const autoplayPlugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
 
   useEffect(() => {
     if (state.message) {
@@ -118,7 +197,7 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="relative w-full py-32 md:py-48 text-center overflow-x-hidden animate-fade-in-up">
           <div className="absolute inset-0 z-0">
-             <Image src="/landbcck.png" alt="Tailoring background" fill className="object-cover" />
+             <Image src="/landbcck.png" alt="Tailoring background" fill className="object-cover" data-ai-hint="fashion studio"/>
              <div className="absolute inset-0 bg-black/50"></div>
           </div>
           <div className="container relative px-4 md:px-6 z-10">
@@ -149,7 +228,7 @@ export default function LandingPage() {
         {/* Our Vision Section */}
         <section id="vision" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
             <Image src="/dots.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute -top-12 -left-24 opacity-20" />
-            <Image src="/lines.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute -bottom-12 -right-24 opacity-20" />
+            <Image src="/dots.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute -bottom-12 -right-24 opacity-20" />
             <div className="container px-4 md:px-6 relative">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -166,7 +245,8 @@ export default function LandingPage() {
 
         {/* Features Section */}
         <section id="features" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '0.4s' }}>
-          <Image src="/lines.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute -top-12 -right-24 opacity-20" />
+          <Image src="/dots.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute top-0 right-0 opacity-20" />
+          <Image src="/dots.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute bottom-0 left-0 opacity-20" />
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide flex items-center gap-2">
@@ -251,6 +331,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="mx-auto w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 relative">
+              <Image src="/lines.svg" alt="" aria-hidden="true" width={500} height={100} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-full max-w-3xl hidden md:block" />
               <div className="flex flex-col items-center space-y-4 p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
                 <div className="p-4 bg-primary rounded-full text-primary-foreground font-bold text-2xl w-16 h-16 flex items-center justify-center">1</div>
                 <h3 className="text-xl font-bold">Scan</h3>
@@ -270,10 +351,52 @@ export default function LandingPage() {
           </div>
         </section>
         
+        {/* Pricing Section */}
+        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+            <div className="container px-4 md:px-6">
+                <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                    <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
+                        <Award className="h-4 w-4" />
+                        Pricing Plans
+                    </div>
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Find the Perfect Plan</h2>
+                    <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                        Choose a plan that fits your style and budget. Unlock exclusive perks and elevate your wardrobe.
+                    </p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-start max-w-5xl mx-auto">
+                    {plans.map((plan) => (
+                        <div key={plan.name} className={`rounded-lg border bg-card text-card-foreground shadow-lg transition-all duration-300 hover:shadow-glow hover:-translate-y-2 flex flex-col ${plan.popular ? 'border-primary border-2' : ''}`}>
+                            {plan.popular && <div className="text-center py-1 bg-primary text-primary-foreground text-sm font-bold rounded-t-md">Most Popular</div>}
+                            <div className="p-6 text-center">
+                                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                                <p className="text-4xl font-bold my-4">{plan.price}<span className="text-lg font-normal text-muted-foreground">/{plan.period}</span></p>
+                                <p className="text-muted-foreground text-sm">{plan.description}</p>
+                            </div>
+                            <div className="p-6 bg-muted/30 flex-grow">
+                                <ul className="space-y-3">
+                                    {plan.features.map(feature => (
+                                        <li key={feature} className="flex items-start gap-3">
+                                            <Check className="h-5 w-5 text-primary mt-1 shrink-0" />
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="p-6">
+                                <Button className="w-full" variant={plan.popular ? 'default' : 'secondary'} asChild>
+                                    <Link href="/signup">Choose Plan</Link>
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
         {/* Team Section */}
         <section id="team" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/40 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '1.0s' }}>
-            <Image src="/dots.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute top-24 right-24 opacity-20" />
-            <Image src="/lines.svg" alt="" aria-hidden="true" width={500} height={500} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10" />
+            <Image src="/lines.svg" alt="" aria-hidden="true" width={800} height={400} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20" />
             <div className="container px-4 md:px-6 relative">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                     <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -287,19 +410,28 @@ export default function LandingPage() {
                 </div>
                 <div className="mx-auto grid max-w-5xl grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
-                        <Image className="rounded-full mb-4 object-cover h-40 w-40" src="/aman-image.png" alt="Team member" width={160} height={160} />
+                        <Avatar className="w-24 h-24 mb-4">
+                            <AvatarImage src="/aman-image.png" alt="Aman Antuley" />
+                            <AvatarFallback>AA</AvatarFallback>
+                        </Avatar>
                         <h3 className="text-xl font-bold">Aman Antuley</h3>
                         <p className="text-sm text-muted-foreground">Software Developer</p>
                         <p className="mt-2 text-sm text-muted-foreground">The architect of our seamless user experience and robust application logic.</p>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
-                         <Image className="rounded-full mb-4 object-cover h-40 w-40" src="/alamin.jpg" alt="Team member" width={160} height={160} />
+                        <Avatar className="w-24 h-24 mb-4">
+                            <AvatarImage src="/alamin.jpg" alt="Alamin Mondal" />
+                            <AvatarFallback>AM</AvatarFallback>
+                        </Avatar>
                         <h3 className="text-xl font-bold">Alamin Mondal</h3>
                         <p className="text-sm text-muted-foreground">AI/ML Engineer</p>
                          <p className="mt-2 text-sm text-muted-foreground">The mastermind behind our powerful AI, ensuring our core technology is always learning and improving.</p>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
-                         <Image className="rounded-full mb-4 object-cover h-40 w-40 object-center" src="/iqra.jpg" alt="Team member" width={160} height={160} />
+                        <Avatar className="w-24 h-24 mb-4">
+                            <AvatarImage src="/iqra.jpg" alt="Iqra Shaikh" />
+                            <AvatarFallback>IS</AvatarFallback>
+                        </Avatar>
                         <h3 className="text-xl font-bold">Iqra Shaikh</h3>
                         <p className="text-sm text-muted-foreground">App Developer</p>
                          <p className="mt-2 text-sm text-muted-foreground">The creative talent who brings our vision to life with elegant design and intuitive interfaces.</p>
@@ -310,7 +442,6 @@ export default function LandingPage() {
 
          {/* Testimonials Section */}
         <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '1.2s' }}>
-          <Image src="/lines.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute -bottom-12 -left-24 opacity-20" />
           <div className="container px-4 md:px-6">
              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
@@ -322,56 +453,43 @@ export default function LandingPage() {
                 Don't just take our word for it. Here's what our community is saying about their PerfectFit experience.
               </p>
             </div>
-            <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-glow hover:-translate-y-1" >
-                    <div className="flex items-center gap-2 mb-4">
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
+            <Carousel
+              plugins={[autoplayPlugin.current]}
+              className="w-full max-w-4xl mx-auto"
+              onMouseEnter={() => autoplayPlugin.current.stop()}
+              onMouseLeave={() => autoplayPlugin.current.play()}
+            >
+              <CarouselContent>
+                {testimonials.map((testimonial, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-4">
+                      <Card className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-glow hover:-translate-y-1">
+                        <CardContent className="p-0 flex flex-col items-center justify-center text-center">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Star className="w-5 h-5 fill-primary text-primary" />
+                                <Star className="w-5 h-5 fill-primary text-primary" />
+                                <Star className="w-5 h-5 fill-primary text-primary" />
+                                <Star className="w-5 h-5 fill-primary text-primary" />
+                                <Star className="w-5 h-5 fill-primary text-primary" />
+                            </div>
+                            <p className="text-muted-foreground mb-4 text-lg">"{testimonial.quote}"</p>
+                            <div className="flex items-center gap-4">
+                              <p className="font-semibold">- {testimonial.name}</p>
+                            </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                    <p className="text-muted-foreground mb-4">"I was skeptical about the AI measurements, but the suit I received fits better than anything I've ever owned. Magic!"</p>
-                    <div className="flex items-center gap-4">
-                       <Image className="rounded-full" src="https://placehold.co/40x40.png" alt="User" width={40} height={40} data-ai-hint="person"/>
-                       <p className="font-semibold">- Alex J.</p>
-                    </div>
-                </div>
-                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-glow hover:-translate-y-1" >
-                     <div className="flex items-center gap-2 mb-4">
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                    </div>
-                    <p className="text-muted-foreground mb-4">"The convenience is a game-changer. I rented a perfect-fitting dress for a wedding without ever leaving my house."</p>
-                     <div className="flex items-center gap-4">
-                       <Image className="rounded-full" src="https://placehold.co/40x40.png" alt="User" width={40} height={40} data-ai-hint="person"/>
-                       <p className="font-semibold">- Sarah K.</p>
-                    </div>
-                </div>
-                <div className="p-6 rounded-lg border bg-card text-card-foreground transition-all duration-300 hover:shadow-glow hover:-translate-y-1" >
-                     <div className="flex items-center gap-2 mb-4">
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                    </div>
-                    <p className="text-muted-foreground mb-4">"Finally, a service that understands that one size does not fit all. The quality of the fabric and tailoring is top-notch."</p>
-                     <div className="flex items-center gap-4">
-                       <Image className="rounded-full" src="https://placehold.co/40x40.png" alt="User" width={40} height={40} data-ai-hint="person"/>
-                       <p className="font-semibold">- Michael P.</p>
-                    </div>
-                </div>
-            </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         </section>
         
         {/* Newsletter Section */}
         <section id="newsletter" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '1.2s' }}>
-            <Image src="/lines.svg" alt="" aria-hidden="true" width={200} height={200} className="absolute top-0 -left-24 opacity-20" />
             <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
                 <div className="space-y-3 flex flex-col items-center">
                     <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Stay in the Loop</h2>
