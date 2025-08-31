@@ -1,3 +1,5 @@
+"use server"; // ensure this only runs on server
+
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
