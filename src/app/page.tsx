@@ -410,7 +410,7 @@ export default function LandingPage() {
                 </div>
                 <div className="mx-auto grid max-w-5xl grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
-                        <Avatar className="w-24 h-24 mb-4">
+                        <Avatar className="w-32 h-32 mb-4">
                             <AvatarImage src="/aman-image.png" alt="Aman Antuley" />
                             <AvatarFallback>AA</AvatarFallback>
                         </Avatar>
@@ -419,7 +419,7 @@ export default function LandingPage() {
                         <p className="mt-2 text-sm text-muted-foreground">The architect of our seamless user experience and robust application logic.</p>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
-                        <Avatar className="w-24 h-24 mb-4">
+                        <Avatar className="w-32 h-32 mb-4">
                             <AvatarImage src="/alamin.jpg" alt="Alamin Mondal" />
                             <AvatarFallback>AM</AvatarFallback>
                         </Avatar>
@@ -428,7 +428,7 @@ export default function LandingPage() {
                          <p className="mt-2 text-sm text-muted-foreground">The mastermind behind our powerful AI, ensuring our core technology is always learning and improving.</p>
                     </div>
                     <div className="flex flex-col items-center text-center p-4 rounded-lg transition-transform duration-300 hover:scale-105 hover:bg-card hover:shadow-glow" >
-                        <Avatar className="w-24 h-24 mb-4">
+                        <Avatar className="w-32 h-32 mb-4">
                             <AvatarImage src="/iqra.jpg" alt="Iqra Shaikh" />
                             <AvatarFallback>IS</AvatarFallback>
                         </Avatar>
