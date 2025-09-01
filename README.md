@@ -74,8 +74,6 @@ PerfectFit-AI/
 Pull requests, feature suggestions, or design improvements are welcome!
 Feel free to fork this repo, raise issues, or start a discussion.
 
----
-
 ## 📧 Contact
 
 Got questions or want to collaborate?
