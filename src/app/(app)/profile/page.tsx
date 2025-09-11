@@ -113,7 +113,7 @@ export default function ProfilePage() {
     <div className="flex justify-center items-start animate-fade-in-up">
       <Card className="w-full max-w-3xl shadow-lg">
         <CardHeader>
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
             My Profile
           </CardTitle>
           <CardDescription>

@@ -60,7 +60,7 @@ export default function FAQPage() {
         <div className="mx-auto bg-primary/10 p-3 rounded-full mb-4">
           <HelpCircle className="h-10 w-10 text-primary" />
         </div>
-        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Frequently Asked Questions</CardTitle>
+        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Frequently Asked Questions</CardTitle>
         <CardDescription>
           Find answers to common questions about our service, measurements, and more.
         </CardDescription>

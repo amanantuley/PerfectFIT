@@ -54,7 +54,7 @@ export default function ContactUsPage() {
     <div className="grid md:grid-cols-2 gap-8 animate-fade-in-up">
        <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Contact Information</CardTitle>
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Contact Information</CardTitle>
           <CardDescription>
             Get in touch with us through any of the following channels.
           </CardDescription>
@@ -85,7 +85,7 @@ export default function ContactUsPage() {
        </Card>
        <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Send us a Message</CardTitle>
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Send us a Message</CardTitle>
           <CardDescription>
             Have a question or feedback? Fill out the form below.
           </CardDescription>

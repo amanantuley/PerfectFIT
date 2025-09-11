@@ -203,7 +203,7 @@ export default function LandingPage() {
           <div className="container relative px-4 md:px-6 z-10">
             <div className="grid gap-6 lg:gap-8">
               <div className="flex flex-col justify-center space-y-4">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
                   The Future of Tailoring is Here.
                 </h1>
                 <p className="max-w-[700px] text-muted-foreground text-lg sm:text-xl mx-auto" >
@@ -235,7 +235,7 @@ export default function LandingPage() {
                         <Lightbulb className="h-4 w-4" />
                         Our Vision
                     </div>
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">A New Era of Personal Style</h2>
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">A New Era of Personal Style</h2>
                     <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                         We believe that fashion should be personal, sustainable, and empowering. By merging the art of traditional tailoring with the power of artificial intelligence, we're making custom-fit clothing accessible to everyone. Our vision is to eliminate the guesswork, reduce waste, and help you build a wardrobe that is uniquely yours, in every sense of the word.
                     </p>
@@ -253,7 +253,7 @@ export default function LandingPage() {
                 <Sparkles className="h-4 w-4"/>
                 Key Features
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Why Choose PerfectFit?</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Why Choose PerfectFit?</h2>
               <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 We blend the timeless art of tailoring with the precision of artificial intelligence to deliver an unmatched experience.
               </p>
@@ -325,7 +325,7 @@ export default function LandingPage() {
                   <Wand2 className="h-4 w-4" />
                   How It Works
                </div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Three Simple Steps to a Perfect Fit</h2>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Three Simple Steps to a Perfect Fit</h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 Getting custom-tailored clothing has never been easier. Our process is designed for your convenience and precision.
               </p>
@@ -359,7 +359,7 @@ export default function LandingPage() {
                         <Award className="h-4 w-4" />
                         Pricing Plans
                     </div>
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Find the Perfect Plan</h2>
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Find the Perfect Plan</h2>
                     <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                         Choose a plan that fits your style and budget. Unlock exclusive perks and elevate your wardrobe.
                     </p>
@@ -403,7 +403,7 @@ export default function LandingPage() {
                       <Users className="h-4 w-4"/>
                       Our Team
                     </div>
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">The Minds Behind the Fit</h2>
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">The Minds Behind the Fit</h2>
                     <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                         "Great things in business are never done by one person. They're done by a team of people." - Steve Jobs
                     </p>
@@ -442,13 +442,14 @@ export default function LandingPage() {
 
          {/* Testimonials Section */}
         <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '1.2s' }}>
+          <Image src="/lines.svg" alt="" aria-hidden="true" width={800} height={400} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 -z-10" />
           <div className="container px-4 md:px-6">
              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="inline-flex rounded-lg bg-muted px-3 py-1 text-sm font-semibold tracking-wide items-center gap-2">
                 <Quote className="h-4 w-4" />
                 Testimonials
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">What Our Customers Say</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">What Our Customers Say</h2>
                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 Don't just take our word for it. Here's what our community is saying about their PerfectFit experience.
               </p>
@@ -492,7 +493,7 @@ export default function LandingPage() {
         <section id="newsletter" className="w-full py-12 md:py-24 lg:py-32 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '1.2s' }}>
             <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
                 <div className="space-y-3 flex flex-col items-center">
-                    <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Stay in the Loop</h2>
+                    <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Stay in the Loop</h2>
                     <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                         Subscribe to our newsletter for the latest styles, offers, and updates from PerfectFit.
                     </p>

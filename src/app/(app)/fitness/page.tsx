@@ -109,7 +109,7 @@ export default function FitnessTrackingPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <Card className="lg:col-span-1 h-fit shadow-lg">
           <CardHeader>
-            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Add New Measurement</CardTitle>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Add New Measurement</CardTitle>
             <CardDescription>Manually log your measurements.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -176,7 +176,7 @@ export default function FitnessTrackingPage() {
 
         <Card className="lg:col-span-2 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Measurement History</CardTitle>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Measurement History</CardTitle>
             <CardDescription>Track your progress over time.</CardDescription>
           </CardHeader>
           <CardContent className="pr-0">
@@ -233,7 +233,7 @@ export default function FitnessTrackingPage() {
        <div className="space-y-8">
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Target />AI Fitness Planner</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Target />AI Fitness Planner</CardTitle>
             <CardDescription>Fill in your details to receive a personalized fitness and diet plan based on your latest measurements.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -319,7 +319,7 @@ export default function FitnessTrackingPage() {
             <div className="grid md:grid-cols-2 gap-8 items-start">
                  <Card className="shadow-lg">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Dumbbell /> AI Fitness Plan</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Dumbbell /> AI Fitness Plan</CardTitle>
                         <CardDescription>{aiPlan.fitnessPlan.title}</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -350,7 +350,7 @@ export default function FitnessTrackingPage() {
 
                  <Card className="shadow-lg">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow"><Utensils /> AI Diet Plan</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Utensils /> AI Diet Plan</CardTitle>
                         <CardDescription>{aiPlan.dietPlan.title}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">

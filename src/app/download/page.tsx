@@ -23,9 +23,15 @@ export default function DownloadAppPage() {
   const { toast } = useToast();
 
   const handleDownloadClick = () => {
+    const link = document.createElement('a');
+    link.href = '/app-debug.apk';
+    link.setAttribute('download', 'app-debug.apk');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     toast({
-        title: 'Coming Soon!',
-        description: 'Our app is not yet available for download. Please check back later!',
+        title: 'Download Started!',
+        description: 'Your download for app-debug.apk has begun.',
     });
   };
 

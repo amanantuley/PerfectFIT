@@ -36,7 +36,7 @@ export default function RewardsPage() {
           <div className="mx-auto bg-primary/10 p-4 rounded-full mb-4">
             <Award className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-4xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Your Rewards</CardTitle>
+          <CardTitle className="text-4xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Your Rewards</CardTitle>
           <CardDescription className="text-lg">
             Thank you for being a loyal customer!
           </CardDescription>
@@ -57,7 +57,7 @@ export default function RewardsPage() {
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Available Rewards</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Available Rewards</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {rewards.map((reward) => (
             <Card key={reward.title} className="flex flex-col text-center shadow-lg hover:shadow-xl transition-shadow">

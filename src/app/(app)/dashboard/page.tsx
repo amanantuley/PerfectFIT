@@ -299,7 +299,7 @@ export default function DashboardPage() {
               <TabsContent value="live">
                 <Card id="live-measurement-card" className="shadow-glow mt-2">
                   <CardHeader>
-                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Live Measurement</CardTitle>
+                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Live Measurement</CardTitle>
                     <CardDescription>Use your camera for instant results.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -330,7 +330,7 @@ export default function DashboardPage() {
               <TabsContent value="upload">
                 <Card id="upload-photo-card" className="shadow-glow mt-2">
                   <CardHeader>
-                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">AI Measurement</CardTitle>
+                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">AI Measurement</CardTitle>
                     <CardDescription>Upload a full-body photo to get your measurements.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -359,7 +359,7 @@ export default function DashboardPage() {
               <TabsContent value="manual">
                  <Card className="shadow-glow mt-2">
                     <CardHeader>
-                        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Manual Input</CardTitle>
+                        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Manual Input</CardTitle>
                         <CardDescription>Enter your measurements directly.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -428,7 +428,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-3 space-y-8">
             <Card id="your-measurements-card" className="shadow-glow">
               <CardHeader>
-                <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Your Measurements</CardTitle>
+                <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Your Measurements</CardTitle>
                 <CardDescription>Results from our AI analysis.</CardDescription>
               </CardHeader>
               <CardContent>
@@ -464,7 +464,7 @@ export default function DashboardPage() {
 
             <Card className="shadow-glow">
                 <CardHeader>
-                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Digital Mannequin</CardTitle>
+                    <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Digital Mannequin</CardTitle>
                     <CardDescription>A visual guide to your measurements.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -518,7 +518,7 @@ export default function DashboardPage() {
        {measurementHistory.length > 0 && (
          <Card className="shadow-glow">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
                     <History /> Measurement History
                 </CardTitle>
                 <CardDescription>View your past measurements and reuse them for recommendations.</CardDescription>
@@ -557,7 +557,7 @@ export default function DashboardPage() {
        )}
 
       <div id="recommendations-section">
-        <h2 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+        <h2 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
           {recommendations ? 'Recommended For You' : 'Our Collection'}
         </h2>
         <p className="text-muted-foreground">
@@ -615,7 +615,7 @@ export default function DashboardPage() {
         <Dialog open={showWelcomeVideo} onOpenChange={setShowWelcomeVideo}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Welcome to PerfectFit!</DialogTitle>
+                    <DialogTitle className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Welcome to PerfectFit!</DialogTitle>
                     <DialogDescription>
                         Watch this short video to learn how to get the most accurate AI measurements.
                     </DialogDescription>

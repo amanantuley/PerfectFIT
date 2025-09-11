@@ -372,7 +372,7 @@ export default function CartPage() {
                 <div className="lg:col-span-2 space-y-8">
                     <Card className="shadow-lg">
                         <CardHeader>
-                            <CardTitle className="text-3xl flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                            <CardTitle className="text-3xl flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
                                 <ShoppingCart className="h-8 w-8" />
                                 Your Shopping Cart
                             </CardTitle>
@@ -536,7 +536,7 @@ export default function CartPage() {
         <Dialog open={isPaymentDialogOpen} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-2xl text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+                    <DialogTitle className="flex items-center gap-2 text-2xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
                         <Wallet />
                         {selectedPaymentMethod === 'creditCard' ? 'Enter Card Details' : 'Complete Your Payment'}
                     </DialogTitle>

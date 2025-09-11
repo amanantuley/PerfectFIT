@@ -57,7 +57,7 @@ export default function FeedbackPage() {
     <div className="flex justify-center items-start animate-fade-in-up">
        <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">Share Your Feedback</CardTitle>
+          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Share Your Feedback</CardTitle>
           <CardDescription>
             We value your opinion. Let us know how we can improve.
           </CardDescription>
