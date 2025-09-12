@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -29,3 +30,5 @@ export async function submitSettings(prevState: any, formData: FormData) {
 
   return { message: 'Your settings have been updated successfully!', error: false };
 }
+
+    

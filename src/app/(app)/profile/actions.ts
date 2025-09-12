@@ -64,3 +64,5 @@ export async function deleteAccount() {
     console.log('User account deletion requested.');
     return { message: 'Your account has been successfully deleted.' };
 }
+
+    
