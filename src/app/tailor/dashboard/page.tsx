@@ -13,9 +13,6 @@ import {
   Star,
   TrendingUp,
   TrendingDown,
-  Scissors,
-  Shirt,
-  ShirtIcon
 } from 'lucide-react';
 import { useTranslation } from '@/context/translation-provider';
 import { useToast } from '@/hooks/use-toast';
@@ -30,26 +27,41 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  ChartContainer,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
 import { AreaChart, Area, CartesianGrid, XAxis, Tooltip, BarChart, Bar, ResponsiveContainer } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 
+// ✅ Safe fallback chart container if "@/components/ui/chart" is missing
+const ChartContainer = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <div className={`w-full h-full ${className || ''}`}>{children}</div>
+);
+
+const ChartTooltipContent = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const item = payload[0];
+    return (
+      <div className="bg-background border border-border text-foreground text-sm p-2 rounded-md shadow-md">
+        <p>{`${item.name || item.dataKey}: ₹${item.value}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// ✅ Status configuration
 const getStatusConfig = (status: string) => {
   switch (status) {
     case 'Ready':
-      return { label: 'Ready', className: 'bg-green-500 text-white', icon: CheckCircle };
+      return { className: 'bg-green-500 text-white', icon: CheckCircle };
     case 'Pending':
-      return { label: 'Pending', className: 'bg-gray-200 text-gray-800', icon: Clock };
+      return { className: 'bg-gray-200 text-gray-800', icon: Clock };
     case 'In Progress':
-      return { label: 'In Progress', className: 'bg-purple-200 text-purple-800', icon: RefreshCw };
+      return { className: 'bg-purple-200 text-purple-800', icon: RefreshCw };
     default:
-      return { label: 'Unknown', className: 'bg-muted text-muted-foreground', icon: ClipboardList };
+      return { className: 'bg-muted text-muted-foreground', icon: ClipboardList };
   }
 };
 
+// ✅ Mock data
 const mockOrders = [
   { orderId: 'ORD1023', customer: 'Aman Verma', amount: 2300, status: 'Ready', dueDate: '2025-11-10', isPriority: true },
   { orderId: 'ORD1024', customer: 'Priya Singh', amount: 1500, status: 'In Progress', dueDate: '2025-11-11', isPriority: false },
@@ -96,7 +108,7 @@ export default function TailorDashboard() {
         title: '🧵 New Order Received!',
         description: `Order ${newOrder.orderId} from ${newOrder.customer} for ₹${newOrder.amount}`,
       });
-    }, 25000);
+    }, 30000);
     return () => clearInterval(interval);
   }, [toast]);
 
@@ -115,7 +127,7 @@ export default function TailorDashboard() {
         <SummaryCard title="Fittings Scheduled" icon={Calendar} value="6" sub="2 completed" />
       </div>
 
-      {/* Charts and Tables */}
+      {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Earnings Overview */}
         <Card className="lg:col-span-2 shadow-glow">
@@ -126,27 +138,21 @@ export default function TailorDashboard() {
             <CardDescription>{t('Track your monthly income trends')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              config={{
-                earnings: {
-                  label: t('Earnings'),
-                  color: 'hsl(var(--primary))',
-                },
-              }}
-              className="h-[250px]"
-            >
-              <AreaChart data={earningsData}>
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="earnings" stroke="hsl(var(--primary))" fill="url(#grad)" />
-              </AreaChart>
+            <ChartContainer className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={earningsData}>
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                  <Tooltip content={<ChartTooltipContent />} />
+                  <Area type="monotone" dataKey="earnings" stroke="hsl(var(--primary))" fill="url(#grad)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -174,6 +180,7 @@ export default function TailorDashboard() {
 
       {/* Recent Orders + Customer Satisfaction */}
       <div className="grid gap-6 lg:grid-cols-3">
+        {/* Recent Orders */}
         <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
@@ -199,9 +206,7 @@ export default function TailorDashboard() {
                       <TableCell>
                         <div className="font-medium flex items-center">
                           {order.customer}
-                          {order.isPriority && (
-                            <Star className="h-4 w-4 ml-1 text-yellow-500 fill-yellow-500" />
-                          )}
+                          {order.isPriority && <Star className="h-4 w-4 ml-1 text-yellow-500 fill-yellow-500" />}
                         </div>
                         <div className="text-xs text-muted-foreground">{order.orderId}</div>
                       </TableCell>
@@ -254,7 +259,7 @@ export default function TailorDashboard() {
         </Card>
       </div>
 
-      {/* Floating Action Button */}
+      {/* Floating Add Button */}
       <Button
         className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg"
         size="icon"
@@ -266,7 +271,7 @@ export default function TailorDashboard() {
   );
 }
 
-// 🔹 Subcomponent for summary cards
+// ✅ Reusable Summary Card Component
 function SummaryCard({
   title,
   value,
