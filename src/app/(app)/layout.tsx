@@ -88,14 +88,17 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     setOpenMobile(false);
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      handleNavigation('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+    setUser(null);
+    // ✅ Use replace() to avoid back button returning to dashboard
+    router.replace('/');
+  } catch (error) {
+    console.error('Error signing out:', error);
+  }
+};
+
 
   const isActive = (path: string) => pathname === path;
   const pageTitle = pageTitles[pathname] || 'Dashboard';
