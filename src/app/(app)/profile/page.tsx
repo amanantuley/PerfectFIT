@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'firebase/auth';
+import { signOut, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
 const initialState = {
@@ -47,19 +46,21 @@ export default function ProfilePage() {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useFormState(submitProfile, initialState);
-  const [avatarPreview, setAvatarPreview] = useState("https://placehold.co/100x100.png");
 
-  // ✅ Firebase user state
+  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch user info from Firebase
+  // ✅ Fetch user info from Firebase Auth
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
         setUserName(user.displayName || 'User');
         setUserEmail(user.email || '');
+        setAvatarPreview(user.photoURL || 'https://placehold.co/100x100?text=User');
       }
       setLoading(false);
     });
@@ -67,12 +68,24 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, []);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        setAvatarPreview(base64);
+        setAvatarFile(file);
+
+        // ✅ Update user profile picture in Firebase
+        const user = auth.currentUser;
+        if (user) {
+          await updateProfile(user, { photoURL: base64 });
+          toast({
+            title: 'Profile Picture Updated',
+            description: 'Your avatar has been updated successfully.',
+          });
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -80,12 +93,20 @@ export default function ProfilePage() {
 
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();
-    await signOut(auth);
-    toast({
-      title: 'Account Deleted',
-      description: result.message,
-    });
-    router.push('/');
+    if (!result.error) {
+      await signOut(auth);
+      toast({
+        title: 'Account Deleted',
+        description: result.message,
+      });
+      router.push('/');
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error Deleting Account',
+        description: result.message,
+      });
+    }
   };
 
   useEffect(() => {
@@ -105,7 +126,6 @@ export default function ProfilePage() {
     }
   }, [state, toast]);
 
-  // ✅ Loading fallback
   if (loading) {
     return <div className="text-center p-8">Loading profile...</div>;
   }
@@ -126,8 +146,8 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={avatarPreview} alt="User Avatar" data-ai-hint="person avatar" />
-                  <AvatarFallback>U</AvatarFallback>
+                  <AvatarImage src={avatarPreview} alt="User Avatar" />
+                  <AvatarFallback>{userName?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
                 <Label htmlFor="avatar-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90">
                   <Camera className="h-4 w-4" />
@@ -186,26 +206,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <Separator />
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Education (for Student Discount)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="school">University/School</Label>
-                  <Input id="school" name="school" placeholder="Fashion Institute of Technology" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="degree">Degree</Label>
-                  <Input id="degree" name="degree" placeholder="B.S." />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="field-of-study">Field of Study</Label>
-                  <Input id="field-of-study" name="fieldOfStudy" placeholder="Fashion Design" />
-                </div>
-              </div>
-            </div>
-
             <div className="flex justify-end">
               <SubmitButton />
             </div>
@@ -248,5 +248,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
