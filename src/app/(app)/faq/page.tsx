@@ -1,3 +1,4 @@
+"use client";
 
 import {
   Card,
@@ -5,78 +6,105 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
-import { HelpCircle } from 'lucide-react';
+} from "@/components/ui/accordion";
+import { HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 const faqs = [
-    {
-        question: "How does the AI measurement work?",
-        answer: "Our AI uses advanced computer vision algorithms to analyze the full-body photo you provide. It identifies key points on your body to estimate measurements like chest, waist, and inseam with high accuracy. For best results, wear form-fitting clothing and stand in a well-lit area. The process is quick, secure, and eliminates the need for a physical measuring tape."
-    },
-    {
-        question: "Is my photo and data secure?",
-        answer: "Absolutely. We prioritize your privacy. Your photos are used only for the measurement extraction process and are not stored on our servers unless you explicitly choose to save them to your profile. All data is encrypted both in transit and at rest, and we adhere to strict data protection regulations."
-    },
-    {
-        question: "What is the difference between buying and renting?",
-        answer: "Buying a garment means you own it. It's brand new and tailored to your size. Renting allows you to wear a garment for a specific period (e.g., a weekend event). It's a cost-effective and sustainable way to access a wide variety of styles without committing to a purchase. All rented items are professionally cleaned and inspected before being sent to you."
-    },
-    {
-        question: "How accurate are the AI measurements?",
-        answer: "Our AI model is highly accurate, typically within half an inch of professional tailor measurements. The accuracy can be affected by the quality of the photo, lighting, and clothing worn. If you feel the measurements are off, you can request a remeasurement or contact support for a free alteration on your first purchased item."
-    },
-    {
-        question: "How long does it take to receive my order?",
-        answer: "For purchased items, which are made-to-order, production takes approximately 7-10 business days, followed by shipping. For rented items, you can select your delivery date at checkout. We recommend choosing a date 1-2 days before your event. Delivery times vary based on your location and selected shipping method."
-    },
-    {
-        question: "How do I return a rented item?",
-        answer: "Returning a rental is easy. We include a prepaid return label and packaging with your order. After you've worn the garment, simply place it in the provided return bag, attach the label, and drop it off at the designated courier. Make sure to return it by the specified due date to avoid late fees."
-    },
-    {
-        question: "Do you offer alterations?",
-        answer: "Yes! For purchased items, we offer a 'Perfect Fit Guarantee' which includes one free alteration to ensure your garment fits exactly as it should. For rented items, minor alterations are not available, but our AI-powered sizing aims to get you the best fit possible from our existing inventory."
-    },
-    {
-        question: "What are subscription credits?",
-        answer: "Our 'Pro' and 'Ultimate' subscription plans come with rental credits. One credit typically allows you to rent one garment, like a suit or a dress. These credits are added to your account monthly and can be used anytime as long as your subscription is active. It's the most flexible way to refresh your wardrobe."
-    },
-    {
-        question: "What if I damage a rented item?",
-        answer: "We understand that minor wear and tear can happen. Minor stains or small repairs are covered by our optional insurance fee, included at checkout. For significant damage or loss of an item, you may be responsible for the repair or replacement cost up to the retail value of the garment."
-    },
+  {
+    question: "How does the AI measurement work?",
+    answer:
+      "Our AI uses advanced computer vision algorithms to analyze your full-body photo. It detects anatomical keypoints to calculate measurements such as chest, waist, and inseam with remarkable accuracy — all without manual measuring. For best results, wear fitted clothing and stand in a well-lit area.",
+  },
+  {
+    question: "Is my photo and data secure?",
+    answer:
+      "Absolutely. Your privacy is our top priority. Images are processed securely and never stored unless you choose to save them. All data is encrypted in transit and at rest, ensuring full GDPR compliance and user confidentiality.",
+  },
+  {
+    question: "What is the difference between buying and renting?",
+    answer:
+      "Buying means owning a brand-new, made-to-measure garment. Renting lets you enjoy designer-quality outfits for a specific event — affordable, sustainable, and zero wardrobe clutter. Each rental piece is professionally cleaned and quality-checked before shipping.",
+  },
+  {
+    question: "How accurate are the AI measurements?",
+    answer:
+      "Our AI model achieves over 95% accuracy, typically within 1.5 cm of professional tailor measurements. Results depend on photo clarity, lighting, and posture. We also offer a free first adjustment to guarantee your Perfect Fit.",
+  },
+  {
+    question: "How long does it take to receive my order?",
+    answer:
+      "Tailored orders take 7–10 business days for production plus shipping. Rentals can arrive within 2–3 days. You can track progress in real time from your PerfectFit dashboard.",
+  },
+  {
+    question: "How do I return a rented item?",
+    answer:
+      "Each rental includes prepaid packaging and a return label. After your event, place the item in the provided bag, attach the label, and drop it off at any courier point before the return date — it’s that easy.",
+  },
+  {
+    question: "Do you offer alterations?",
+    answer:
+      "Yes! We offer a ‘Perfect Fit Guarantee’ with one free alteration for custom purchases. Rentals aren’t eligible for alterations, but our AI sizing ensures a reliable fit from our curated inventory.",
+  },
+  {
+    question: "What are subscription credits?",
+    answer:
+      "Our Pro and Ultimate plans include monthly rental credits. One credit equals one rental item — a suit, dress, or outfit. Unused credits roll over, so you can redeem them anytime for fresh styles.",
+  },
+  {
+    question: "What if I damage a rented item?",
+    answer:
+      "Minor wear and tear is covered by our rental insurance. For significant damage or loss, charges are capped at the garment’s retail value. We handle repairs sustainably to extend every item’s life cycle.",
+  },
 ];
 
 export default function FAQPage() {
   return (
-    <Card className="shadow-lg animate-fade-in-up">
-      <CardHeader className="text-center">
-        <div className="mx-auto bg-primary/10 p-3 rounded-full mb-4">
-          <HelpCircle className="h-10 w-10 text-primary" />
-        </div>
-        <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Frequently Asked Questions</CardTitle>
-        <CardDescription>
-          Find answers to common questions about our service, measurements, and more.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="max-w-3xl mx-auto">
-        <Accordion type="single" collapsible className="w-full">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="min-h-screen flex justify-center items-start p-4 sm:p-8"
+    >
+      <Card className="w-full max-w-4xl shadow-xl border border-muted/50">
+        <CardHeader className="text-center space-y-4">
+          <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
+            <HelpCircle className="h-10 w-10 text-primary" />
+          </div>
+          <CardTitle className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
+            Frequently Asked Questions
+          </CardTitle>
+          <CardDescription className="text-base text-muted-foreground">
+            Everything you need to know about AI measurements, rentals, and
+            subscriptions — all in one place.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="space-y-3">
             {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index + 1}`}>
-                <AccordionTrigger>{faq.question}</AccordionTrigger>
-                <AccordionContent>
+              <AccordionItem
+                key={index}
+                value={`item-${index + 1}`}
+                className="border border-muted/40 rounded-lg px-4 py-2 hover:border-primary/40 transition-all duration-300 bg-background/60 backdrop-blur-sm"
+              >
+                <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary transition-colors">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-sm leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
             ))}
-        </Accordion>
-      </CardContent>
-    </Card>
+          </Accordion>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
