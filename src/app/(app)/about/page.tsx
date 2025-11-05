@@ -148,7 +148,7 @@ export default function AboutUsPage() {
         <CardContent className="flex flex-wrap justify-center gap-6 p-8">
   {[
     { name: 'Aman Antuley', role: 'Founder & CEO', img: '/aman-image.png' },
-    { name: 'Alamin Mondal', role: 'AI Engineer', img: '/alamin.png' },
+    { name: 'Alamin Mondal', role: 'AI Engineer', img: '/alamin.jpg' },
     { name: 'Shaikh Iqra', role: 'Lead Designer', img: '/iqra.jpg' },
   ].map((member) => (
     <div
