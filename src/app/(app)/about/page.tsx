@@ -146,27 +146,28 @@ export default function AboutUsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap justify-center gap-6 p-8">
-          {[
-            { name: 'Aman Antuley', role: 'Founder & CEO', img: './aman-image.png' },
-            { name: 'Alamin Mondal', role: 'AI Engineer', img: './alamin.png' },
-            { name: 'Shaikh Iqra', role: 'Lead Designer', img: './iqra.jpg' },
-          ].map((member) => (
-            <div
-              key={member.name}
-              className="flex flex-col items-center space-y-3 bg-background/40 backdrop-blur-sm rounded-xl p-4 border hover:border-primary/40 transition-all duration-300 hover:scale-105 w-[200px] shadow-sm"
-            >
-              <Image
-                src={member.img}
-                alt={member.name}
-                width={100}
-                height={100}
-                className="rounded-full object-cover"
-              />
-              <h3 className="font-semibold">{member.name}</h3>
-              <p className="text-sm text-muted-foreground">{member.role}</p>
-            </div>
-          ))}
-        </CardContent>
+  {[
+    { name: 'Aman Antuley', role: 'Founder & CEO', img: '/aman-image.png' },
+    { name: 'Alamin Mondal', role: 'AI Engineer', img: '/alamin.png' },
+    { name: 'Shaikh Iqra', role: 'Lead Designer', img: '/iqra.jpg' },
+  ].map((member) => (
+    <div
+      key={member.name}
+      className="flex flex-col items-center space-y-3 bg-background/40 backdrop-blur-sm rounded-xl p-4 border hover:border-primary/40 transition-all duration-300 hover:scale-105 w-[200px] shadow-sm"
+    >
+      <Image
+        src={member.img}
+        alt={member.name}
+        width={100}
+        height={100}
+        className="rounded-full object-cover"
+      />
+      <h3 className="font-semibold">{member.name}</h3>
+      <p className="text-sm text-muted-foreground">{member.role}</p>
+    </div>
+  ))}
+</CardContent>
+
       </Card>
     </div>
   );
