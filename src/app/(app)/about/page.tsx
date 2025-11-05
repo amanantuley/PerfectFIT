@@ -147,9 +147,9 @@ export default function AboutUsPage() {
         </CardHeader>
         <CardContent className="flex flex-wrap justify-center gap-6 p-8">
           {[
-            { name: 'Aarav Shah', role: 'Founder & CEO', img: 'https://randomuser.me/api/portraits/men/22.jpg' },
-            { name: 'Meera Patel', role: 'AI Engineer', img: 'https://randomuser.me/api/portraits/women/44.jpg' },
-            { name: 'Ryan D’Souza', role: 'Lead Designer', img: 'https://randomuser.me/api/portraits/men/50.jpg' },
+            { name: 'Aman Antuley', role: 'Founder & CEO', img: './public/aman-image.png' },
+            { name: 'Alamin Mondal', role: 'AI Engineer', img: './public/alamin.png' },
+            { name: 'Shaikh Iqra', role: 'Lead Designer', img: './public/iqra.jpg' },
           ].map((member) => (
             <div
               key={member.name}
