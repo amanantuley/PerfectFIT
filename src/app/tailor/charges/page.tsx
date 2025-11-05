@@ -1,6 +1,4 @@
 'use client';
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 import {
   Card,
@@ -24,61 +22,28 @@ import { useToast } from '@/hooks/use-toast';
 import { chargesData } from '@/lib/charges-data';
 import { useEffect, useState } from 'react';
 
-// ✅ Lazy-load Firestore client only in the browser
-let firestore: any = null;
-if (typeof window !== 'undefined') {
-  import('@/lib/firebase').then((mod) => {
-    firestore = mod.db;
-  });
-}
-
 export default function TailorChargesPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [prices, setPrices] = useState<Record<string, number>>({});
-  const [isFetching, setIsFetching] = useState(true);
 
-  const tailorId = 'tailor_demo_1'; // 🔹 Replace with logged-in user ID later
-
-  // ✅ Default prices (fallback)
-  const getDefaultPrices = () => {
-    const defaults: Record<string, number> = {};
-    chargesData.forEach((cat) =>
-      cat.services.forEach((s) => (defaults[s.id] = s.price))
-    );
-    return defaults;
-  };
-
-  // ✅ Fetch Firestore Data Safely
+  // ✅ Load from localStorage or defaults
   useEffect(() => {
-    if (!firestore) return;
-
-    const { doc, onSnapshot, setDoc } = require('firebase/firestore');
-    const ref = doc(firestore, 'tailorCharges', tailorId);
-
-    const unsubscribe = onSnapshot(
-      ref,
-      (snap: any) => {
-        if (snap.exists()) {
-          setPrices(snap.data().prices || getDefaultPrices());
-        } else {
-          setPrices(getDefaultPrices());
-        }
-        setIsFetching(false);
-      },
-      (err: any) => {
-        console.error('❌ Firestore listener error:', err);
-        setPrices(getDefaultPrices());
-        setIsFetching(false);
-      }
-    );
-
-    return () => unsubscribe();
+    const stored = localStorage.getItem('tailorPrices');
+    if (stored) {
+      setPrices(JSON.parse(stored));
+    } else {
+      const defaults: Record<string, number> = {};
+      chargesData.forEach((cat) =>
+        cat.services.forEach((s) => (defaults[s.id] = s.price))
+      );
+      setPrices(defaults);
+    }
   }, []);
 
-  // ✅ Update price field
+  // ✅ Update a local price field
   const handlePriceChange = (id: string, value: string) => {
     const newPrice = Number(value);
     if (!isNaN(newPrice) && newPrice >= 0) {
@@ -86,33 +51,20 @@ export default function TailorChargesPage() {
     }
   };
 
-  // ✅ Save changes safely
+  // ✅ Simulated Save (stores to localStorage)
   const handleSaveChanges = async () => {
-    if (!firestore) return;
-
     setIsLoading(true);
-    try {
-      const { doc, setDoc } = require('firebase/firestore');
-      const ref = doc(firestore, 'tailorCharges', tailorId);
-      await setDoc(ref, { prices }, { merge: true });
-
+    setTimeout(() => {
+      localStorage.setItem('tailorPrices', JSON.stringify(prices));
       toast({
         title: t('Changes Saved!'),
-        description: t('Your service charges have been synced to Firestore.'),
+        description: t('Your updated service charges have been stored locally.'),
       });
-    } catch (err) {
-      console.error('❌ Error saving prices:', err);
-      toast({
-        title: t('Error'),
-        description: t('Something went wrong while saving your charges.'),
-        variant: 'destructive',
-      });
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
-  if (isFetching) {
+  if (Object.keys(prices).length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
         <Loader2 className="h-6 w-6 animate-spin mb-2 text-primary" />
@@ -132,9 +84,12 @@ export default function TailorChargesPage() {
                 {t('Service Charges')}
               </CardTitle>
               <CardDescription>
-                {t('Manage your stitching and tailoring charges. Your updates sync instantly to Firestore.')}
+                {t(
+                  'Manage your stitching and tailoring charges. Changes are saved locally on your browser.'
+                )}
               </CardDescription>
             </div>
+
             <Button
               className="w-full sm:w-auto"
               onClick={handleSaveChanges}
@@ -156,11 +111,7 @@ export default function TailorChargesPage() {
         </CardHeader>
 
         <CardContent>
-          <Accordion
-            type="multiple"
-            defaultValue={[chargesData[0].id]}
-            className="w-full"
-          >
+          <Accordion type="multiple" defaultValue={[chargesData[0].id]} className="w-full">
             {chargesData.map((category) => (
               <AccordionItem key={category.id} value={category.id}>
                 <AccordionTrigger className="text-lg font-semibold">
@@ -173,6 +124,7 @@ export default function TailorChargesPage() {
                         key={service.id}
                         className="grid grid-cols-1 md:grid-cols-3 items-end gap-4 rounded-lg border border-border p-4 transition-all hover:bg-muted/40"
                       >
+                        {/* Service Info */}
                         <div className="space-y-1">
                           <h4 className="font-semibold">{t(service.name as any)}</h4>
                           <p className="text-sm text-muted-foreground leading-snug">
@@ -180,6 +132,7 @@ export default function TailorChargesPage() {
                           </p>
                         </div>
 
+                        {/* Editable Price Input */}
                         <div>
                           <Label htmlFor={service.id} className="text-sm font-medium">
                             {t('Your Price')}
@@ -201,6 +154,7 @@ export default function TailorChargesPage() {
                           </div>
                         </div>
 
+                        {/* Market Reference */}
                         <div>
                           <p className="text-sm text-muted-foreground">
                             {t('Suggested Market Price')}:{' '}
