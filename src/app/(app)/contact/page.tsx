@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { Mail, Phone, MapPin, Loader2 } from 'lucide-react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { submitContact } from './actions';
 import React, { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 
 const initialState = {
   message: '',
@@ -22,92 +22,120 @@ function SubmitButton() {
   return (
     <Button type="submit" className="w-full" disabled={pending}>
       {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Send Message
+      {pending ? 'Sending...' : 'Send Message'}
     </Button>
   );
 }
 
 export default function ContactUsPage() {
-    const { toast } = useToast();
-    const formRef = useRef<HTMLFormElement>(null);
-    const [state, formAction] = useFormState(submitContact, initialState);
+  const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [state, formAction] = useFormState(submitContact, initialState);
 
-    useEffect(() => {
-      if (state.message) {
-        if (state.error) {
-          toast({
-            variant: 'destructive',
-            title: 'Submission Error',
-            description: state.message,
-          });
-        } else {
-          toast({
-            title: 'Message Sent!',
-            description: "Thanks for reaching out. We'll get back to you shortly.",
-          });
-          formRef.current?.reset();
-        }
+  useEffect(() => {
+    if (state.message) {
+      if (state.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Submission Error',
+          description: state.message,
+        });
+      } else {
+        toast({
+          title: '✅ Message Sent Successfully!',
+          description: "Thanks for reaching out. We'll get back to you shortly.",
+        });
+        formRef.current?.reset();
       }
-    }, [state, toast]);
+    }
+  }, [state, toast]);
 
   return (
     <div className="grid md:grid-cols-2 gap-8 animate-fade-in-up">
-       <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Contact Information</CardTitle>
-          <CardDescription>
-            Get in touch with us through any of the following channels.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
+              Contact Information
+            </CardTitle>
+            <CardDescription>We’d love to hear from you.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="flex items-start gap-4">
-                <Mail className="h-6 w-6 mt-1 text-primary"/>
-                <div>
-                    <h3 className="font-semibold">Email</h3>
-                    <p className="text-muted-foreground">support@perfectfit.com</p>
-                </div>
+              <Mail className="h-6 w-6 mt-1 text-primary" />
+              <div>
+                <h3 className="font-semibold">Email</h3>
+                <p className="text-muted-foreground">support@perfectfit.com</p>
+              </div>
             </div>
-             <div className="flex items-start gap-4">
-                <Phone className="h-6 w-6 mt-1 text-primary"/>
-                <div>
-                    <h3 className="font-semibold">Phone</h3>
-                    <p className="text-muted-foreground">+91 9867408609</p>
-                </div>
+            <div className="flex items-start gap-4">
+              <Phone className="h-6 w-6 mt-1 text-primary" />
+              <div>
+                <h3 className="font-semibold">Phone</h3>
+                <p className="text-muted-foreground">+91 9867408609</p>
+              </div>
             </div>
-             <div className="flex items-start gap-4">
-                <MapPin className="h-6 w-6 mt-1 text-primary"/>
-                <div>
-                    <h3 className="font-semibold">Address</h3>
-                    <p className="text-muted-foreground">Navi Mumbai, Maharashtra, India</p>
-                </div>
+            <div className="flex items-start gap-4">
+              <MapPin className="h-6 w-6 mt-1 text-primary" />
+              <div>
+                <h3 className="font-semibold">Address</h3>
+                <p className="text-muted-foreground">
+                  Navi Mumbai, Maharashtra, India
+                </p>
+              </div>
             </div>
-        </CardContent>
-       </Card>
-       <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Send us a Message</CardTitle>
-          <CardDescription>
-            Have a question or feedback? Fill out the form below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
+              Send us a Message
+            </CardTitle>
+            <CardDescription>
+              Have a question or feedback? Let us know below.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <form ref={formRef} action={formAction} className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" name="name" placeholder="Your Name" required/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" name="email" type="email" placeholder="your@email.com" required/>
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea id="message" name="message" placeholder="Your message..." required/>
-                </div>
-                <SubmitButton />
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" placeholder="Your Name" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="message">Message</Label>
+                <Textarea
+                  id="message"
+                  name="message"
+                  placeholder="Your message..."
+                  required
+                />
+              </div>
+              <SubmitButton />
             </form>
-        </CardContent>
-       </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

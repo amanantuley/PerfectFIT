@@ -5,9 +5,9 @@ import { sendContactMail } from '@/lib/mailer';
 
 export async function submitContact(prevState: any, formData: FormData) {
   const schema = z.object({
-    name: z.string().min(1, { message: "Name is required." }),
-    email: z.string().email({ message: "Invalid email address." }),
-    message: z.string().min(1, { message: "Message is required." }),
+    name: z.string().min(2, { message: 'Please enter a valid name.' }),
+    email: z.string().email({ message: 'Please enter a valid email address.' }),
+    message: z.string().min(5, { message: 'Message should be at least 5 characters.' }),
   });
 
   const parsed = schema.safeParse({
@@ -17,15 +17,24 @@ export async function submitContact(prevState: any, formData: FormData) {
   });
 
   if (!parsed.success) {
-    const error = parsed.error.issues[0].message;
+    const error = parsed.error.issues.map(i => i.message).join(', ');
     return { message: error, error: true };
   }
 
   try {
-    await sendContactMail(parsed.data); // ✅ send email
-    return { message: 'Message sent successfully!', error: false };
-  } catch (err) {
-    console.error("❌ Email sending failed:", err);
-    return { message: 'Failed to send message. Try again later.', error: true };
+    const { name, email, message } = parsed.data;
+    console.log(`📧 [Contact Form] Message received at ${new Date().toISOString()}`, {
+      name,
+      email,
+      message,
+    });
+
+    // Send email (handled via mailer)
+    await sendContactMail(parsed.data);
+
+    return { message: 'Your message has been sent successfully!', error: false };
+  } catch (err: any) {
+    console.error('❌ Email sending failed:', err);
+    return { message: 'Failed to send message. Please try again later.', error: true };
   }
 }
