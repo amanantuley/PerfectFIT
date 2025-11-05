@@ -9,13 +9,12 @@ import Image from 'next/image';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import Logo from '@/components/logo';
-
-import { 
-  signInWithEmailAndPassword, 
+import {
+  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
   fetchSignInMethodsForEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
@@ -44,7 +43,6 @@ function PreLoader() {
   );
 }
 
-// Simulated backend subscription
 const subscribeToNotifications = (email: string) => {
   console.log(`Subscribed ${email} to notifications`);
 };
@@ -59,7 +57,7 @@ export default function SignupPage() {
   const [userType, setUserType] = useState<'customer' | 'tailor'>('customer');
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Email login/signup
+  // ✅ Email Auth — fixed
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -67,45 +65,52 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      // Check if account exists
       const methods = await fetchSignInMethodsForEmail(auth, email);
 
-      if (methods.length > 0) {
-        // 🔹 Email exists → try login
+      if (methods.includes('password')) {
+        // ✅ User already exists → login
         await signInWithEmailAndPassword(auth, email, password);
         setSuccess('Login successful!');
-      } else {
-        // 🆕 No account → register
+      } else if (methods.length === 0) {
+        // 🆕 New email → register
         await createUserWithEmailAndPassword(auth, email, password);
         subscribeToNotifications(email);
         setSuccess('Account created successfully!');
+      } else {
+        setError('This email is already linked with another provider (e.g. Google).');
+        return;
       }
 
       // Redirect
       router.push(userType === 'tailor' ? '/tailor/dashboard' : '/dashboard');
 
     } catch (err: any) {
-      console.error('Auth error:', err);
-      if (err.code === 'auth/wrong-password') {
-        setError('Incorrect password. Please try again.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Please enter a valid email address.');
-      } else {
-        setError(err.message || 'Authentication failed.');
+      console.error(err);
+      switch (err.code) {
+        case 'auth/wrong-password':
+          setError('Incorrect password. Please try again.');
+          break;
+        case 'auth/email-already-in-use':
+          setError('This email is already registered. Please log in instead.');
+          break;
+        case 'auth/user-not-found':
+          setError('No user found. Please sign up first.');
+          break;
+        default:
+          setError(err.message || 'Authentication failed.');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ✅ Google login
+  // ✅ Google Login
   const handleGoogleLogin = async () => {
     setError(null);
     setIsLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const isNewUser =
-        result.user.metadata.creationTime === result.user.metadata.lastSignInTime;
+      const isNewUser = result.user.metadata.creationTime === result.user.metadata.lastSignInTime;
       if (isNewUser && result.user.email) subscribeToNotifications(result.user.email);
       router.push(userType === 'tailor' ? '/tailor/dashboard' : '/dashboard');
     } catch (err: any) {
@@ -115,9 +120,9 @@ export default function SignupPage() {
     }
   };
 
-  // ✅ Forgot password handler
+  // ✅ Forgot Password
   const handleForgotPassword = async () => {
-    if (!email) return setError('Please enter your email first.');
+    if (!email) return setError('Enter your email to reset password.');
     try {
       await sendPasswordResetEmail(auth, email);
       setSuccess('Password reset email sent!');
@@ -147,6 +152,7 @@ export default function SignupPage() {
             <p className="text-muted-foreground">Sign in or create an account to continue.</p>
           </div>
 
+          {/* User type */}
           <RadioGroup
             defaultValue="customer"
             onValueChange={(value) => setUserType(value as 'customer' | 'tailor')}
@@ -176,29 +182,12 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleAuth} className="space-y-4">
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            {userType === 'tailor' && (
-              <Input id="tailor-code" type="text" placeholder="Enter Unique Tailor Code" required />
-            )}
+            <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input id="password" type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            {userType === 'tailor' && <Input id="tailor-code" type="text" placeholder="Enter Unique Tailor Code" required />}
             <Button type="submit" className="w-full">Continue with Email</Button>
           </form>
 
-          {/* Forgot Password */}
           <div className="text-right text-sm">
             <button type="button" onClick={handleForgotPassword} className="text-primary hover:underline">
               Forgot password?
@@ -207,12 +196,6 @@ export default function SignupPage() {
 
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           {success && <p className="text-sm text-green-500 text-center">{success}</p>}
-
-          <p className="px-8 text-center text-sm text-muted-foreground">
-            By signing up, you agree to our{' '}
-            <Link href="#" className="underline hover:text-primary">Terms</Link> and{' '}
-            <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>.
-          </p>
         </div>
       </div>
     </div>
