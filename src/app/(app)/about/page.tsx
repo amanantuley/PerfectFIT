@@ -1,3 +1,4 @@
+'use client';
 
 import {
   Card,
@@ -6,70 +7,165 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Gem, Recycle, Handshake } from 'lucide-react';
+import { Gem, Recycle, Handshake, Sparkles, Users, Rocket } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AboutUsPage() {
   return (
-    <div className="space-y-8 animate-fade-in-up">
+    <div className="space-y-16 animate-fade-in-up">
+      {/* Hero Section */}
+      <section className="relative w-full h-[60vh] rounded-xl overflow-hidden shadow-lg">
+        <Image
+          src="/about.webp"
+          alt="Tailoring workshop"
+          fill
+          className="object-cover brightness-[0.4]"
+          priority
+        />
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6">
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow drop-shadow-md">
+            About PerfectFit
+          </h1>
+          <p className="mt-4 text-lg sm:text-xl text-gray-200 max-w-2xl">
+            Revolutionizing tailoring through Artificial Intelligence — because perfect fit should be for everyone.
+          </p>
+        </div>
+      </section>
+
+      {/* Story Section */}
       <Card className="shadow-lg overflow-hidden">
-        <CardHeader className="text-center p-6">
-          <CardTitle className="text-4xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">About PerfectFit</CardTitle>
-          <CardDescription className="text-lg">
-            Redefining Tailoring with Artificial Intelligence.
+        <CardContent className="space-y-12 p-6 sm:p-10">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <h2 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
+                Our Story
+              </h2>
+              <p className="text-muted-foreground leading-relaxed text-lg">
+                Founded in <strong>2025</strong>, PerfectFit was born from a passion for blending the timeless craft of tailoring with the precision of AI-driven innovation. 
+                We envisioned a world where every individual could wear clothing that fits perfectly — without guesswork, endless returns, or compromise.
+                <br /><br />
+                Our team of <strong>fashion experts, data scientists, and designers</strong> joined forces to create an intelligent platform that understands body shapes as well as human tailors — bringing bespoke craftsmanship into the digital era.
+              </p>
+            </div>
+            <Image
+              src="https://picsum.photos/seed/perfectfit-story/700/500"
+              alt="PerfectFit founders and team"
+              width={700}
+              height={500}
+              className="rounded-lg shadow-lg transition-transform duration-500 hover:scale-105"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Mission Section */}
+      <Card className="shadow-lg overflow-hidden">
+        <CardContent className="space-y-12 p-6 sm:p-10">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <Image
+              src="https://picsum.photos/seed/ai-innovation/700/500"
+              alt="AI Technology and Tailoring"
+              width={700}
+              height={500}
+              className="rounded-lg shadow-lg md:order-2 transition-transform duration-500 hover:scale-105"
+            />
+            <div className="md:order-1">
+              <h2 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
+                Our Mission
+              </h2>
+              <p className="text-muted-foreground leading-relaxed text-lg">
+                At PerfectFit, our mission is to make <strong>custom-fit fashion accessible, sustainable, and empowering</strong> for everyone. 
+                We leverage AI body measurement and virtual try-on technology to reduce waste, improve confidence, and redefine comfort.
+                <br /><br />
+                By eliminating ill-fitting garments, we’re shaping a more sustainable future — one perfect fit at a time.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Core Values */}
+      <section className="text-center space-y-8">
+        <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
+          Our Core Values
+        </h2>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {[
+            {
+              icon: Gem,
+              title: 'Quality & Craftsmanship',
+              desc: 'Every garment is crafted with precision using premium materials and expert tailoring partners.',
+            },
+            {
+              icon: Recycle,
+              title: 'Sustainability',
+              desc: 'We embrace made-to-order efficiency, minimizing fabric waste and supporting eco-conscious production.',
+            },
+            {
+              icon: Handshake,
+              title: 'Customer-Centric Approach',
+              desc: 'Our Perfect Fit Guarantee ensures satisfaction through AI precision and human care.',
+            },
+          ].map(({ icon: Icon, title, desc }) => (
+            <div
+              key={title}
+              className="space-y-3 p-6 rounded-lg bg-background/40 backdrop-blur-sm border hover:border-primary/40 transition-all duration-300 hover:scale-105 shadow-md"
+            >
+              <Icon className="h-12 w-12 mx-auto text-primary" />
+              <h3 className="text-xl font-bold">{title}</h3>
+              <p className="text-muted-foreground text-sm">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Vision Section */}
+      <Card className="shadow-lg overflow-hidden">
+        <CardContent className="space-y-8 p-6 sm:p-10 text-center">
+          <div className="flex flex-col items-center justify-center space-y-6">
+            <Rocket className="h-14 w-14 text-primary" />
+            <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
+              Our Vision for the Future
+            </h2>
+            <p className="text-muted-foreground max-w-3xl text-lg leading-relaxed">
+              PerfectFit is building the future of fashion — a world where algorithms and artisans collaborate to produce
+              <strong> zero-waste, AI-tailored fashion experiences</strong>. Our goal is to make “perfect fit” the global standard.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Team Section */}
+      <Card className="shadow-lg overflow-hidden">
+        <CardHeader className="text-center">
+          <CardTitle className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
+            Meet Our Team
+          </CardTitle>
+          <CardDescription>
+            The passionate innovators behind the future of personalized fashion.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-12 p-6">
-          <div className="relative w-full aspect-[3/1] rounded-lg overflow-hidden">
-             <Image src="/about.webp" alt="Tailoring workshop" fill objectFit="cover" data-ai-hint="tailor workshop" />
-          </div>
-           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Our Story</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Founded in 2025, PerfectFit was born from a desire to blend the timeless art of tailoring with the precision of modern technology. We saw a world where "off-the-rack" was the norm, leading to inconsistent fits, high return rates, and a disconnect between people and the clothes they wear. We believed there had to be a better way. Our founders, a team of fashion enthusiasts and tech innovators, came together to create a solution that brings the bespoke tailoring experience into the digital age. We believe everyone deserves to wear clothes that feel like they were made just for them, because they are.
-              </p>
+        <CardContent className="flex flex-wrap justify-center gap-6 p-8">
+          {[
+            { name: 'Aarav Shah', role: 'Founder & CEO', img: 'https://randomuser.me/api/portraits/men/22.jpg' },
+            { name: 'Meera Patel', role: 'AI Engineer', img: 'https://randomuser.me/api/portraits/women/44.jpg' },
+            { name: 'Ryan D’Souza', role: 'Lead Designer', img: 'https://randomuser.me/api/portraits/men/50.jpg' },
+          ].map((member) => (
+            <div
+              key={member.name}
+              className="flex flex-col items-center space-y-3 bg-background/40 backdrop-blur-sm rounded-xl p-4 border hover:border-primary/40 transition-all duration-300 hover:scale-105 w-[200px] shadow-sm"
+            >
+              <Image
+                src={member.img}
+                alt={member.name}
+                width={100}
+                height={100}
+                className="rounded-full object-cover"
+              />
+              <h3 className="font-semibold">{member.name}</h3>
+              <p className="text-sm text-muted-foreground">{member.role}</p>
             </div>
-            <Image src="https://picsum.photos/seed/our-story-final/600/400" alt="Founders" width={600} height={400} className="rounded-lg shadow-md transition-transform duration-300 hover:scale-105" data-ai-hint="team startup" />
-          </div>
-
-           <div className="grid md:grid-cols-2 gap-8 items-center">
-             <Image src="https://picsum.photos/seed/technology/600/400" alt="AI Technology" width={600} height={400} className="rounded-lg shadow-md md:order-2 transition-transform duration-300 hover:scale-105" data-ai-hint="abstract technology" />
-            <div className="md:order-1">
-              <h2 className="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Our Mission</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Our mission is to make custom-fit clothing accessible, convenient, and sustainable for all. By harnessing the power of AI, we eliminate the guesswork and environmental waste associated with traditional retail. We provide you with garments tailored to your unique body shape, fostering a deeper connection to your wardrobe and promoting conscious consumption. We aim to empower you to express your personal style with confidence, knowing that your clothes fit perfectly and are made with care.
-              </p>
-            </div>
-          </div>
-          
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Our Core Values</h2>
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
-              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-105">
-                <Gem className="h-12 w-12 mx-auto text-primary" />
-                <h3 className="text-xl font-bold">Quality & Craftsmanship</h3>
-                <p className="text-muted-foreground">
-                  We partner with skilled tailors and use only high-quality materials to ensure every garment is a masterpiece of comfort and durability.
-                </p>
-              </div>
-              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-105">
-                <Recycle className="h-12 w-12 mx-auto text-primary" />
-                <h3 className="text-xl font-bold">Sustainability</h3>
-                <p className="text-muted-foreground">
-                  By creating made-to-order clothing, we minimize waste and promote a more sustainable fashion industry. Our rental service further supports a circular economy.
-                </p>
-              </div>
-              <div className="space-y-2 p-4 rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-105 sm:col-span-2 md:col-span-1">
-                <Handshake className="h-12 w-12 mx-auto text-primary" />
-                <h3 className="text-xl font-bold">Customer-Centric</h3>
-                <p className="text-muted-foreground">
-                  Your satisfaction is our top priority. From AI-powered sizing to our Perfect Fit Guarantee, we are committed to providing an exceptional experience.
-                </p>
-              </div>
-            </div>
-          </div>
-
+          ))}
         </CardContent>
       </Card>
     </div>
