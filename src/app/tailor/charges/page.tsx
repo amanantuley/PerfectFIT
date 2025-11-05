@@ -1,4 +1,6 @@
 'use client';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 import {
   Card,
@@ -21,8 +23,14 @@ import { useTranslation } from '@/context/translation-provider';
 import { useToast } from '@/hooks/use-toast';
 import { chargesData } from '@/lib/charges-data';
 import { useEffect, useState } from 'react';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+
+// ✅ Lazy-load Firestore client only in the browser
+let firestore: any = null;
+if (typeof window !== 'undefined') {
+  import('@/lib/firebase').then((mod) => {
+    firestore = mod.db;
+  });
+}
 
 export default function TailorChargesPage() {
   const { t } = useTranslation();
@@ -32,10 +40,9 @@ export default function TailorChargesPage() {
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [isFetching, setIsFetching] = useState(true);
 
-  const tailorId = 'tailor_demo_1'; // 🔹 Replace with dynamic user ID after auth integration
-  const chargesRef = doc(db, 'tailorCharges', tailorId);
+  const tailorId = 'tailor_demo_1'; // 🔹 Replace with logged-in user ID later
 
-  // ✅ Initialize with default data
+  // ✅ Default prices (fallback)
   const getDefaultPrices = () => {
     const defaults: Record<string, number> = {};
     chargesData.forEach((cat) =>
@@ -44,22 +51,34 @@ export default function TailorChargesPage() {
     return defaults;
   };
 
-  // ✅ Fetch & Listen to Firestore
+  // ✅ Fetch Firestore Data Safely
   useEffect(() => {
-    const unsubscribe = onSnapshot(chargesRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        setPrices(data.prices || getDefaultPrices());
-      } else {
+    if (!firestore) return;
+
+    const { doc, onSnapshot, setDoc } = require('firebase/firestore');
+    const ref = doc(firestore, 'tailorCharges', tailorId);
+
+    const unsubscribe = onSnapshot(
+      ref,
+      (snap: any) => {
+        if (snap.exists()) {
+          setPrices(snap.data().prices || getDefaultPrices());
+        } else {
+          setPrices(getDefaultPrices());
+        }
+        setIsFetching(false);
+      },
+      (err: any) => {
+        console.error('❌ Firestore listener error:', err);
         setPrices(getDefaultPrices());
+        setIsFetching(false);
       }
-      setIsFetching(false);
-    });
+    );
 
     return () => unsubscribe();
   }, []);
 
-  // ✅ Handle Price Change
+  // ✅ Update price field
   const handlePriceChange = (id: string, value: string) => {
     const newPrice = Number(value);
     if (!isNaN(newPrice) && newPrice >= 0) {
@@ -67,20 +86,25 @@ export default function TailorChargesPage() {
     }
   };
 
-  // ✅ Save to Firestore
+  // ✅ Save changes safely
   const handleSaveChanges = async () => {
+    if (!firestore) return;
+
     setIsLoading(true);
     try {
-      await setDoc(chargesRef, { prices }, { merge: true });
+      const { doc, setDoc } = require('firebase/firestore');
+      const ref = doc(firestore, 'tailorCharges', tailorId);
+      await setDoc(ref, { prices }, { merge: true });
+
       toast({
         title: t('Changes Saved!'),
-        description: t('Your new service charges have been updated in the cloud.'),
+        description: t('Your service charges have been synced to Firestore.'),
       });
     } catch (err) {
       console.error('❌ Error saving prices:', err);
       toast({
         title: t('Error'),
-        description: t('Something went wrong while saving your prices.'),
+        description: t('Something went wrong while saving your charges.'),
         variant: 'destructive',
       });
     } finally {
@@ -149,7 +173,6 @@ export default function TailorChargesPage() {
                         key={service.id}
                         className="grid grid-cols-1 md:grid-cols-3 items-end gap-4 rounded-lg border border-border p-4 transition-all hover:bg-muted/40"
                       >
-                        {/* Service Info */}
                         <div className="space-y-1">
                           <h4 className="font-semibold">{t(service.name as any)}</h4>
                           <p className="text-sm text-muted-foreground leading-snug">
@@ -157,7 +180,6 @@ export default function TailorChargesPage() {
                           </p>
                         </div>
 
-                        {/* Editable Price Input */}
                         <div>
                           <Label htmlFor={service.id} className="text-sm font-medium">
                             {t('Your Price')}
@@ -179,7 +201,6 @@ export default function TailorChargesPage() {
                           </div>
                         </div>
 
-                        {/* Market Reference */}
                         <div>
                           <p className="text-sm text-muted-foreground">
                             {t('Suggested Market Price')}:{' '}
