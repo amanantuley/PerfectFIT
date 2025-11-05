@@ -44,7 +44,7 @@ export default function DownloadAppPage() {
       <header className="px-4 lg:px-6 h-16 flex items-center bg-background/70 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <Link href="/" className="flex items-center justify-center gap-2">
           <Logo />
-          <span className="font-semibold text-lg hidden sm:inline">PerfectFit</span>
+          <span className="font-semibold text-lg hidden sm:inline"></span>
         </Link>
         <nav className="ml-auto flex items-center gap-2 sm:gap-4">
           <ThemeToggle />
