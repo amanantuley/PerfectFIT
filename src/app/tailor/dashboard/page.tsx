@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   DollarSign,
   Users,
@@ -27,39 +28,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AreaChart, Area, CartesianGrid, XAxis, Tooltip, BarChart, Bar, ResponsiveContainer } from 'recharts';
 import { Progress } from '@/components/ui/progress';
 
-// ✅ Safe fallback chart container if "@/components/ui/chart" is missing
-const ChartContainer = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={`w-full h-full ${className || ''}`}>{children}</div>
-);
-
-const ChartTooltipContent = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const item = payload[0];
-    return (
-      <div className="bg-background border border-border text-foreground text-sm p-2 rounded-md shadow-md">
-        <p>{`${item.name || item.dataKey}: ₹${item.value}`}</p>
-      </div>
-    );
-  }
-  return null;
-};
-
-// ✅ Status configuration
-const getStatusConfig = (status: string) => {
-  switch (status) {
-    case 'Ready':
-      return { className: 'bg-green-500 text-white', icon: CheckCircle };
-    case 'Pending':
-      return { className: 'bg-gray-200 text-gray-800', icon: Clock };
-    case 'In Progress':
-      return { className: 'bg-purple-200 text-purple-800', icon: RefreshCw };
-    default:
-      return { className: 'bg-muted text-muted-foreground', icon: ClipboardList };
-  }
-};
+// ✅ Dynamically import recharts components to disable SSR
+const ResponsiveContainer = dynamic(() => import('recharts').then((m) => m.ResponsiveContainer), { ssr: false });
+const AreaChart = dynamic(() => import('recharts').then((m) => m.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then((m) => m.Area), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then((m) => m.CartesianGrid), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then((m) => m.XAxis), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then((m) => m.Tooltip), { ssr: false });
+const BarChart = dynamic(() => import('recharts').then((m) => m.BarChart), { ssr: false });
+const Bar = dynamic(() => import('recharts').then((m) => m.Bar), { ssr: false });
 
 // ✅ Mock data
 const mockOrders = [
@@ -84,13 +63,28 @@ const serviceData = [
   { service: 'Casual Shirts', orders: 15 },
 ];
 
+// ✅ Status helper
+const getStatusConfig = (status: string) => {
+  switch (status) {
+    case 'Ready':
+      return { className: 'bg-green-500 text-white', icon: CheckCircle };
+    case 'Pending':
+      return { className: 'bg-gray-200 text-gray-800', icon: Clock };
+    case 'In Progress':
+      return { className: 'bg-purple-200 text-purple-800', icon: RefreshCw };
+    default:
+      return { className: 'bg-muted text-muted-foreground', icon: ClipboardList };
+  }
+};
+
 export default function TailorDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [recentOrders, setRecentOrders] = useState(mockOrders);
   const [earningsGrowth, setEarningsGrowth] = useState(15.4);
+  const [isChartReady, setIsChartReady] = useState(false);
 
-  // 🔄 Simulate receiving new orders
+  // ✅ Simulate real-time order updates
   useEffect(() => {
     const interval = setInterval(() => {
       const newOrder = {
@@ -108,14 +102,19 @@ export default function TailorDashboard() {
         title: '🧵 New Order Received!',
         description: `Order ${newOrder.orderId} from ${newOrder.customer} for ₹${newOrder.amount}`,
       });
-    }, 30000);
+    }, 25000);
     return () => clearInterval(interval);
   }, [toast]);
+
+  // ✅ Ensure chart renders after hydration
+  useEffect(() => {
+    setTimeout(() => setIsChartReady(true), 300);
+  }, []);
 
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Header */}
-      <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
+      <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
         {t('Tailor Dashboard')}
       </h1>
 
@@ -129,7 +128,7 @@ export default function TailorDashboard() {
 
       {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Earnings Overview */}
+        {/* ✅ Earnings Overview (Working now) */}
         <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
@@ -138,22 +137,39 @@ export default function TailorDashboard() {
             <CardDescription>{t('Track your monthly income trends')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={earningsData}>
-                  <defs>
-                    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                  <Tooltip content={<ChartTooltipContent />} />
-                  <Area type="monotone" dataKey="earnings" stroke="hsl(var(--primary))" fill="url(#grad)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+            {isChartReady ? (
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={earningsData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        borderRadius: '8px',
+                        border: '1px solid #e5e7eb',
+                      }}
+                      formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Earnings']}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="earnings"
+                      stroke="#14b8a6"
+                      strokeWidth={2}
+                      fill="url(#earningsGradient)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-sm text-muted-foreground">Loading chart...</p>
+            )}
           </CardContent>
         </Card>
 
@@ -166,27 +182,35 @@ export default function TailorDashboard() {
             <CardDescription>{t('Most requested tailoring categories')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={serviceData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="service" tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="orders" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={serviceData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="service" tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                    }}
+                    formatter={(v: number) => [`${v} orders`, 'Service']}
+                  />
+                  <Bar dataKey="orders" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Orders + Customer Satisfaction */}
+      {/* Recent Orders */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Recent Orders */}
         <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
               {t('Recent Orders')}
             </CardTitle>
-            <CardDescription>{t('Latest 5 tailoring orders')}</CardDescription>
+            <CardDescription>{t('Latest tailoring orders')}</CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -206,7 +230,9 @@ export default function TailorDashboard() {
                       <TableCell>
                         <div className="font-medium flex items-center">
                           {order.customer}
-                          {order.isPriority && <Star className="h-4 w-4 ml-1 text-yellow-500 fill-yellow-500" />}
+                          {order.isPriority && (
+                            <Star className="h-4 w-4 ml-1 text-yellow-500 fill-yellow-500" />
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground">{order.orderId}</div>
                       </TableCell>
@@ -260,18 +286,14 @@ export default function TailorDashboard() {
       </div>
 
       {/* Floating Add Button */}
-      <Button
-        className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg"
-        size="icon"
-        aria-label="Add Order"
-      >
+      <Button className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg" size="icon">
         <Plus className="h-8 w-8" />
       </Button>
     </div>
   );
 }
 
-// ✅ Reusable Summary Card Component
+// ✅ Summary Card Component
 function SummaryCard({
   title,
   value,
