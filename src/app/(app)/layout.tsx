@@ -75,30 +75,33 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { isPremium } = useSubscription();
   const [user, setUser] = useState<any>(null);
 
-  // ✅ Listen to Firebase user state
+  // ✅ Listen to Firebase user state and protect routes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(currentUser => {
       setUser(currentUser);
+      // Redirect to landing page if not logged in and not already there
+      if (!currentUser && pathname !== '/') {
+        router.replace('/');
+      }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router, pathname]);
 
   const handleNavigation = (path: string) => {
     router.push(path);
     setOpenMobile(false);
   };
 
-const handleLogout = async () => {
-  try {
-    await signOut(auth);
-    setUser(null);
-    // ✅ Use replace() to avoid back button returning to dashboard
-    router.replace('/');
-  } catch (error) {
-    console.error('Error signing out:', error);
-  }
-};
-
+  // ✅ Improved logout with clean redirect
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      router.replace('/'); // Prevent going back to dashboard
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const isActive = (path: string) => pathname === path;
   const pageTitle = pageTitles[pathname] || 'Dashboard';
