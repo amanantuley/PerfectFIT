@@ -29,10 +29,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { db } from '@/lib/firebase';
-import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
 
-// ✅ Dynamically import recharts (No SSR)
+// ✅ Dynamically import Recharts (to prevent SSR issues)
 const ResponsiveContainer = dynamic(() => import('recharts').then((m) => m.ResponsiveContainer), { ssr: false });
 const AreaChart = dynamic(() => import('recharts').then((m) => m.AreaChart), { ssr: false });
 const Area = dynamic(() => import('recharts').then((m) => m.Area), { ssr: false });
@@ -42,11 +40,7 @@ const Tooltip = dynamic(() => import('recharts').then((m) => m.Tooltip), { ssr: 
 const BarChart = dynamic(() => import('recharts').then((m) => m.BarChart), { ssr: false });
 const Bar = dynamic(() => import('recharts').then((m) => m.Bar), { ssr: false });
 
-// 🔹 Firestore Paths
-const ordersRef = collection(db, 'tailorOrders');
-const earningsRef = doc(db, 'tailorEarnings', 'demoTailor1');
-
-// 🔹 Helper for order status
+// 🔹 Status helper
 const getStatusConfig = (status: string) => {
   switch (status) {
     case 'Ready':
@@ -70,36 +64,16 @@ export default function TailorDashboard() {
   const [earningsGrowth, setEarningsGrowth] = useState(0);
   const [isChartReady, setIsChartReady] = useState(false);
 
-  // 🔹 Live Firestore Data Fetch
+  // 🔹 Initialize Mock Data
   useEffect(() => {
-    // Earnings data listener
-    const unsubscribeEarnings = onSnapshot(earningsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        setEarningsData(data.monthlyData || []);
-        setEarningsGrowth(data.growth || 0);
-      } else {
-        // Set initial if not exists
-        setDoc(earningsRef, {
-          monthlyData: [
-            { month: 'Jul', earnings: 19000 },
-            { month: 'Aug', earnings: 21000 },
-            { month: 'Sep', earnings: 26000 },
-            { month: 'Oct', earnings: 31000 },
-            { month: 'Nov', earnings: 37000 },
-          ],
-          growth: 15.4,
-        });
-      }
-    });
+    setEarningsData([
+      { month: 'Jul', earnings: 19000 },
+      { month: 'Aug', earnings: 21000 },
+      { month: 'Sep', earnings: 26000 },
+      { month: 'Oct', earnings: 31000 },
+      { month: 'Nov', earnings: 37000 },
+    ]);
 
-    // Orders listener
-    const unsubscribeOrders = onSnapshot(ordersRef, (snapshot) => {
-      const docs = snapshot.docs.map((doc) => doc.data());
-      setRecentOrders(docs.slice(0, 5));
-    });
-
-    // Mock Services
     setServiceData([
       { service: 'Custom Suits', orders: 48 },
       { service: 'Alterations', orders: 36 },
@@ -108,18 +82,19 @@ export default function TailorDashboard() {
       { service: 'Casual Shirts', orders: 15 },
     ]);
 
-    // Chart hydration delay
-    setTimeout(() => setIsChartReady(true), 300);
+    setRecentOrders([
+      { orderId: 'ORD1023', customer: 'Aman Verma', amount: 2300, status: 'Ready', dueDate: '2025-11-10', isPriority: true },
+      { orderId: 'ORD1024', customer: 'Priya Singh', amount: 1500, status: 'In Progress', dueDate: '2025-11-11', isPriority: false },
+      { orderId: 'ORD1025', customer: 'Rahul Mehta', amount: 3000, status: 'Pending', dueDate: '2025-11-13', isPriority: true },
+    ]);
 
-    return () => {
-      unsubscribeEarnings();
-      unsubscribeOrders();
-    };
+    setEarningsGrowth(15.4);
+    setTimeout(() => setIsChartReady(true), 300);
   }, []);
 
-  // 🔹 Auto-generate random new orders every 30 sec (for demo)
+  // 🔹 Simulate real-time new orders every 30 sec
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const interval = setInterval(() => {
       const newOrder = {
         orderId: `ORD${Math.floor(Math.random() * 9000 + 1000)}`,
         customer: ['Kavita', 'Manoj', 'Sneha'][Math.floor(Math.random() * 3)],
@@ -127,10 +102,11 @@ export default function TailorDashboard() {
         status: ['Pending', 'In Progress', 'Ready'][Math.floor(Math.random() * 3)],
         dueDate: new Date(Date.now() + Math.random() * 5 * 86400000).toISOString().split('T')[0],
         isPriority: Math.random() > 0.6,
-        createdAt: new Date().toISOString(),
       };
 
-      await setDoc(doc(ordersRef, newOrder.orderId), newOrder);
+      setRecentOrders((prev) => [newOrder, ...prev.slice(0, 4)]);
+      setEarningsGrowth((prev) => Math.max(0, prev + (Math.random() * 4 - 2)));
+
       toast({
         title: '🧵 New Order Received!',
         description: `Order ${newOrder.orderId} from ${newOrder.customer} for ₹${newOrder.amount}`,
@@ -155,7 +131,7 @@ export default function TailorDashboard() {
         <SummaryCard title="Fittings Scheduled" icon={Calendar} value="6" sub="2 completed" />
       </div>
 
-      {/* Earnings & Services */}
+      {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Earnings Overview */}
         <Card className="lg:col-span-2 shadow-glow">
@@ -166,7 +142,7 @@ export default function TailorDashboard() {
             <CardDescription>{t('Track your monthly income trends')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {isChartReady && earningsData.length ? (
+            {isChartReady ? (
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={earningsData}>
@@ -356,7 +332,7 @@ function SummaryCard({
             ) : (
               <TrendingDown className="h-3 w-3 text-red-500" />
             )}
-            {growth >= 0 ? `+${growth}%` : `${growth}%`} growth
+            {growth >= 0 ? `+${growth.toFixed(1)}%` : `${growth.toFixed(1)}%`} growth
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">{sub}</p>
