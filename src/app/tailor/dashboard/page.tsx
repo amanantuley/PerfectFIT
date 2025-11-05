@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 
-// ✅ Dynamic Recharts imports — absolutely required to prevent SSR
+// ✅ Dynamically import Recharts (to prevent SSR issues)
 const ResponsiveContainer = dynamic(() => import('recharts').then((m) => m.ResponsiveContainer), { ssr: false });
 const AreaChart = dynamic(() => import('recharts').then((m) => m.AreaChart), { ssr: false });
 const Area = dynamic(() => import('recharts').then((m) => m.Area), { ssr: false });
@@ -62,19 +62,9 @@ export default function TailorDashboard() {
   const [earningsData, setEarningsData] = useState<{ month: string; earnings: number }[]>([]);
   const [serviceData, setServiceData] = useState<{ service: string; orders: number }[]>([]);
   const [earningsGrowth, setEarningsGrowth] = useState(0);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [isChartReady, setIsChartReady] = useState(false);
 
-  // ✅ Fix: Mark as hydrated once client mounts
-  useEffect(() => {
-    const handleHydrate = () => setIsHydrated(true);
-    handleHydrate();
-
-    // Force a re-render when resized (helps Recharts fit container)
-    window.addEventListener('resize', handleHydrate);
-    return () => window.removeEventListener('resize', handleHydrate);
-  }, []);
-
-  // ✅ Initialize mock data
+  // 🔹 Initialize Mock Data
   useEffect(() => {
     setEarningsData([
       { month: 'Jul', earnings: 19000 },
@@ -99,9 +89,10 @@ export default function TailorDashboard() {
     ]);
 
     setEarningsGrowth(15.4);
+    setTimeout(() => setIsChartReady(true), 300);
   }, []);
 
-  // ✅ Simulate live order updates
+  // 🔹 Simulate real-time new orders every 30 sec
   useEffect(() => {
     const interval = setInterval(() => {
       const newOrder = {
@@ -140,9 +131,9 @@ export default function TailorDashboard() {
         <SummaryCard title="Fittings Scheduled" icon={Calendar} value="6" sub="2 completed" />
       </div>
 
-      {/* Charts */}
+      {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Earnings Chart */}
+        {/* Earnings Overview */}
         <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
@@ -151,7 +142,7 @@ export default function TailorDashboard() {
             <CardDescription>{t('Track your monthly income trends')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {isHydrated ? (
+            {isChartReady ? (
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={earningsData}>
@@ -181,7 +172,7 @@ export default function TailorDashboard() {
           </CardContent>
         </Card>
 
-        {/* Bar Chart */}
+        {/* Service Analytics */}
         <Card className="shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-orange-500 animate-text-rainbow">
@@ -190,27 +181,107 @@ export default function TailorDashboard() {
             <CardDescription>{t('Most requested tailoring categories')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {isHydrated ? (
-              <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={serviceData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="service" tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        borderRadius: '8px',
-                        border: '1px solid #e5e7eb',
-                      }}
-                      formatter={(v: number) => [`${v} orders`, 'Service']}
-                    />
-                    <Bar dataKey="orders" fill="#6366f1" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={serviceData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="service" tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                    }}
+                    formatter={(v: number) => [`${v} orders`, 'Service']}
+                  />
+                  <Bar dataKey="orders" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Orders */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2 shadow-glow">
+          <CardHeader>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
+              {t('Recent Orders')}
+            </CardTitle>
+            <CardDescription>{t('Latest tailoring orders')}</CardDescription>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            {recentOrders.length ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('Customer')}</TableHead>
+                    <TableHead>{t('Amount')}</TableHead>
+                    <TableHead>{t('Status')}</TableHead>
+                    <TableHead>{t('Due Date')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentOrders.map((order) => {
+                    const { className } = getStatusConfig(order.status);
+                    return (
+                      <TableRow key={order.orderId}>
+                        <TableCell>
+                          <div className="font-medium flex items-center">
+                            {order.customer}
+                            {order.isPriority && <Star className="h-4 w-4 ml-1 text-yellow-500 fill-yellow-500" />}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{order.orderId}</div>
+                        </TableCell>
+                        <TableCell>₹{order.amount.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className={className}>
+                            {t(order.status as any)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{order.dueDate}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             ) : (
-              <p className="text-center text-sm text-muted-foreground">Loading chart...</p>
+              <p className="text-center text-sm text-muted-foreground">No orders yet.</p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Customer Satisfaction */}
+        <Card className="shadow-glow">
+          <CardHeader>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-purple-500 animate-text-rainbow">
+              {t('Customer Satisfaction')}
+            </CardTitle>
+            <CardDescription>{t('Based on recent feedback')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="text-sm font-medium">Average Rating</p>
+                <div className="flex items-center gap-2 mt-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                  ))}
+                  <span className="text-sm text-muted-foreground ml-1">(4.8)</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Positive Reviews</p>
+                <Progress value={93} className="h-2 mt-2" />
+                <p className="text-xs text-muted-foreground mt-1">93% happy customers</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">On-Time Delivery</p>
+                <Progress value={88} className="h-2 mt-2" />
+                <p className="text-xs text-muted-foreground mt-1">88% orders on time</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
