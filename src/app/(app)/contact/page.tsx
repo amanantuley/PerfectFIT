@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator'; // ✅ FIXED IMPORT HERE
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -84,7 +85,7 @@ export default function ContactUsPage() {
   }, [state, toast]);
 
   return (
-    <div className="space-y-20 animate-fade-in-up">
+    <div className="space-y-20 animate-fade-in-up max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
       {/* 🏠 Contact Header */}
       <motion.section
         initial={{ opacity: 0, y: 15 }}
@@ -177,11 +178,15 @@ export default function ContactUsPage() {
                   </p>
                 </div>
               </div>
-              <Separator />
+
+              <Separator className="my-4" /> {/* ✅ FIXED */}
+
+              {/* 🌐 Social Links */}
               <div className="flex justify-center gap-4 pt-2">
                 <Link
                   href="https://www.linkedin.com/company/perfectfit"
                   target="_blank"
+                  aria-label="LinkedIn"
                   className="p-2 rounded-full hover:bg-primary/10 transition"
                 >
                   <Linkedin className="h-5 w-5 text-primary" />
@@ -189,6 +194,7 @@ export default function ContactUsPage() {
                 <Link
                   href="https://www.instagram.com/perfectfit"
                   target="_blank"
+                  aria-label="Instagram"
                   className="p-2 rounded-full hover:bg-primary/10 transition"
                 >
                   <Instagram className="h-5 w-5 text-primary" />
@@ -196,6 +202,7 @@ export default function ContactUsPage() {
                 <Link
                   href="https://twitter.com/perfectfit"
                   target="_blank"
+                  aria-label="Twitter"
                   className="p-2 rounded-full hover:bg-primary/10 transition"
                 >
                   <Twitter className="h-5 w-5 text-primary" />
@@ -203,6 +210,7 @@ export default function ContactUsPage() {
                 <Link
                   href="https://perfectfit.com"
                   target="_blank"
+                  aria-label="Official Website"
                   className="p-2 rounded-full hover:bg-primary/10 transition"
                 >
                   <Globe className="h-5 w-5 text-primary" />
@@ -211,7 +219,7 @@ export default function ContactUsPage() {
             </CardContent>
           </Card>
 
-          {/* 🌍 Embedded Map */}
+          {/* 🗺️ Embedded Map */}
           <div className="mt-6 rounded-xl overflow-hidden border shadow-md">
             <iframe
               title="PerfectFit Location"
@@ -219,7 +227,7 @@ export default function ContactUsPage() {
               width="100%"
               height="250"
               loading="lazy"
-              className="border-0 w-full"
+              className="border-0 w-full h-[250px]"
             ></iframe>
           </div>
         </motion.div>
