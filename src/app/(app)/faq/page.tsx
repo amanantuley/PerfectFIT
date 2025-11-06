@@ -14,9 +14,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
-import { HelpCircle, ChevronDown } from "lucide-react";
+import { HelpCircle, ChevronDown, Search } from "lucide-react";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
 const faqs = [
   {
@@ -69,51 +69,59 @@ const faqs = [
 export default function FAQPage() {
   const [query, setQuery] = useState("");
 
-  const filteredFaqs = faqs.filter((faq) =>
-    faq.question.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredFaqs = useMemo(() => {
+    return faqs.filter((faq) =>
+      faq.question.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query]);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="min-h-screen flex justify-center items-start p-4 sm:p-6 md:p-8 bg-background/40"
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="min-h-screen flex justify-center items-start p-4 sm:p-6 md:p-8 bg-background/50"
     >
-      <Card className="w-full max-w-5xl shadow-xl border border-muted/50 backdrop-blur-sm bg-background/60">
-        <CardHeader className="text-center space-y-4 px-6 sm:px-10">
-          <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
+      <Card className="w-full max-w-5xl shadow-xl border border-muted/50 backdrop-blur-md bg-background/60 overflow-hidden">
+        {/* Header */}
+        <CardHeader className="text-center space-y-4 px-6 sm:px-10 pt-10">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mx-auto bg-primary/10 p-4 rounded-full w-fit"
+          >
             <HelpCircle className="h-10 w-10 text-primary" />
-          </div>
+          </motion.div>
+
           <CardTitle className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow leading-tight">
             Frequently Asked Questions
           </CardTitle>
+
           <CardDescription className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             Everything you need to know about AI measurements, rentals, and
             subscriptions — all in one place.
           </CardDescription>
         </CardHeader>
 
-        {/* 🔍 Search Bar */}
-        <div className="px-6 sm:px-10 pb-2">
+        {/* Search Bar */}
+        <div className="relative px-6 sm:px-10 mt-2 mb-6">
+          <Search className="absolute left-8 top-3 text-muted-foreground h-5 w-5" />
           <Input
             type="text"
-            placeholder="Search a question..."
+            placeholder="Search for a question..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full text-sm sm:text-base focus-visible:ring-primary"
+            className="w-full pl-12 text-sm sm:text-base focus-visible:ring-primary"
+            aria-label="Search FAQs"
           />
         </div>
 
-        {/* 💬 Accordion Section */}
+        {/* Accordion Section */}
         <CardContent className="max-w-3xl mx-auto w-full px-4 sm:px-8 pb-10">
-          <Accordion
-            type="single"
-            collapsible
-            className="space-y-3 sm:space-y-4"
-          >
-            {filteredFaqs.length > 0 ? (
-              filteredFaqs.map((faq, index) => (
+          {filteredFaqs.length > 0 ? (
+            <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
+              {filteredFaqs.map((faq, index) => (
                 <motion.div
                   key={faq.question}
                   initial={{ opacity: 0, y: 10 }}
@@ -122,25 +130,39 @@ export default function FAQPage() {
                 >
                   <AccordionItem
                     value={`item-${index + 1}`}
-                    className="border border-muted/40 rounded-lg hover:border-primary/40 hover:shadow-md bg-background/60 backdrop-blur-sm transition-all duration-300"
+                    className="group border border-muted/40 rounded-lg hover:border-primary/40 bg-background/60 backdrop-blur-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-primary/30"
                   >
-                    <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base flex justify-between items-center gap-3">
+                    <AccordionTrigger className="flex justify-between items-center text-left font-medium text-foreground hover:text-primary px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base focus:outline-none">
                       <span>{faq.question}</span>
-                      <ChevronDown className="w-4 h-4 shrink-0 transition-transform duration-200 accordion-chevron" />
+                      <ChevronDown
+                        className="w-4 h-4 shrink-0 transition-transform duration-300 group-data-[state=open]:rotate-180"
+                        aria-hidden="true"
+                      />
                     </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-sm sm:text-base leading-relaxed px-3 sm:px-4 pb-3 sm:pb-4">
+                    <AccordionContent className="text-muted-foreground text-sm sm:text-base leading-relaxed px-3 sm:px-4 pb-3 sm:pb-4 border-t border-muted/20">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
                 </motion.div>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-6">
-                No questions found for “{query}”.
-              </p>
-            )}
-          </Accordion>
+              ))}
+            </Accordion>
+          ) : (
+            <p className="text-center text-muted-foreground py-6 text-base">
+              No questions found for “{query}”.
+            </p>
+          )}
         </CardContent>
+
+        {/* Footer note */}
+        <div className="border-t border-muted/30 py-6 text-center text-sm text-muted-foreground">
+          Still have questions?{" "}
+          <a
+            href="/contact"
+            className="text-primary hover:underline font-medium"
+          >
+            Contact our support team.
+          </a>
+        </div>
       </Card>
     </motion.div>
   );
