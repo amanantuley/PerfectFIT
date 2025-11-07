@@ -9,30 +9,27 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },
-      { protocol: 'https', hostname: 'picsum.photos', pathname: '/**' },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-      path: false,
-      '@opentelemetry/exporter-jaeger': false,
+      '@opentelemetry/exporter-jaeger': false, // ✅ Ignore Jaeger module
     };
     return config;
   },
-  experimental: {
-    serverComponentsExternalPackages: [
-      'handlebars',
-      'dotprompt',
-      'genkit',
-      '@genkit-ai/core',
-    ],
-  },
-  output: 'standalone',
 };
 
 export default nextConfig;

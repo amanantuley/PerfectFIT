@@ -1,24 +1,64 @@
 'use server';
-import { z } from 'zod'; // ✅ NOT 'genkit'
+/**
+ * @fileOverview A general purpose conversational AI assistant.
+ *
+ * - chatWithPerfectAI - Handles the chat conversation.
+ * - ChatWithPerfectAIInput - The input type for the chat function.
+ * - ChatWithPerfectAIOutput - The return type for the chat function.
+ */
 
-export async function chatWithPerfectAI(input: any) {
-  try {
-    const { ai } = await import('@/ai/genkit'); // ✅ Lazy import
-    const prompt = ai.definePrompt({
-      name: 'chatWithPerfectAIPrompt',
-      input: { schema: z.object({ message: z.string() }) },
-      output: { schema: z.object({ response: z.string() }) },
-      prompt: `You are PerfectAI. Respond clearly and politely to user messages.`,
-    });
+import {ai} from '@/ai/genkit';
+import {z} from 'genkit';
 
-    const flow = ai.defineFlow(
-      { name: 'chatWithPerfectAIFlow' },
-      async (input) => (await prompt(input)).output!
-    );
+const ChatMessageSchema = z.object({
+    role: z.enum(['user', 'model']),
+    content: z.string(),
+});
 
-    return flow(input);
-  } catch (e) {
-    console.error('AI init failed:', e);
-    return { response: 'PerfectAI is unavailable right now.' };
-  }
+const ChatWithPerfectAIInputSchema = z.object({
+  history: z.array(ChatMessageSchema).describe('The conversation history.'),
+  message: z.string().describe('The latest user message.'),
+});
+export type ChatWithPerfectAIInput = z.infer<typeof ChatWithPerfectAIInputSchema>;
+
+
+const ChatWithPerfectAIOutputSchema = z.object({
+  response: z.string().describe("The AI's response to the user."),
+});
+export type ChatWithPerfectAIOutput = z.infer<typeof ChatWithPerfectAIOutputSchema>;
+
+
+export async function chatWithPerfectAI(input: ChatWithPerfectAIInput): Promise<ChatWithPerfectAIOutput> {
+  return chatWithPerfectAIFlow(input);
 }
+
+const prompt = ai.definePrompt({
+  name: 'chatWithPerfectAIPrompt',
+  input: {schema: ChatWithPerfectAIInputSchema},
+  output: {schema: ChatWithPerfectAIOutputSchema},
+  prompt: `You are PerfectAI, a friendly and helpful AI assistant. Your goal is to assist users with their questions on any topic. Be concise, friendly, and professional.
+
+  Here is the conversation history:
+  {{#each history}}
+  {{this.role}}: {{{this.content}}}
+  {{/each}}
+
+  Here is the new user message:
+  user: {{{message}}}
+
+  Generate a helpful response as the model.
+`,
+});
+
+
+const chatWithPerfectAIFlow = ai.defineFlow(
+  {
+    name: 'chatWithPerfectAIFlow',
+    inputSchema: ChatWithPerfectAIInputSchema,
+    outputSchema: ChatWithPerfectAIOutputSchema,
+  },
+  async (input) => {
+    const {output} = await prompt(input);
+    return output!;
+  }
+);

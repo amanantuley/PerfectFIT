@@ -2,44 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* -----------------------------------------------
-   🌈 PERFECTFIT DESIGN SYSTEM – GLOBAL VARIABLES
-------------------------------------------------*/
 @layer base {
   :root {
-    /* 🎨 Light Mode Colors */
     --background: 240 10% 97%;
     --foreground: 240 10% 3.9%;
-
     --card: 240 10% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 240 10% 100%;
     --popover-foreground: 240 10% 3.9%;
-
     --primary: 262 82% 57%;
     --primary-foreground: 210 20% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-    --accent: 262 82% 96%;
-    --accent-foreground: 262 82% 40%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
+    --accent: 262 82% 96%;
+    --accent-foreground: 262 82% 40%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
-
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 262 82% 57%;
     --radius: 0.75rem;
-
-    /* 🧮 Chart Colors */
     --chart-1: 262 82% 57%;
     --chart-2: 168 76% 42%;
     --chart-3: 28 92% 53%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-
-    /* 🧭 Sidebar Colors */
     --sidebar-background: 240 4.8% 95.9%;
     --sidebar-foreground: 240 10% 3.9%;
     --sidebar-primary: 262 82% 57%;
@@ -51,29 +40,25 @@
   }
 
   .dark {
-    /* 🌙 Dark Mode Colors */
     --background: 240 10% 4%;
     --foreground: 210 20% 98%;
     --card: 240 4% 12%;
     --card-foreground: 210 20% 98%;
     --popover: 240 10% 4%;
     --popover-foreground: 210 20% 98%;
-
     --primary: 270 90% 65%;
     --primary-foreground: 210 20% 98%;
     --secondary: 240 4% 20%;
     --secondary-foreground: 210 20% 98%;
-    --accent: 270 90% 30%;
-    --accent-foreground: 210 20% 98%;
     --muted: 240 4% 20%;
     --muted-foreground: 240 5% 65%;
+    --accent: 270 90% 30%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
-
     --border: 240 4% 20%;
     --input: 240 4% 20%;
     --ring: 270 90% 65%;
-
     --sidebar-background: 240 10% 8%;
     --sidebar-foreground: 210 20% 98%;
     --sidebar-primary: 270 90% 65%;
@@ -85,119 +70,37 @@
   }
 }
 
-/* -----------------------------------------------
-   🩶 BASE STYLES
-------------------------------------------------*/
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply scroll-m-20 font-bold tracking-tight;
-  }
-
-  h1 { @apply text-4xl md:text-5xl; }
-  h2 { @apply text-3xl md:text-4xl; }
-  h3 { @apply text-2xl md:text-3xl; }
-
-  p {
-    @apply leading-relaxed text-muted-foreground;
-  }
-
-  a {
-    @apply text-primary hover:text-primary/80 transition-colors;
+    @apply bg-background text-foreground;
   }
 }
 
-/* -----------------------------------------------
-   🧱 COMPONENT LAYER – GLASS & CARD SYSTEM
-------------------------------------------------*/
 @layer components {
-  .card {
-    background-color: hsla(var(--card), 1);
-    @apply rounded-xl border border-border shadow-sm transition-all duration-300;
-  }
-
   .dark .card {
     background-color: hsla(var(--card), 0.8);
-    backdrop-filter: blur(10px);
-    @apply border border-border shadow-md;
+    backdrop-filter: blur(8px);
+    border: 1px solid hsla(var(--border));
   }
-
-  /* 🌫️ Glass Effect Utility */
-  .glass {
-    @apply bg-background/60 backdrop-blur-xl border border-border/50 shadow-lg;
+  .card {
+     background-color: hsla(var(--card));
   }
-
-  /* 🪞 Elevated Shadows */
-  .shadow-soft { box-shadow: 0 4px 15px hsl(var(--foreground)/0.08); }
-  .shadow-glow { box-shadow: 0 0 20px hsl(var(--primary)/0.25); }
 }
 
-/* -----------------------------------------------
-   ⚡ UTILITIES – ANIMATIONS & GRADIENTS
-------------------------------------------------*/
 @layer utilities {
-  /* Gradient Text */
   .bg-size-200 {
     background-size: 200% auto;
   }
-
   .animate-text-rainbow {
     animation: text-rainbow 5s ease-in-out infinite;
   }
-
   @keyframes text-rainbow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
-
-  /* Fade In */
-  .animate-fade-in-up {
-    animation: fade-in-up 0.6s ease-out both;
-  }
-
-  @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Hover Lift */
-  .hover-lift {
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px hsl(var(--primary)/0.2);
-  }
-
-  /* Brand Gradient Backgrounds */
-  .bg-gradient-brand {
-    background-image: linear-gradient(to right, hsl(174 80% 50%), hsl(262 82% 57%), hsl(33 95% 60%));
-  }
-
-  .text-gradient-brand {
-    background-image: linear-gradient(to right, hsl(174 80% 50%), hsl(262 82% 57%), hsl(33 95% 60%));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* Smooth Transition */
-  .transition-smooth {
-    transition: all 0.3s ease-in-out;
-  }
 }
+    
