@@ -1,12 +1,12 @@
 'use server';
 /**
- * @fileOverview A general purpose conversational AI assistant.
+ * @fileOverview PerfectAI conversational assistant — Next.js 15 safe version.
+ * This version dynamically loads Genkit to prevent Webpack bundling issues.
  */
 
-import { z } from 'genkit'; // zod wrapper from genkit is fine to import
-// ❌ Do not import `ai` here at the top
-// import { ai } from '@/ai/genkit'; ❌
+import { z } from 'genkit';
 
+// ✅ Define reusable schemas
 const ChatMessageSchema = z.object({
   role: z.enum(['user', 'model']),
   content: z.string(),
@@ -23,45 +23,53 @@ const ChatWithPerfectAIOutputSchema = z.object({
 });
 export type ChatWithPerfectAIOutput = z.infer<typeof ChatWithPerfectAIOutputSchema>;
 
-// ✅ FIXED: Lazy load Genkit AI runtime
+// ✅ Safe server-only function
 export async function chatWithPerfectAI(
   input: ChatWithPerfectAIInput
 ): Promise<ChatWithPerfectAIOutput> {
-  // Import `ai` dynamically to prevent Next.js from bundling handlebars
-  const { ai } = await import('@/ai/genkit');
+  try {
+    // ✅ Lazy import to prevent static bundling of handlebars
+    const { ai } = await import('@/ai/genkit');
 
-  // Define prompt + flow dynamically (safe for server runtime)
-  const prompt = ai.definePrompt({
-    name: 'chatWithPerfectAIPrompt',
-    input: { schema: ChatWithPerfectAIInputSchema },
-    output: { schema: ChatWithPerfectAIOutputSchema },
-    prompt: `
-      You are PerfectAI, a friendly and helpful AI assistant. Your goal is to assist users with their questions on any topic. Be concise, friendly, and professional.
+    const prompt = ai.definePrompt({
+      name: 'chatWithPerfectAIPrompt',
+      input: { schema: ChatWithPerfectAIInputSchema },
+      output: { schema: ChatWithPerfectAIOutputSchema },
+      prompt: `
+        You are PerfectAI, a friendly and helpful AI assistant. 
+        Your goal is to assist users with their questions on any topic.
+        Be concise, friendly, and professional.
 
-      Here is the conversation history:
-      {{#each history}}
-      {{this.role}}: {{{this.content}}}
-      {{/each}}
+        Conversation history:
+        {{#each history}}
+        {{this.role}}: {{{this.content}}}
+        {{/each}}
 
-      Here is the new user message:
-      user: {{{message}}}
+        New user message:
+        user: {{{message}}}
 
-      Generate a helpful response as the model.
-    `,
-  });
+        Generate a helpful response as the model.
+      `,
+    });
 
-  const chatWithPerfectAIFlow = ai.defineFlow(
-    {
-      name: 'chatWithPerfectAIFlow',
-      inputSchema: ChatWithPerfectAIInputSchema,
-      outputSchema: ChatWithPerfectAIOutputSchema,
-    },
-    async (input) => {
-      const { output } = await prompt(input);
-      return output!;
-    }
-  );
+    const chatWithPerfectAIFlow = ai.defineFlow(
+      {
+        name: 'chatWithPerfectAIFlow',
+        inputSchema: ChatWithPerfectAIInputSchema,
+        outputSchema: ChatWithPerfectAIOutputSchema,
+      },
+      async (input) => {
+        const { output } = await prompt(input);
+        return output!;
+      }
+    );
 
-  // ✅ Execute at runtime only (no static bundling)
-  return chatWithPerfectAIFlow(input);
+    return chatWithPerfectAIFlow(input);
+  } catch (error: any) {
+    console.error('⚠️ PerfectAI initialization failed:', error);
+    return {
+      response:
+        'Sorry, PerfectAI is currently unavailable. Please try again later.',
+    };
+  }
 }
