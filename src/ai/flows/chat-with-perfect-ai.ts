@@ -1,10 +1,10 @@
 'use server';
 /**
- * @fileOverview PerfectAI conversational assistant — Next.js 15 safe version.
- * This version dynamically loads Genkit to prevent Webpack bundling issues.
+ * @file PerfectAI conversational assistant — Vercel + Next.js 15 safe version.
+ * Uses lazy dynamic imports to avoid bundling Node-only modules like Handlebars.
  */
 
-import { z } from 'genkit';
+import { z } from 'zod'; // ✅ Use Zod directly — NOT from Genkit
 
 // ✅ Define reusable schemas
 const ChatMessageSchema = z.object({
@@ -23,36 +23,40 @@ const ChatWithPerfectAIOutputSchema = z.object({
 });
 export type ChatWithPerfectAIOutput = z.infer<typeof ChatWithPerfectAIOutputSchema>;
 
-// ✅ Safe server-only function
+/**
+ * Safely handles chat requests to the PerfectAI assistant.
+ * Dynamically imports Genkit to avoid Webpack bundling issues on Vercel.
+ */
 export async function chatWithPerfectAI(
   input: ChatWithPerfectAIInput
 ): Promise<ChatWithPerfectAIOutput> {
   try {
-    // ✅ Lazy import to prevent static bundling of handlebars
+    // ✅ Lazy import to prevent static evaluation during build
     const { ai } = await import('@/ai/genkit');
 
+    // ✅ Define prompt once per runtime instance
     const prompt = ai.definePrompt({
       name: 'chatWithPerfectAIPrompt',
       input: { schema: ChatWithPerfectAIInputSchema },
       output: { schema: ChatWithPerfectAIOutputSchema },
       prompt: `
-        You are PerfectAI, a friendly and helpful AI assistant. 
-        Your goal is to assist users with their questions on any topic.
-        Be concise, friendly, and professional.
+        You are PerfectAI — a friendly and professional AI assistant.
+        Help users clearly and concisely on any topic.
 
-        Conversation history:
+        --- Conversation History ---
         {{#each history}}
         {{this.role}}: {{{this.content}}}
         {{/each}}
 
-        New user message:
+        --- User Message ---
         user: {{{message}}}
 
-        Generate a helpful response as the model.
+        Reply as the "model" in a helpful and natural way.
       `,
     });
 
-    const chatWithPerfectAIFlow = ai.defineFlow(
+    // ✅ Define and run the flow
+    const flow = ai.defineFlow(
       {
         name: 'chatWithPerfectAIFlow',
         inputSchema: ChatWithPerfectAIInputSchema,
@@ -64,7 +68,8 @@ export async function chatWithPerfectAI(
       }
     );
 
-    return chatWithPerfectAIFlow(input);
+    const result = await flow(input);
+    return result;
   } catch (error: any) {
     console.error('⚠️ PerfectAI initialization failed:', error);
     return {
