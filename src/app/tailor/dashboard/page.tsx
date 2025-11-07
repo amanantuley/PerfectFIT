@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import {
   DollarSign,
@@ -30,28 +30,24 @@ import {
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 
-// ✅ Dynamically import Recharts (to prevent SSR issues)
-const ResponsiveContainer = dynamic(() => import('recharts').then((m) => m.ResponsiveContainer), { ssr: false });
-const AreaChart = dynamic(() => import('recharts').then((m) => m.AreaChart), { ssr: false });
-const Area = dynamic(() => import('recharts').then((m) => m.Area), { ssr: false });
-const CartesianGrid = dynamic(() => import('recharts').then((m) => m.CartesianGrid), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then((m) => m.XAxis), { ssr: false });
-const Tooltip = dynamic(() => import('recharts').then((m) => m.Tooltip), { ssr: false });
-const BarChart = dynamic(() => import('recharts').then((m) => m.BarChart), { ssr: false });
-const Bar = dynamic(() => import('recharts').then((m) => m.Bar), { ssr: false });
+// ✅ Lazy-load Recharts (prevents SSR hydration errors)
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false });
+const AreaChart = dynamic(() => import('recharts').then(m => m.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then(m => m.Area), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then(m => m.CartesianGrid), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(m => m.XAxis), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip), { ssr: false });
+const BarChart = dynamic(() => import('recharts').then(m => m.BarChart), { ssr: false });
+const Bar = dynamic(() => import('recharts').then(m => m.Bar), { ssr: false });
 
-// 🔹 Status helper
+// 🔹 Status helper (kept concise)
 const getStatusConfig = (status: string) => {
-  switch (status) {
-    case 'Ready':
-      return { className: 'bg-green-500 text-white', icon: CheckCircle };
-    case 'Pending':
-      return { className: 'bg-gray-200 text-gray-800', icon: Clock };
-    case 'In Progress':
-      return { className: 'bg-purple-200 text-purple-800', icon: RefreshCw };
-    default:
-      return { className: 'bg-muted text-muted-foreground', icon: ClipboardList };
-  }
+  const configs: Record<string, { className: string; icon: any }> = {
+    Ready: { className: 'bg-green-500 text-white', icon: CheckCircle },
+    Pending: { className: 'bg-gray-200 text-gray-800', icon: Clock },
+    'In Progress': { className: 'bg-purple-200 text-purple-800', icon: RefreshCw },
+  };
+  return configs[status] || { className: 'bg-muted text-muted-foreground', icon: ClipboardList };
 };
 
 export default function TailorDashboard() {
@@ -64,7 +60,7 @@ export default function TailorDashboard() {
   const [earningsGrowth, setEarningsGrowth] = useState(0);
   const [isChartReady, setIsChartReady] = useState(false);
 
-  // 🔹 Initialize Mock Data
+  // ✅ Initialize once
   useEffect(() => {
     setEarningsData([
       { month: 'Jul', earnings: 19000 },
@@ -89,10 +85,11 @@ export default function TailorDashboard() {
     ]);
 
     setEarningsGrowth(15.4);
-    setTimeout(() => setIsChartReady(true), 300);
+    const chartDelay = setTimeout(() => setIsChartReady(true), 300);
+    return () => clearTimeout(chartDelay);
   }, []);
 
-  // 🔹 Simulate real-time new orders every 30 sec
+  // ✅ Simulate live order feed
   useEffect(() => {
     const interval = setInterval(() => {
       const newOrder = {
@@ -104,8 +101,8 @@ export default function TailorDashboard() {
         isPriority: Math.random() > 0.6,
       };
 
-      setRecentOrders((prev) => [newOrder, ...prev.slice(0, 4)]);
-      setEarningsGrowth((prev) => Math.max(0, prev + (Math.random() * 4 - 2)));
+      setRecentOrders(prev => [newOrder, ...prev.slice(0, 4)]);
+      setEarningsGrowth(prev => Math.max(0, Number((prev + (Math.random() * 4 - 2)).toFixed(1))));
 
       toast({
         title: '🧵 New Order Received!',
@@ -116,6 +113,11 @@ export default function TailorDashboard() {
     return () => clearInterval(interval);
   }, [toast]);
 
+  // ✅ Compute summary stats
+  const totalEarnings = useMemo(() => {
+    return earningsData.reduce((acc, curr) => acc + curr.earnings, 0);
+  }, [earningsData]);
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Header */}
@@ -125,10 +127,30 @@ export default function TailorDashboard() {
 
       {/* Summary Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard title="Today's Earnings" icon={DollarSign} value="₹8,920" growth={earningsGrowth} />
-        <SummaryCard title="Active Orders" icon={ClipboardList} value={recentOrders.length.toString()} sub="Active" />
-        <SummaryCard title="Total Customers" icon={Users} value="132" sub="+8 this month" />
-        <SummaryCard title="Fittings Scheduled" icon={Calendar} value="6" sub="2 completed" />
+        <SummaryCard
+          title={t("Total Earnings")}
+          icon={DollarSign}
+          value={`₹${totalEarnings.toLocaleString()}`}
+          growth={earningsGrowth}
+        />
+        <SummaryCard
+          title={t("Active Orders")}
+          icon={ClipboardList}
+          value={recentOrders.length.toString()}
+          sub={t("Active")}
+        />
+        <SummaryCard
+          title={t("Total Customers")}
+          icon={Users}
+          value="132"
+          sub={t("+8 this month")}
+        />
+        <SummaryCard
+          title={t("Fittings Scheduled")}
+          icon={Calendar}
+          value="6"
+          sub={t("2 completed")}
+        />
       </div>
 
       {/* Charts Section */}
@@ -143,7 +165,7 @@ export default function TailorDashboard() {
           </CardHeader>
           <CardContent>
             {isChartReady ? (
-              <div className="h-[300px] w-full">
+              <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={earningsData}>
                     <defs>
@@ -160,7 +182,7 @@ export default function TailorDashboard() {
                         borderRadius: '8px',
                         border: '1px solid #e5e7eb',
                       }}
-                      formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Earnings']}
+                      formatter={(v: number) => [`₹${v.toLocaleString()}`, 'Earnings']}
                     />
                     <Area type="monotone" dataKey="earnings" stroke="#14b8a6" fill="url(#earnGrad)" />
                   </AreaChart>
@@ -181,28 +203,32 @@ export default function TailorDashboard() {
             <CardDescription>{t('Most requested tailoring categories')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={serviceData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="service" tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      borderRadius: '8px',
-                      border: '1px solid #e5e7eb',
-                    }}
-                    formatter={(v: number) => [`${v} orders`, 'Service']}
-                  />
-                  <Bar dataKey="orders" fill="#6366f1" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {isChartReady ? (
+              <div className="h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={serviceData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="service" tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        borderRadius: '8px',
+                        border: '1px solid #e5e7eb',
+                      }}
+                      formatter={(v: number) => [`${v} orders`, 'Service']}
+                    />
+                    <Bar dataKey="orders" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-sm text-muted-foreground">Loading chart...</p>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Orders */}
+      {/* Recent Orders + Feedback */}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
@@ -223,7 +249,7 @@ export default function TailorDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentOrders.map((order) => {
+                  {recentOrders.map(order => {
                     const { className } = getStatusConfig(order.status);
                     return (
                       <TableRow key={order.orderId}>
@@ -264,7 +290,7 @@ export default function TailorDashboard() {
             <div className="flex flex-col gap-4">
               <div>
                 <p className="text-sm font-medium">Average Rating</p>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                   ))}
@@ -286,14 +312,14 @@ export default function TailorDashboard() {
         </Card>
       </div>
 
-      {/* Floating Add Button */}
+      {/* Floating Action Button */}
       <Button
-        className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg"
+        className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-xl"
         size="icon"
         onClick={() =>
           toast({
-            title: 'Add Order',
-            description: 'New order creation feature coming soon!',
+            title: '✨ Add Order',
+            description: 'The order creation form is coming soon!',
           })
         }
       >
@@ -303,7 +329,7 @@ export default function TailorDashboard() {
   );
 }
 
-// ✅ Summary Card
+// ✅ Summary Card Component
 function SummaryCard({
   title,
   value,
@@ -318,14 +344,14 @@ function SummaryCard({
   growth?: number;
 }) {
   return (
-    <Card className="shadow-glow hover:shadow-lg transition-all duration-300">
+    <Card className="shadow-glow hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        {growth !== undefined ? (
+        {typeof growth === 'number' ? (
           <div className="flex items-center text-xs text-muted-foreground gap-1">
             {growth >= 0 ? (
               <TrendingUp className="h-3 w-3 text-green-500" />
