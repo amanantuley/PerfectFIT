@@ -16,20 +16,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CircleDollarSign, Save, Loader2 } from 'lucide-react';
+import { CircleDollarSign, Save, Loader2, CloudUpload, RefreshCw } from 'lucide-react';
 import { useTranslation } from '@/context/translation-provider';
 import { useToast } from '@/hooks/use-toast';
 import { chargesData } from '@/lib/charges-data';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TailorChargesPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
-  const [isLoading, setIsLoading] = useState(false);
   const [prices, setPrices] = useState<Record<string, number>>({});
+  const [isPending, startTransition] = useTransition();
+  const [loaded, setLoaded] = useState(false);
 
-  // ✅ Load from localStorage or defaults
+  // ✅ Load existing charges
   useEffect(() => {
     const stored = localStorage.getItem('tailorPrices');
     if (stored) {
@@ -41,77 +43,104 @@ export default function TailorChargesPage() {
       );
       setPrices(defaults);
     }
+    setLoaded(true);
   }, []);
 
-  // ✅ Update a local price field
+  // ✅ Handle change
   const handlePriceChange = (id: string, value: string) => {
-    const newPrice = Number(value);
-    if (!isNaN(newPrice) && newPrice >= 0) {
-      setPrices((prev) => ({ ...prev, [id]: newPrice }));
+    const num = Number(value);
+    if (!isNaN(num) && num >= 0) {
+      setPrices((prev) => ({ ...prev, [id]: num }));
     }
   };
 
-  // ✅ Simulated Save (stores to localStorage)
-  const handleSaveChanges = async () => {
-    setIsLoading(true);
-    setTimeout(() => {
+  // ✅ Save locally (simulate cloud sync)
+  const handleSaveChanges = () => {
+    startTransition(() => {
       localStorage.setItem('tailorPrices', JSON.stringify(prices));
+
+      // 💡 Future-ready cloud sync (Firebase / API)
+      // await fetch('/api/tailor/prices', { method: 'POST', body: JSON.stringify(prices) });
+
       toast({
-        title: t('Changes Saved!'),
-        description: t('Your updated service charges have been stored locally.'),
+        title: t('✅ Charges Saved!'),
+        description: t('Your latest service prices are stored securely.'),
       });
-      setIsLoading(false);
-    }, 1000);
+    });
   };
 
-  if (Object.keys(prices).length === 0) {
+  const handleReset = () => {
+    startTransition(() => {
+      localStorage.removeItem('tailorPrices');
+      const defaults: Record<string, number> = {};
+      chargesData.forEach((cat) =>
+        cat.services.forEach((s) => (defaults[s.id] = s.price))
+      );
+      setPrices(defaults);
+      toast({
+        title: t('🔄 Reset Successful'),
+        description: t('All prices have been restored to default values.'),
+      });
+    });
+  };
+
+  if (!loaded) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin mb-2 text-primary" />
-        <p className="text-muted-foreground text-sm">{t('Loading your charges...')}</p>
+        <Loader2 className="h-8 w-8 animate-spin mb-3 text-primary" />
+        <p className="text-sm text-muted-foreground">{t('Loading your charges...')}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in-up">
-      <Card className="shadow-lg border border-border">
+    <motion.div
+      className="space-y-8 animate-fade-in-up"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <Card className="shadow-xl border border-border/60 bg-background/70 backdrop-blur-sm">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-size-200 animate-text-rainbow">
                 <CircleDollarSign className="h-5 w-5 text-teal-500" />
-                {t('Service Charges')}
+                {t('Tailor Service Charges')}
               </CardTitle>
               <CardDescription>
-                {t(
-                  'Manage your stitching and tailoring charges. Changes are saved locally on your browser.'
-                )}
+                {t('Set, customize, and manage your tailoring prices.')}
               </CardDescription>
             </div>
 
-            <Button
-              className="w-full sm:w-auto"
-              onClick={handleSaveChanges}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('Saving...')}
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {t('Save All Changes')}
-                </>
-              )}
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button onClick={handleSaveChanges} disabled={isPending} className="flex items-center">
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('Saving...')}
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    {t('Save Changes')}
+                  </>
+                )}
+              </Button>
+
+              <Button variant="outline" onClick={handleReset} disabled={isPending}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {t('Reset')}
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
         <CardContent>
-          <Accordion type="multiple" defaultValue={[chargesData[0].id]} className="w-full">
+          <Accordion
+            type="multiple"
+            defaultValue={[chargesData[0].id]}
+            className="w-full space-y-2"
+          >
             {chargesData.map((category) => (
               <AccordionItem key={category.id} value={category.id}>
                 <AccordionTrigger className="text-lg font-semibold">
@@ -120,14 +149,18 @@ export default function TailorChargesPage() {
                 <AccordionContent>
                   <div className="space-y-5 pt-3">
                     {category.services.map((service) => (
-                      <div
+                      <motion.div
                         key={service.id}
-                        className="grid grid-cols-1 md:grid-cols-3 items-end gap-4 rounded-lg border border-border p-4 transition-all hover:bg-muted/40"
+                        className="grid grid-cols-1 md:grid-cols-3 items-end gap-4 rounded-lg border border-border p-4 transition-all hover:bg-muted/30 hover:shadow-glow"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
                       >
                         {/* Service Info */}
                         <div className="space-y-1">
-                          <h4 className="font-semibold">{t(service.name as any)}</h4>
-                          <p className="text-sm text-muted-foreground leading-snug">
+                          <h4 className="font-semibold text-foreground">
+                            {t(service.name as any)}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
                             {t(service.description as any)}
                           </p>
                         </div>
@@ -145,25 +178,23 @@ export default function TailorChargesPage() {
                               id={service.id}
                               type="number"
                               min={0}
-                              value={prices[service.id] || ''}
-                              onChange={(e) =>
-                                handlePriceChange(service.id, e.target.value)
-                              }
+                              value={prices[service.id] ?? ''}
+                              onChange={(e) => handlePriceChange(service.id, e.target.value)}
                               className="mt-1 pl-6"
                             />
                           </div>
                         </div>
 
-                        {/* Market Reference */}
+                        {/* Market Range */}
                         <div>
                           <p className="text-sm text-muted-foreground">
-                            {t('Suggested Market Price')}:{' '}
+                            {t('Market Range')}:{' '}
                             <span className="font-medium text-foreground">
                               ₹{service.marketRange.min} - ₹{service.marketRange.max}
                             </span>
                           </p>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </AccordionContent>
@@ -172,6 +203,21 @@ export default function TailorChargesPage() {
           </Accordion>
         </CardContent>
       </Card>
-    </div>
+
+      <AnimatePresence>
+        {isPending && (
+          <motion.div
+            key="saving"
+            className="text-center p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <CloudUpload className="mx-auto mb-3 h-8 w-8 animate-pulse text-primary" />
+            <p className="text-muted-foreground">{t('Syncing changes...')}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
