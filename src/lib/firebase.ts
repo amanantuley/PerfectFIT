@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  signOut,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -24,5 +25,5 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
-export { RecaptchaVerifier, signInWithPhoneNumber };
+export { RecaptchaVerifier, signInWithPhoneNumber, signOut };
 export default app;
