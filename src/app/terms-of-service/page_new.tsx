@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Card,
@@ -6,52 +6,52 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   FileText, Scale, ShieldCheck, CheckCircle2, Info, ArrowLeft,
   Users, ShoppingBag, Image as ImageIcon, AlertTriangle,
   Lock, Globe, HelpCircle, ChevronRight, Building
-} from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useState } from "react";
+} from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useState } from 'react';
 
 const highlights = [
-  { icon: Users, title: "Fair Usage", desc: "Clear account rules" },
-  { icon: ShieldCheck, title: "Your Protection", desc: "Security & privacy" },
-  { icon: Scale, title: "Transparent Terms", desc: "No hidden clauses" },
-  { icon: Globe, title: "Global Standards", desc: "International compliance" },
+  { icon: Users, title: 'Fair Usage', desc: 'Clear account rules' },
+  { icon: ShieldCheck, title: 'Your Protection', desc: 'Security & privacy' },
+  { icon: Scale, title: 'Transparent Terms', desc: 'No hidden clauses' },
+  { icon: Globe, title: 'Global Standards', desc: 'International compliance' },
 ];
 
 const userRights = [
-  { icon: CheckCircle2, title: "Account Access", desc: "Full control over your profile and data" },
-  { icon: Lock, title: "Privacy Control", desc: "Manage your preferences anytime" },
-  { icon: ShoppingBag, title: "Fair Transactions", desc: "Protected under our policies" },
-  { icon: AlertTriangle, title: "Dispute Resolution", desc: "Contact support for any issues" },
+  { icon: CheckCircle2, title: 'Account Access', desc: 'Full control over your profile and data' },
+  { icon: Lock, title: 'Privacy Control', desc: 'Manage your preferences anytime' },
+  { icon: ShoppingBag, title: 'Fair Transactions', desc: 'Protected under our policies' },
+  { icon: AlertTriangle, title: 'Dispute Resolution', desc: 'Contact support for any issues' },
 ];
 
 const responsibilities = [
-  "Provide accurate account information",
-  "Keep login credentials secure",
-  "Comply with acceptable use policies",
-  "Report violations or security concerns",
-  "Review updates to these Terms",
+  'Provide accurate account information',
+  'Keep login credentials secure',
+  'Comply with acceptable use policies',
+  'Report violations or security concerns',
+  'Review updates to these Terms',
 ];
 
 const restrictions = [
-  "Impersonate others or create fake accounts",
-  "Upload harmful, offensive, or illegal content",
-  "Manipulate pricing, discounts, or AI measurements",
-  "Scrape, crawl, or access without authorization",
-  "Resell services without written permission",
+  'Impersonate others or create fake accounts',
+  'Upload harmful, offensive, or illegal content',
+  'Manipulate pricing, discounts, or AI measurements',
+  'Scrape, crawl, or access without authorization',
+  'Resell services without written permission',
 ];
 
 export default function TermsOfServicePage() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState('overview');
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
   const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.98]);
@@ -69,7 +69,7 @@ export default function TermsOfServicePage() {
             <motion.div
               className="bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 p-[3px] rounded-xl"
               animate={{ rotate: [0, 360] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
             >
               <div className="bg-background rounded-lg p-3 sm:p-4">
                 <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
@@ -248,7 +248,7 @@ export default function TermsOfServicePage() {
               <div className="inline-flex p-3 bg-primary/10 rounded-full"><Building className="h-6 w-6 sm:h-8 sm:w-8 text-primary" /></div>
               <div className="space-y-2">
                 <h3 className="text-lg sm:text-xl font-bold">Questions About These Terms?</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">Our legal team is available to clarify any terms or conditions. We&apos;re committed to transparency and compliance.</p>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">Our legal team is available to clarify any terms or conditions. We're committed to transparency and compliance.</p>
               </div>
               <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-4">
                 <Card className="p-4 text-center hover:shadow-lg transition-shadow"><h4 className="font-semibold mb-1 text-xs">Legal Team</h4><a href="mailto:legal@perfectfit.com" className="text-xs text-primary hover:underline break-all">legal@perfectfit.com</a></Card>
