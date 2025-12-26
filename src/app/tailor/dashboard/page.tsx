@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -19,7 +20,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import {
   DollarSign,
-  Users,
   Calendar,
   ClipboardList,
   CheckCircle,
@@ -41,7 +41,6 @@ import {
 } from 'lucide-react';
 import {
   ChartContainer,
-  ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { AreaChart, Area, CartesianGrid, XAxis, Tooltip } from 'recharts';
