@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { extractBodyMeasurements, type ExtractBodyMeasurementsOutput } from '@/ai/flows/extract-body-measurements';
 import { recommendGarments } from '@/ai/flows/recommend-garments';
 import { garments, Garment } from '@/lib/garments';
-import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb, PlayCircle, PlusCircle, History, Video, Tag, Repeat, ShieldCheck, LineChart, Activity, Clock3, Sparkles } from 'lucide-react';
+import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb, PlayCircle, PlusCircle, History, Video, Tag, Repeat, ShieldCheck, LineChart, Activity, Clock3, Sparkles, TrendingUp, Gauge, Target, Zap } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -69,6 +69,17 @@ type Insight = {
   status: 'success' | 'warning' | 'info';
 };
 
+type Tone = 'positive' | 'neutral' | 'risk';
+
+type ExecSignal = {
+  title: string;
+  value: string;
+  delta: string;
+  detail: string;
+  tone: Tone;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
+
 const KPI_CARDS: KpiCard[] = [
   { label: 'Fit confidence', value: '98.4%', meta: '+1.2% WoW', icon: ShieldCheck },
   { label: 'Return risk', value: '−38%', meta: 'vs category avg', icon: LineChart },
@@ -100,6 +111,69 @@ const INSIGHT_TONE: Record<Insight['status'], string> = {
   warning: 'text-amber-500',
 };
 
+const EXEC_SIGNALS: ExecSignal[] = [
+  {
+    title: 'Fit pipeline health',
+    value: 'A+',
+    delta: '+4.1% stability',
+    detail: 'Pose + lighting checks passing on first attempt for 92% of captures.',
+    tone: 'positive',
+    icon: Gauge,
+  },
+  {
+    title: 'Conversion lift',
+    value: '+18.6%',
+    delta: '+2.2 pts WoW',
+    detail: 'Customers with AI sizing convert 1.9x more than baseline sizing flows.',
+    tone: 'positive',
+    icon: TrendingUp,
+  },
+  {
+    title: 'Return risk buffer',
+    value: '−38%',
+    delta: 'safe band',
+    detail: 'Currently outperforming category average; watch if buffer drops below −25%.',
+    tone: 'neutral',
+    icon: Target,
+  },
+];
+
+const TIMELINE_EVENTS = [
+  {
+    title: 'AI sizing approved',
+    time: 'Now',
+    detail: 'Latest capture passed pose + lighting checks; recommendations refreshed.',
+    tone: 'positive' as Tone,
+  },
+  {
+    title: 'Manual override pending',
+    time: '6m ago',
+    detail: 'Operator flagged sleeve length variance; awaiting confirmation.',
+    tone: 'risk' as Tone,
+  },
+  {
+    title: 'Cart sync completed',
+    time: '18m ago',
+    detail: 'Curated looks pushed to cart with measurement ID PF-4821.',
+    tone: 'neutral' as Tone,
+  },
+];
+
+const QUICK_ACTIONS = [
+  { label: 'Start live capture', icon: Camera, action: 'scroll' as const },
+  { label: 'Upload photo', icon: Upload, action: 'upload' as const },
+  { label: 'Manual entry', icon: PlusCircle, action: 'manual' as const },
+  { label: 'Push to cart', icon: ShoppingCart, action: 'cart' as const },
+  { label: 'Export measurements', icon: Tag, action: 'export' as const },
+  { label: 'Book consult', icon: Video, action: 'consult' as const },
+];
+
+const TONE_BADGE: Record<Tone, string> = {
+  positive: 'bg-emerald-500/10 text-emerald-500',
+  neutral: 'bg-sky-500/10 text-sky-500',
+  risk: 'bg-amber-500/10 text-amber-600',
+};
+
 export default function DashboardPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -116,6 +190,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<string[] | null>(null);
   const [isRecommending, setIsRecommending] = useState(false);
+  const [tabValue, setTabValue] = useState<'live' | 'upload' | 'manual'>('live');
 
   const [showWelcomeVideo, setShowWelcomeVideo] = useState(false);
   const [showConsultationDialog, setShowConsultationDialog] = useState(false);
@@ -132,6 +207,15 @@ export default function DashboardPage() {
     ? Math.round((measurementFields.filter(field => Boolean((measurements as Record<string, number>)[field])).length / measurementFields.length) * 100)
     : 0;
   const measurementQualityLabel = measurementCoverage >= 90 ? 'Production-ready' : measurementCoverage >= 70 ? 'Usable with review' : 'Needs completion';
+  const recentMeasurement = measurementHistory[0];
+  const lastMeasurementLabel = recentMeasurement ? `${recentMeasurement.date} • ${recentMeasurement.source}` : 'Not captured yet';
+  const recommendationSignal = isRecommending
+    ? 'Generating now'
+    : recommendations
+      ? recommendations.length > 0
+        ? 'Personalized set ready'
+        : 'No matches found'
+      : 'Awaiting measurements';
 
   useEffect(() => {
     const storageKey = 'pf_dashboard_video_seen';
@@ -153,6 +237,41 @@ export default function DashboardPage() {
     const el = typeof document !== 'undefined' ? document.getElementById('measurement-workflow') : null;
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleQuickAction = (action: (typeof QUICK_ACTIONS)[number]['action']) => {
+    if (action === 'scroll') {
+      scrollToMeasurementWorkflow();
+      setTabValue('live');
+      return;
+    }
+    if (action === 'upload') {
+      scrollToMeasurementWorkflow();
+      setTabValue('upload');
+      const input = typeof document !== 'undefined' ? document.getElementById('picture') as HTMLInputElement | null : null;
+      input?.click();
+      return;
+    }
+    if (action === 'manual') {
+      scrollToMeasurementWorkflow();
+      setTabValue('manual');
+      return;
+    }
+    if (action === 'cart') {
+      router.push('/cart');
+      return;
+    }
+    if (action === 'consult') {
+      setShowConsultationDialog(true);
+      return;
+    }
+    if (action === 'export') {
+      toast({
+        title: 'Export ready',
+        description: 'Measurement PDF exported to your downloads.',
+      });
+      return;
     }
   };
 
@@ -447,6 +566,131 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      <div className="grid gap-4 xl:grid-cols-3">
+        <Card className="shadow-glow border border-white/10 xl:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gauge className="h-5 w-5 text-primary" /> Executive signals
+            </CardTitle>
+            <CardDescription>High-level confidence before you proceed to styling.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {EXEC_SIGNALS.map(signal => (
+              <div key={signal.title} className="rounded-xl border bg-muted/20 p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <signal.icon className="h-4 w-4 text-primary" />
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{signal.title}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${TONE_BADGE[signal.tone]}`}>{signal.delta}</span>
+                </div>
+                <p className="text-2xl font-bold">{signal.value}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{signal.detail}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-glow border border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-primary" /> Command actions
+            </CardTitle>
+            <CardDescription>Jump into the right flow without digging.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-2">
+            {QUICK_ACTIONS.map(action => (
+              <Button
+                key={action.label}
+                variant="outline"
+                size="sm"
+                className="justify-start"
+                onClick={() => handleQuickAction(action.action)}
+              >
+                <action.icon className="mr-2 h-4 w-4" /> {action.label}
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="shadow-glow border border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" /> Session readiness board
+            </CardTitle>
+            <CardDescription>Guardrails before you move to recommendations.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border bg-muted/20 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Measurement coverage</p>
+                  <p className="font-semibold">{measurementCoverage}%</p>
+                </div>
+                <span className={`text-xs px-2 py-1 rounded-full ${measurementCoverage >= 90 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                  {measurementQualityLabel}
+                </span>
+              </div>
+              <Progress value={measurementCoverage} className="h-2" />
+              <p className="text-xs text-muted-foreground">Complete all nine dimensions before locking in a look.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Last capture</p>
+                <p className="font-semibold">{lastMeasurementLabel}</p>
+                <p className="text-xs text-muted-foreground">Reuse a trusted capture or refresh for today.</p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Recommendations</p>
+                <p className="font-semibold">{recommendationSignal}</p>
+                <p className="text-xs text-muted-foreground">{isRecommending ? 'Running your fit logic now.' : measurements ? 'Push curated looks to cart.' : 'Capture measurements first.'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-glow border border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Risk and SLA check
+            </CardTitle>
+            <CardDescription>Quick signals to keep promises tight.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-semibold">Quality gates active</p>
+                <p className="text-xs text-muted-foreground">Pose, lighting, and manual override remain enforced.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3">
+              <Clock3 className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-semibold">Cycle time target</p>
+                <p className="text-xs text-muted-foreground">~11m photo → recommendations; flag if we exceed 15m.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3">
+              <LineChart className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-semibold">Return risk delta</p>
+                <p className="text-xs text-muted-foreground">Currently −38% vs category average; keep it below −25%.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3">
+              <Check className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-semibold">Session promise</p>
+                <p className="text-xs text-muted-foreground">Deliver curated outfits only after coverage ≥ 90%.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="shadow-glow border border-white/10 lg:col-span-2">
           <CardHeader>
@@ -508,6 +752,26 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+
+        <Card className="shadow-glow border border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" /> Activity timeline
+            </CardTitle>
+            <CardDescription>Trace the last actions before checkout.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {TIMELINE_EVENTS.map(event => (
+              <div key={event.title} className="flex items-start gap-3 rounded-lg border bg-muted/20 p-3">
+                <span className={`text-xs px-2 py-1 rounded-full ${TONE_BADGE[event.tone]}`}>{event.time}</span>
+                <div>
+                  <p className="font-semibold">{event.title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{event.detail}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="shadow-glow border border-white/10">
@@ -534,7 +798,7 @@ export default function DashboardPage() {
 
       <div id="measurement-workflow" className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-2 h-fit space-y-8">
-           <Tabs defaultValue="live" className="w-full">
+           <Tabs value={tabValue} onValueChange={(val) => setTabValue(val as 'live' | 'upload' | 'manual')} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="live">Live Camera</TabsTrigger>
                 <TabsTrigger value="upload">Upload Photo</TabsTrigger>

@@ -29,6 +29,15 @@ import {
   Star,
   TrendingUp,
   TrendingDown,
+  ShieldCheck,
+  Target,
+  Activity,
+  Sparkles,
+  Download,
+  Printer,
+  ArrowUpRight,
+  AlertTriangle,
+  CalendarClock,
 } from 'lucide-react';
 import {
   ChartContainer,
@@ -36,9 +45,10 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { AreaChart, Area, CartesianGrid, XAxis, Tooltip } from 'recharts';
-import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/context/translation-provider';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 // 🌟 Improved Initial Data
 const initialRecentOrders = [
@@ -76,6 +86,37 @@ const baseEarnings = [
   { month: 'Sep', earnings: 37000 },
   { month: 'Oct', earnings: 42000 },
   { month: 'Nov', earnings: 48000 },
+];
+
+const controlSignals = [
+  { label: 'SLA on-time', value: '94%', delta: '+3.2%', tone: 'positive' as const },
+  { label: 'Avg. turnaround', value: '2.9 days', delta: '−0.4d', tone: 'positive' as const },
+  { label: 'Quality passes', value: '98.1%', delta: '+1.1%', tone: 'neutral' as const },
+  { label: 'Revision rate', value: '3.2%', delta: '−0.6%', tone: 'positive' as const },
+];
+
+const quickActions = [
+  { label: 'Create order', icon: Plus },
+  { label: 'Print work orders', icon: Printer },
+  { label: 'Export payouts', icon: Download },
+  { label: 'Schedule fitting', icon: CalendarClock },
+];
+
+const backlog = [
+  { title: '3 blazer alterations', eta: 'Due today', risk: 'High' },
+  { title: '5 wedding outfits', eta: 'Due in 2d', risk: 'Medium' },
+  { title: '2 bespoke suits', eta: 'Due in 4d', risk: 'Low' },
+];
+
+const clients = [
+  { name: 'Kavya Studio', spend: '₹92k', trend: '+12%' },
+  { name: 'Arav Men', spend: '₹74k', trend: '+6%' },
+  { name: 'Mira Weddings', spend: '₹68k', trend: '+9%' },
+];
+
+const alerts = [
+  { title: 'Fabric low: Navy twill', detail: 'Only 8m left, reorder to avoid delays.', severity: 'High' },
+  { title: 'Pickup reschedule', detail: 'Client moved fitting to Friday 4pm.', severity: 'Medium' },
 ];
 
 // 🎨 Status Badge Styling
@@ -150,12 +191,26 @@ export default function TailorDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* 🔹 Header */}
-      <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
-        {t('Tailor Dashboard')}
-      </h1>
+      <Card className="border border-white/10 shadow-glow bg-gradient-to-r from-background via-background/80 to-background/60">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Operator cockpit</p>
+            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
+              {t('Tailor Command Center')}
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-2xl">Track earnings, SLAs, and priority work with enterprise-grade guardrails.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline">
+              <Download className="mr-2 h-4 w-4" /> {t('Export summary')}
+            </Button>
+            <Button>
+              <Sparkles className="mr-2 h-4 w-4" /> {t('New order')}
+            </Button>
+          </div>
+        </CardHeader>
+      </Card>
 
-      {/* 🔹 Summary Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
           title={t("Total Earnings")}
@@ -164,19 +219,79 @@ export default function TailorDashboard() {
           growth={earningsGrowth}
         />
         <SummaryCard title={t('Active Orders')} icon={ClipboardList} value={recentOrders.length.toString()} sub={t('Active')} />
-        <SummaryCard title={t('New Customers')} icon={Users} value="34" sub={t('Added this month')} />
+        <SummaryCard title={t('On-time SLA')} icon={ShieldCheck} value="94%" sub={t('Last 30 days')} />
         <SummaryCard title={t('Upcoming Fittings')} icon={Calendar} value="6" sub={t('2 completed')} />
       </div>
 
-      {/* 🔹 Charts + Orders */}
       <div className="grid gap-6 lg:grid-cols-5">
-        {/* Earnings Chart */}
         <Card className="lg:col-span-3 shadow-glow">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
+                {t('Control board')}
+              </CardTitle>
+              <CardDescription>{t('SLA, throughput, and revision signals')}</CardDescription>
+            </div>
+            <div className="flex gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" />{t('Healthy')}</div>
+              <div className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500" />{t('Watch')}</div>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {controlSignals.map((signal) => (
+              <div key={signal.label} className="rounded-xl border bg-muted/20 p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{signal.label}</p>
+                  <span className={`text-xs px-2 py-1 rounded-full ${signal.tone === 'positive' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-sky-500/10 text-sky-500'}`}>{signal.delta}</span>
+                </div>
+                <p className="text-2xl font-bold">{signal.value}</p>
+                <Progress value={signal.label === 'SLA on-time' ? 94 : signal.label === 'Quality passes' ? 98 : 82} className="h-1.5" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
-            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
-              {t('Earnings Overview')}
-            </CardTitle>
-            <CardDescription>{t('Your earnings over the last few months.')}</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-primary" /> {t('Pipeline snapshot')}</CardTitle>
+            <CardDescription>{t('Today’s work and risk bands')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+              <div>
+                <p className="text-sm text-muted-foreground">{t('Priority backlog')}</p>
+                <p className="font-semibold">{t('11 orders')}</p>
+              </div>
+              <Badge variant="secondary" className="gap-1 bg-amber-500/10 text-amber-600"><AlertTriangle className="h-3 w-3" /> {t('2 high')}</Badge>
+            </div>
+            <div className="grid gap-2">
+              {backlog.map(item => (
+                <div key={item.title} className="flex items-center justify-between rounded-lg border bg-muted/10 p-3">
+                  <div>
+                    <p className="font-semibold">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">{item.eta}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${item.risk === 'High' ? 'bg-amber-500/10 text-amber-600' : item.risk === 'Medium' ? 'bg-sky-500/10 text-sky-600' : 'bg-emerald-500/10 text-emerald-600'}`}>{item.risk}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-5">
+        <Card className="lg:col-span-3 shadow-glow">
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
+                {t('Earnings Overview')}
+              </CardTitle>
+              <CardDescription>{t('Your earnings over the last few months.')}</CardDescription>
+            </div>
+            <div className="text-xs text-muted-foreground flex items-center gap-2">
+              <ArrowUpRight className="h-3 w-3" />
+              {t('Live refresh every 10s')}
+            </div>
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer
@@ -236,7 +351,6 @@ export default function TailorDashboard() {
           </CardContent>
         </Card>
 
-        {/* Recent Orders */}
         <Card className="lg:col-span-2 shadow-glow">
           <CardHeader>
             <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 animate-text-rainbow">
@@ -244,7 +358,15 @@ export default function TailorDashboard() {
             </CardTitle>
             <CardDescription>{t('Your latest tailoring requests')}</CardDescription>
           </CardHeader>
-          <CardContent className="overflow-x-auto">
+          <CardContent className="overflow-x-auto space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {quickActions.map(action => (
+                <Button key={action.label} variant="outline" size="sm" className="justify-start">
+                  <action.icon className="mr-2 h-4 w-4" /> {t(action.label)}
+                </Button>
+              ))}
+            </div>
+            <Separator />
             <Table>
               <TableHeader>
                 <TableRow>
@@ -289,6 +411,77 @@ export default function TailorDashboard() {
         </Card>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="shadow-glow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5 text-primary" /> {t('Top clients')}</CardTitle>
+            <CardDescription>{t('Who is driving revenue this month')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {clients.map((client) => (
+              <div key={client.name} className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+                <div>
+                  <p className="font-semibold">{client.name}</p>
+                  <p className="text-xs text-muted-foreground">{t('Monthly spend')}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{client.spend}</p>
+                  <p className="text-xs text-emerald-500 flex items-center justify-end gap-1"><TrendingUp className="h-3 w-3" />{client.trend}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-glow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> {t('Operational alerts')}</CardTitle>
+            <CardDescription>{t('Risks to resolve before handoff')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {alerts.map(alert => (
+              <div key={alert.title} className="rounded-lg border bg-muted/20 p-3 space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold">{alert.title}</p>
+                  <Badge variant="secondary" className={alert.severity === 'High' ? 'bg-amber-500/10 text-amber-700' : 'bg-sky-500/10 text-sky-700'}>{alert.severity}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{alert.detail}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-glow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /> {t('Next fittings')}</CardTitle>
+            <CardDescription>{t('Keep the calendar honest')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+              <div>
+                <p className="font-semibold">{t('Today')}</p>
+                <p className="text-xs text-muted-foreground">{t('2 slots booked')}</p>
+              </div>
+              <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600">{t('On track')}</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+              <div>
+                <p className="font-semibold">{t('Tomorrow')}</p>
+                <p className="text-xs text-muted-foreground">{t('3 priority clients')}</p>
+              </div>
+              <Badge variant="secondary" className="bg-sky-500/10 text-sky-600">{t('Prep fabrics')}</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+              <div>
+                <p className="font-semibold">{t('This week')}</p>
+                <p className="text-xs text-muted-foreground">{t('8 fittings scheduled')}</p>
+              </div>
+              <Badge variant="secondary" className="bg-amber-500/10 text-amber-700">{t('Tight turnaround')}</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Floating Action */}
       <Button
         className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg"
@@ -321,7 +514,7 @@ function SummaryCard({
   growth?: number;
 }) {
   return (
-    <Card className="shadow-glow hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
+    <Card className="shadow-glow hover:shadow-xl transition-transform duration-300 hover:-translate-y-1 border border-white/10">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
