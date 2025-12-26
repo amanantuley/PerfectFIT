@@ -42,6 +42,11 @@ import {
   Banknote,
   HelpCircle,
   Download,
+  ShieldCheck,
+  Clock,
+  BadgeCheck,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
@@ -63,6 +68,17 @@ export default function ReturnsPage() {
   const { returns } = useApp();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedReturn, setSelectedReturn] = useState<ReturnEntry | null>(null);
+
+  const replacedCount = returns?.filter((r) => r.status.toLowerCase() === 'replaced').length || 0;
+  const returnedCount = returns?.filter((r) => r.status.toLowerCase() === 'returned').length || 0;
+  const totalRefund = returns?.reduce((sum, r) => sum + (r.refundDetails?.netRefund || 0), 0) || 0;
+
+  const KPI_CARDS = [
+    { icon: Undo, label: 'Open Returns', value: returnedCount.toString(), unit: 'in review' },
+    { icon: Replace, label: 'Replacements', value: replacedCount.toString(), unit: 'fulfilled' },
+    { icon: Banknote, label: 'Refunded', value: `₹${totalRefund.toFixed(0)}`, unit: 'total' },
+    { icon: Clock, label: 'Avg SLA', value: '5-7', unit: 'days' },
+  ];
 
   const handleOpenDetails = (item: ReturnEntry) => {
     setSelectedReturn(item);
@@ -150,12 +166,61 @@ export default function ReturnsPage() {
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 25 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="space-y-10 p-4 sm:p-6 md:p-10 bg-gradient-to-b from-background via-background/70 to-background/40"
-    >
+    <div className="space-y-8 animate-fade-in-up p-4 sm:p-6 md:p-10 bg-gradient-to-b from-background via-background/70 to-background/40">
+      {/* Hero */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="relative overflow-hidden rounded-2xl border border-muted/40 bg-gradient-to-br from-primary/10 via-background to-primary/5 p-6 sm:p-10"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50" />
+        <div className="relative space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 text-xs rounded-full border border-primary/30 bg-primary/5 text-muted-foreground flex items-center gap-1">
+              <ShieldCheck className="h-3.5 w-3.5" /> Protected Returns
+            </span>
+            <span className="px-3 py-1 text-xs rounded-full border border-primary/30 bg-primary/5 text-muted-foreground flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5" /> Free Alteration Voucher
+            </span>
+          </div>
+          <div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500">Returns & Refunds Hub</h1>
+            <p className="mt-3 text-base sm:text-lg text-muted-foreground max-w-2xl">
+              Manage returns, replacements, and refund invoices with enterprise-grade transparency and clarity.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">⏱ Refunds in 5–7 days</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">📑 Downloadable credit notes</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">🤝 Replacement-first policy</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {KPI_CARDS.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <Card key={idx} className="shadow-lg border-muted/40 bg-background/70 backdrop-blur-sm">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground font-medium">{card.label}</p>
+                    <p className="text-2xl font-bold text-foreground">{card.value}</p>
+                    <p className="text-xs text-muted-foreground">{card.unit}</p>
+                  </div>
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
       {/* --- Return Policy Section --- */}
       <Card className="shadow-xl border border-border/30 backdrop-blur-sm">
         <CardHeader>
@@ -403,6 +468,34 @@ export default function ReturnsPage() {
           )}
         </DialogContent>
       </Dialog>
-    </motion.section>
+
+      {/* Trust & CTA */}
+      <Card className="shadow-xl border border-primary/30 bg-gradient-to-r from-primary/5 via-background to-primary/5">
+        <CardContent className="py-6 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-primary flex items-center gap-2"><BadgeCheck className="h-4 w-4" /> Promise</p>
+              <p className="text-base text-foreground">Fast, transparent refunds and replacements with downloadable credit notes.</p>
+            </div>
+            <Button className="bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 text-white hover:opacity-90" asChild>
+              <a href="/contact" className="flex items-center gap-2">
+                Need help?
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3 text-sm text-muted-foreground">
+            <div className="flex items-start gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary mt-0.5" />
+              <p><strong>Protected:</strong> Every return is logged with a transaction ID and refund status for auditability.</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <Clock className="h-4 w-4 text-primary mt-0.5" />
+              <p><strong>Predictable SLAs:</strong> Standard refunds in 5–7 business days; replacements prioritized within 72 hours.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

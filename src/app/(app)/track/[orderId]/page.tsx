@@ -2,7 +2,23 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Package, Truck, Home, Scissors, Info, AlertTriangle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  CheckCircle,
+  Package,
+  Truck,
+  Home,
+  Scissors,
+  Info,
+  AlertTriangle,
+  Calendar,
+  Clock,
+  Receipt,
+  ShieldCheck,
+  FileDown,
+  MessageCircle,
+  MapPin,
+} from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useApp, Order } from '@/context/app-context';
 import { useEffect, useState, useMemo } from 'react';
@@ -12,6 +28,9 @@ import { Separator } from '@/components/ui/separator';
 import { addDays, format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const MapPlaceholder = ({ status }: { status: Order['status'] }) => {
   const progressPercentage = useMemo(() => {
@@ -122,6 +141,7 @@ export default function TrackOrderPage() {
   const orderId = params.orderId as string;
   const [order, setOrder] = useState<Order | undefined>();
   const [currentStep, setCurrentStep] = useState(0);
+  const eta = useMemo(() => (order ? addDays(new Date(order.date), 10) : null), [order]);
 
   useEffect(() => {
     const foundOrder = orders.find(o => o.id === orderId);
@@ -192,19 +212,40 @@ export default function TrackOrderPage() {
       transition={{ duration: 0.6 }}
       className="space-y-8 animate-fade-in-up"
     >
+      {/* Hero / Header */}
       <Card className="shadow-xl border border-muted/30 backdrop-blur-md">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
-            Track Your Order
-          </CardTitle>
-          <CardDescription>
-            Order ID: {order.id} | Estimated Delivery:{' '}
-            {format(addDays(new Date(order.date), 10), 'PPP')}
-          </CardDescription>
+        <CardHeader className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <CardTitle className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
+                Track Your Order
+              </CardTitle>
+              <CardDescription>
+                Order ID: {order.id}
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="gap-1 bg-primary/10 border-primary/30 text-primary"><ShieldCheck className="h-4 w-4" /> Insured shipping</Badge>
+              <Badge variant="outline" className="gap-1 bg-primary/10 border-primary/30 text-primary"><Clock className="h-4 w-4" /> ETA {eta ? format(eta, 'PPP') : '—'}</Badge>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[{ label: 'Placed', value: format(new Date(order.date), 'PPP'), icon: Calendar }, { label: 'Status', value: order.status, icon: Info }, { label: 'Type', value: order.type, icon: Package }, { label: 'Total', value: `₹${order.price?.toLocaleString('en-IN')}`, icon: Receipt }].map(({ label, value, icon: Icon }) => (
+              <div key={label} className="flex items-center gap-3 rounded-xl border border-muted/30 bg-background/70 px-4 py-3 shadow-sm">
+                <span className="p-2 rounded-full bg-primary/10"><Icon className="h-4 w-4 text-primary" /></span>
+                <div className="leading-tight">
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="font-semibold text-foreground text-sm">{value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardHeader>
         <CardContent className="space-y-10">
           <MapPlaceholder status={order.status} />
           <Separator />
+
+          {/* Delivery Status timeline */}
           <div>
             <h3 className="text-xl font-bold mb-6">Delivery Status</h3>
             <div className="relative space-y-10">
@@ -231,11 +272,7 @@ export default function TrackOrderPage() {
                       {step.status}
                     </p>
                     <p className="text-sm text-muted-foreground">{step.description}</p>
-                    {index <= currentStep && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {getStepDate(order.date, index)}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground mt-1">{getStepDate(order.date, index)}</p>
                   </div>
                 </div>
               ))}
@@ -243,6 +280,96 @@ export default function TrackOrderPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Summary and Shipment Details */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Order Summary */}
+        <Card className="lg:col-span-2 border border-muted/30 bg-background/70 backdrop-blur-sm shadow-lg">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="text-xl">Order Summary</CardTitle>
+              <CardDescription>Item details and customization notes.</CardDescription>
+            </div>
+            <Button variant="outline" className="gap-2" onClick={() => {
+              const doc = new jsPDF();
+              const pageWidth = doc.internal.pageSize.getWidth();
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(18);
+              doc.text('PerfectFit - Order Invoice', 14, 18);
+              doc.setFontSize(10);
+              doc.setFont('helvetica', 'normal');
+              doc.text(`Order ID: ${order.id}`, 14, 26);
+              doc.text(`Date: ${format(new Date(order.date), 'PPP')}`, 14, 32);
+              (doc as any).autoTable({ startY: 42, head: [['Item', 'Type', 'Price']], body: [[order.item, order.type, `₹${order.price?.toLocaleString('en-IN')}`]], headStyles: { fillColor: [143, 88, 240] } });
+              const lastY = (doc as any).lastAutoTable.finalY + 8;
+              doc.setFont('helvetica', 'bold');
+              doc.text('Total', pageWidth - 60, lastY);
+              doc.text(`₹${order.price?.toLocaleString('en-IN')}`, pageWidth - 20, lastY, { align: 'right' });
+              if (order.customizationNote) {
+                doc.setFont('helvetica', 'bold');
+                doc.text('Customization Notes', 14, lastY + 12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(order.customizationNote, 14, lastY + 18, { maxWidth: pageWidth - 28 });
+              }
+              doc.save(`PerfectFit-Invoice-${order.id}.pdf`);
+            }}>
+              <FileDown className="h-4 w-4" /> Download invoice
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-md overflow-hidden border bg-muted/20">
+                {/* decorative image if available */}
+                <Image src={order.image} alt={order.item} width={64} height={64} className="object-cover h-full w-full" />
+              </div>
+              <div className="space-y-1">
+                <p className="font-semibold text-foreground">{order.item}</p>
+                <p className="text-sm text-muted-foreground">{order.type} • Placed {format(new Date(order.date), 'PPP')}</p>
+              </div>
+            </div>
+            {order.customizationNote && (
+              <div className="rounded-lg border border-muted/30 p-3 bg-muted/10">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Customization</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{order.customizationNote}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Shipment Details */}
+        <Card className="border border-muted/30 bg-background/70 backdrop-blur-sm shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-xl">Shipment details</CardTitle>
+            <CardDescription>Courier and delivery information.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm"><Truck className="h-4 w-4 text-primary" /> Carrier</div>
+              <p className="text-sm font-medium">Perfect Logistics</p>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm"><MapPin className="h-4 w-4 text-primary" /> Destination</div>
+              <p className="text-sm font-medium">Your saved address</p>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm"><Clock className="h-4 w-4 text-primary" /> ETA</div>
+              <p className="text-sm font-medium">{eta ? format(eta, 'PPP') : '—'}</p>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">Need help with delivery?</p>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm" className="gap-1">
+                  <Link href="/messages"><MessageCircle className="h-4 w-4" /> Chat</Link>
+                </Button>
+                <Button asChild size="sm" className="gap-1 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 text-white">
+                  <Link href="/contact">Contact support</Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </motion.div>
   );
 }
