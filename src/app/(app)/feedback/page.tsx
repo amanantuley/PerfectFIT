@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Star } from "lucide-react";
+import { Loader2, Star, Zap, Heart, AlertCircle, MessageSquare, TrendingUp, ShieldCheck } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 import { submitFeedback } from "./actions";
 import React, { useEffect, useRef, useState } from "react";
@@ -24,20 +24,35 @@ const initialState = {
   error: false,
 };
 
+type FeedbackCategory = 'sizing' | 'fit' | 'shipping' | 'rental' | 'support' | 'other';
+
+const CATEGORY_ICONS: Record<FeedbackCategory, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  sizing: Zap,
+  fit: Heart,
+  shipping: TrendingUp,
+  rental: MessageSquare,
+  support: MessageSquare,
+  other: AlertCircle,
+};
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button
       type="submit"
-      className="w-full font-medium text-white bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 hover:opacity-90 transition-all"
+      className="w-full font-medium text-white bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 hover:opacity-90 transition-all h-11 text-base"
       disabled={pending}
+      size="lg"
     >
       {pending ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting feedback...
         </>
       ) : (
-        <>Submit Feedback</>
+        <>
+          <Heart className="mr-2 h-4 w-4" />
+          Share Your Insight
+        </>
       )}
     </Button>
   );
@@ -49,6 +64,7 @@ export default function FeedbackPage() {
   const [state, formAction] = useFormState(submitFeedback, initialState);
   const [rating, setRating] = useState(5);
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<FeedbackCategory>('other');
 
   useEffect(() => {
     if (state.message) {
@@ -91,13 +107,45 @@ export default function FeedbackPage() {
             Share Your Feedback
           </CardTitle>
 
-          <CardDescription className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto">
-            We value your opinion — help us make PerfectFit even better.
+          <CardDescription className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+            Every insight helps us refine AI accuracy, delivery speed, and fit quality. Your voice shapes our roadmap.
           </CardDescription>
+
+          <div className="flex flex-wrap justify-center gap-2 mt-4">
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">🔍 Read within 24 hours</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">✅ Action feedback reviewed weekly</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">🎯 Product team monitors trends</span>
+          </div>
         </CardHeader>
 
         <CardContent className="p-6 sm:p-8">
           <form ref={formRef} action={formAction} className="space-y-6">
+            {/* Category */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Feedback Category</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {(['sizing', 'fit', 'shipping', 'rental', 'support', 'other'] as FeedbackCategory[]).map((cat) => {
+                  const Icon = CATEGORY_ICONS[cat];
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`p-3 rounded-lg border transition-all flex flex-col items-center gap-2 text-sm font-medium ${
+                        selectedCategory === cat
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-muted hover:border-primary/40 text-muted-foreground hover:bg-muted/40'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className="capitalize text-xs">{cat}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <input type="hidden" name="category" value={selectedCategory} />
+            </div>
+
             {/* User Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -124,13 +172,16 @@ export default function FeedbackPage() {
             </div>
 
             {/* Rating */}
-            <div className="space-y-3 text-center">
-              <Label className="text-base font-medium">Overall Rating</Label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-medium">Experience Rating</Label>
+                <span className="text-sm text-muted-foreground">({rating}/5 stars)</span>
+              </div>
               <RadioGroup
                 name="rating"
                 value={rating.toString()}
                 onValueChange={(value) => setRating(Number(value))}
-                className="flex justify-center gap-3 sm:gap-4 flex-wrap"
+                className="flex gap-2 sm:gap-3 flex-wrap"
               >
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Label
@@ -138,7 +189,7 @@ export default function FeedbackPage() {
                     htmlFor={`rating-${star}`}
                     onMouseEnter={() => setHoveredStar(star)}
                     onMouseLeave={() => setHoveredStar(null)}
-                    className="cursor-pointer p-3 sm:p-4 rounded-xl border hover:border-primary/40 hover:bg-muted/40 transition-all duration-300 flex flex-col items-center space-y-2"
+                    className="cursor-pointer p-2 rounded-lg border hover:border-primary/40 hover:bg-muted/40 transition-all duration-300 flex flex-col items-center space-y-1 flex-1"
                   >
                     <RadioGroupItem
                       value={star.toString()}
@@ -146,13 +197,13 @@ export default function FeedbackPage() {
                       className="sr-only"
                     />
                     <Star
-                      className={`w-8 h-8 transition-colors duration-300 ${
+                      className={`w-6 h-6 transition-colors duration-300 ${
                         (hoveredStar ?? rating) >= star
                           ? "text-primary fill-primary"
                           : "text-muted-foreground"
                       }`}
                     />
-                    <span className="text-xs font-medium">{star}</span>
+                    <span className="text-xs font-medium text-muted-foreground group-hover:text-primary">{star}</span>
                   </Label>
                 ))}
               </RadioGroup>
@@ -176,8 +227,17 @@ export default function FeedbackPage() {
           </form>
         </CardContent>
 
-        <div className="border-t border-muted/40 text-center py-4 text-sm text-muted-foreground">
-          💡 Your feedback helps us tailor the future of fashion.
+        <div className="border-t border-muted/40 py-6 px-6 sm:px-8 bg-gradient-to-r from-primary/5 via-background to-primary/5">
+          <div className="max-w-2xl mx-auto space-y-3">
+            <div className="flex items-start gap-3 text-sm text-muted-foreground">
+              <ShieldCheck className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <p><strong>Privacy First:</strong> Feedback is confidential. We never share personal data or publicly quote responses without consent.</p>
+            </div>
+            <div className="flex items-start gap-3 text-sm text-muted-foreground">
+              <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <p><strong>Real Impact:</strong> Feedback directly influences quarterly roadmap updates and feature prioritization.</p>
+            </div>
+          </div>
         </div>
       </Card>
     </motion.div>

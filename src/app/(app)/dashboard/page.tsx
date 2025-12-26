@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { extractBodyMeasurements, type ExtractBodyMeasurementsOutput } from '@/ai/flows/extract-body-measurements';
 import { recommendGarments } from '@/ai/flows/recommend-garments';
 import { garments, Garment } from '@/lib/garments';
-import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb, PlayCircle, PlusCircle, History, Video, Tag, Repeat } from 'lucide-react';
+import { Upload, Loader2, Ruler, ShoppingCart, Shirt, Briefcase, PersonStanding, Hand, Armchair, ChevronRight, Check, Waves, Camera, GitCommitHorizontal, X, Lightbulb, PlayCircle, PlusCircle, History, Video, Tag, Repeat, ShieldCheck, LineChart, Activity, Clock3, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -55,6 +56,50 @@ type MeasurementEntry = ExtractBodyMeasurementsOutput & {
   source: 'AI' | 'Manual';
 };
 
+type KpiCard = {
+  label: string;
+  value: string;
+  meta: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
+
+type Insight = {
+  title: string;
+  detail: string;
+  status: 'success' | 'warning' | 'info';
+};
+
+const KPI_CARDS: KpiCard[] = [
+  { label: 'Fit confidence', value: '98.4%', meta: '+1.2% WoW', icon: ShieldCheck },
+  { label: 'Return risk', value: '−38%', meta: 'vs category avg', icon: LineChart },
+  { label: 'Cycle time', value: '11m 24s', meta: 'photo → recs', icon: Clock3 },
+  { label: 'Engagement', value: '4.9 / 5', meta: 'session satisfaction', icon: Activity },
+];
+
+const INSIGHTS: Insight[] = [
+  {
+    title: 'AI sizing validated',
+    detail: 'Last three sessions matched manual checks within ±3mm.',
+    status: 'success',
+  },
+  {
+    title: 'Photo quality reminder',
+    detail: 'Well-lit, full-body frames improve hip/waist precision by 12%.',
+    status: 'info',
+  },
+  {
+    title: 'Reduce rework',
+    detail: 'Encourage customers to save profiles to reuse measurements instantly.',
+    status: 'warning',
+  },
+];
+
+const INSIGHT_TONE: Record<Insight['status'], string> = {
+  success: 'text-emerald-500',
+  info: 'text-sky-500',
+  warning: 'text-amber-500',
+};
+
 export default function DashboardPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -76,15 +121,40 @@ export default function DashboardPage() {
   const [showConsultationDialog, setShowConsultationDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const measurementStateLabel = measurements
+    ? 'Ready with latest capture'
+    : isLoading
+      ? 'Processing photo'
+      : 'Awaiting input';
+
+  const measurementFields = ['height','weight','neckSize','shoulder','chest','sleeveLength','waist','hip','inseam'] as const;
+  const measurementCoverage = measurements
+    ? Math.round((measurementFields.filter(field => Boolean((measurements as Record<string, number>)[field])).length / measurementFields.length) * 100)
+    : 0;
+  const measurementQualityLabel = measurementCoverage >= 90 ? 'Production-ready' : measurementCoverage >= 70 ? 'Usable with review' : 'Needs completion';
 
   useEffect(() => {
-    // Show the video every time the user visits the dashboard
-    setShowWelcomeVideo(true);
+    const storageKey = 'pf_dashboard_video_seen';
+    if (typeof window !== 'undefined') {
+      const seen = sessionStorage.getItem(storageKey);
+      if (!seen) {
+        setShowWelcomeVideo(true);
+        sessionStorage.setItem(storageKey, '1');
+      }
+    }
   }, []);
-  
+
+
   const closeVideoAndStartTour = () => {
     setShowWelcomeVideo(false);
-  }
+  };
+
+  const scrollToMeasurementWorkflow = () => {
+    const el = typeof document !== 'undefined' ? document.getElementById('measurement-workflow') : null;
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -288,7 +358,181 @@ export default function DashboardPage() {
 
   return (
     <div id="welcome-step" className="space-y-8 animate-fade-in-up">
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <Card className="overflow-hidden border border-white/10 shadow-glow">
+        <div className="grid gap-0 md:grid-cols-2">
+          <div className="relative min-h-[240px] bg-black">
+            <Image
+              src="https://placehold.co/1600x900.png"
+              alt="PerfectFit walkthrough"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+            <div className="absolute inset-0 flex flex-col justify-end p-6 space-y-3">
+              <p className="text-xs uppercase tracking-[0.2em] text-white/70">Start here</p>
+              <h2 className="text-2xl font-bold text-white">Welcome to your fit command center</h2>
+              <p className="text-sm text-white/80 max-w-xl">Watch a 60-second walkthrough on capturing accurate measurements and driving perfect-fit recommendations.</p>
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => setShowWelcomeVideo(true)}>
+                  <PlayCircle className="mr-2 h-4 w-4" /> Play overview
+                </Button>
+                <Button variant="outline" onClick={scrollToMeasurementWorkflow}>
+                  <Ruler className="mr-2 h-4 w-4" /> Start measuring
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="p-6 md:p-8 space-y-4 bg-gradient-to-b from-background/70 via-background/50 to-background/30">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Accuracy protocol</p>
+                <p className="text-sm text-foreground">Pose validation, lighting guardrails, and human override keep outputs dependable.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase tracking-wide">Median delta</p>
+                <p className="text-lg font-semibold text-foreground">±3mm vs manual</p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase tracking-wide">Throughput</p>
+                <p className="text-lg font-semibold text-foreground">~11m photo → recs</p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase tracking-wide">Return risk</p>
+                <p className="text-lg font-semibold text-emerald-500">−38% vs avg</p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase tracking-wide">Satisfaction</p>
+                <p className="text-lg font-semibold text-foreground">4.9 / 5</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">AI fit control</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">
+            Intelligent Fit Command Center
+          </h1>
+          <p className="text-muted-foreground max-w-3xl">
+            Manage live measurements, AI sizing, and curated looks from a single console. Designed for stylists, operators, and premium customers.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="outline" onClick={() => router.push('/orders')}>
+            <History className="mr-2 h-4 w-4" /> Review recent orders
+          </Button>
+          <Button onClick={() => setShowWelcomeVideo(true)}>
+            <Sparkles className="mr-2 h-4 w-4" /> Launch guided setup
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {KPI_CARDS.map(({ label, value, meta, icon: Icon }) => (
+          <Card key={label} className="border border-white/10 shadow-glow bg-gradient-to-b from-background/80 via-background/60 to-background/40">
+            <CardContent className="p-5 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+                <Icon className="h-4 w-4 text-primary" />
+              </div>
+              <p className="text-2xl font-bold">{value}</p>
+              <p className="text-sm text-emerald-500">{meta}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="shadow-glow border border-white/10 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <GitCommitHorizontal className="h-5 w-5 text-primary" /> Live session playbook
+            </CardTitle>
+            <CardDescription>Guide customers through the most reliable measurement flow.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-3">
+            {[
+              { title: 'Capture', desc: 'Choose live camera or upload. Confirm lighting + framing.', icon: Camera },
+              { title: 'Calibrate', desc: 'AI validates pose, then extracts 10 key dimensions.', icon: Ruler },
+              { title: 'Personalize', desc: 'Generate fit-ready looks and push to cart in seconds.', icon: ShoppingCart },
+            ].map(step => (
+              <div key={step.title} className="rounded-xl border bg-muted/20 p-4 space-y-2">
+                <step.icon className="h-5 w-5 text-primary" />
+                <p className="font-semibold">{step.title}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-glow border border-white/10">
+          <CardHeader>
+            <CardTitle>Status and readiness</CardTitle>
+            <CardDescription>Operational signal for this session.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+              <div>
+                <p className="text-sm text-muted-foreground">Measurement state</p>
+                <p className="font-semibold">{measurementStateLabel}</p>
+              </div>
+              <ShieldCheck className="h-5 w-5 text-primary" />
+            </div>
+            <div className="rounded-lg border bg-muted/20 p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Completeness</p>
+                  <p className="font-semibold">{measurementCoverage}% • {measurementQualityLabel}</p>
+                </div>
+                <LineChart className="h-5 w-5 text-primary" />
+              </div>
+              <Progress value={measurementCoverage} className="h-2" />
+              <p className="text-xs text-muted-foreground">Ensure all nine dimensions are present for premium-fit accuracy.</p>
+            </div>
+            <div className="rounded-lg border bg-muted/20 p-3 space-y-2">
+              <p className="text-sm text-muted-foreground">Quality guardrails</p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Lighting check auto-runs on capture.</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Pose validation prevents skewed outputs.</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" /> Manual override retains human control.</li>
+              </ul>
+            </div>
+            <div className="rounded-lg border bg-muted/20 p-3">
+              <p className="text-sm text-muted-foreground">Next best action</p>
+              <p className="font-semibold">{measurements ? 'Finalize recommendations and add to cart.' : 'Capture or upload a photo to unlock fit insights.'}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="shadow-glow border border-white/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-primary" /> Fit operations insights
+          </CardTitle>
+          <CardDescription>Concise, actionable signals to keep sessions premium.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-3">
+          {INSIGHTS.map(insight => (
+            <div key={insight.title} className="rounded-xl border bg-muted/20 p-4 space-y-2">
+                <p className={`text-sm uppercase tracking-wide ${INSIGHT_TONE[insight.status]}`}>{insight.status}</p>
+                <p className="font-semibold">{insight.title}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{insight.detail}</p>
+                <div className="text-xs text-muted-foreground/80 flex items-center gap-2">
+                  <Sparkles className="h-3 w-3 text-primary" />
+                  <span>Apply now to reduce rework.</span>
+                </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <div id="measurement-workflow" className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-2 h-fit space-y-8">
            <Tabs defaultValue="live" className="w-full">
               <TabsList className="grid w-full grid-cols-3">

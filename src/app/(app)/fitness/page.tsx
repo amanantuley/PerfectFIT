@@ -19,7 +19,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { LineChart, CartesianGrid, XAxis, YAxis, Legend, Tooltip, Line } from 'recharts';
-import { PlusCircle, Dumbbell, Utensils, Target, Loader2, Bot, Info, BarChart } from 'lucide-react';
+import { PlusCircle, Dumbbell, Utensils, Target, Loader2, Bot, Info, BarChart, TrendingDown, Flame, Clock, CheckCircle, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { generateFitnessPlan, type GenerateFitnessPlanInput } from '@/ai/flows/generate-fitness-plan';
@@ -102,15 +102,61 @@ export default function FitnessTrackingPage() {
     } finally {
         setIsLoading(false);
     }
-  }
+  };
+
+  const KPI_CARDS = [
+    { icon: TrendingDown, label: 'Avg Progress', value: fitnessHistory.length > 1 ? ((fitnessHistory[0].waist - fitnessHistory[fitnessHistory.length - 1].waist) / (fitnessHistory.length - 1)).toFixed(1) : '0', unit: 'cm/entry' },
+    { icon: CheckCircle, label: 'Total Entries', value: fitnessHistory.length.toString(), unit: 'measurements' },
+    { icon: Clock, label: 'Tracking Period', value: fitnessHistory.length > 1 ? fitnessHistory.length.toString() : '—', unit: 'weeks' },
+    { icon: Flame, label: 'AI Plans', value: aiPlan ? '1' : '0', unit: 'active' },
+  ];
 
   return (
     <div className="space-y-8 animate-fade-in-up">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl border border-muted/40 bg-gradient-to-br from-primary/10 via-background to-primary/5 p-8 sm:p-12">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50" />
+        <div className="relative space-y-4">
+          <div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500">Fitness Transformation Hub</h1>
+            <p className="mt-2 text-lg text-muted-foreground max-w-2xl">Track measurements, generate AI-powered fitness and diet plans, and monitor your progress with scientific precision.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">📊 Data-Driven Recommendations</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">🤖 AI-Powered Plans</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground">✅ Weekly Plan Updates</span>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {KPI_CARDS.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <Card key={idx} className="shadow-lg border-muted/40 bg-background/70 backdrop-blur-sm">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground font-medium">{card.label}</p>
+                    <p className="text-2xl font-bold text-foreground">{card.value}</p>
+                    <p className="text-xs text-muted-foreground">{card.unit}</p>
+                  </div>
+                  <div className="p-3 bg-primary/10 rounded-full">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <Card className="lg:col-span-1 h-fit shadow-lg">
+        <Card className="lg:col-span-1 h-fit shadow-lg border-muted/40 bg-background/70 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Add New Measurement</CardTitle>
-            <CardDescription>Manually log your measurements.</CardDescription>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow flex items-center gap-2"><PlusCircle className="h-5 w-5" /> Log Measurement</CardTitle>
+            <CardDescription>Record body measurements for accurate tracking.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddMeasurement} className="space-y-4">
@@ -166,18 +212,18 @@ export default function FitnessTrackingPage() {
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Entry
+              <Button type="submit" className="w-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 hover:opacity-90 text-white font-medium">
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Save Measurement
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 shadow-lg">
+        <Card className="lg:col-span-2 shadow-lg border-muted/40 bg-background/70 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow">Measurement History</CardTitle>
-            <CardDescription>Track your progress over time.</CardDescription>
+            <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow flex items-center gap-2"><BarChart className="h-5 w-5" /> Progress Timeline</CardTitle>
+            <CardDescription>Visual tracking of body measurement changes over time.</CardDescription>
           </CardHeader>
           <CardContent className="pr-0">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -231,11 +277,17 @@ export default function FitnessTrackingPage() {
       </div>
 
        <div className="space-y-8">
-        <Card className="shadow-lg">
+        <Card className="shadow-lg border-muted/40 bg-background/70 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Target />AI Fitness Planner</CardTitle>
-            <CardDescription>Fill in your details to receive a personalized fitness and diet plan based on your latest measurements.</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Bot className="h-6 w-6" /> AI Plan Generator</CardTitle>
+            <CardDescription>Receive scientifically-designed fitness and nutrition plans personalized to your measurements, goals, and lifestyle.</CardDescription>
           </CardHeader>
+          
+          <div className="px-6 flex flex-wrap gap-2 pb-4">
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Data-Backed</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Updated Weekly</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-muted-foreground flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Adaptive</span>
+          </div>
           <CardContent>
             <form onSubmit={handleGeneratePlan} className="space-y-6">
                 <div className="grid md:grid-cols-3 gap-6">
@@ -299,9 +351,9 @@ export default function FitnessTrackingPage() {
                     </div>
                 )}
                 
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 hover:opacity-90 text-white font-medium h-11" size="lg" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-                    Generate My Personalized Plan
+                    Generate Personalized Plan
                 </Button>
             </form>
           </CardContent>
@@ -316,11 +368,19 @@ export default function FitnessTrackingPage() {
         )}
 
         {aiPlan && (
+            <>
+            <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-background to-primary/5 p-6 sm:p-8">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-primary flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Plan Generated Successfully</p>
+                <p className="text-muted-foreground">Your AI-powered plan adapts to your progress. Update measurements weekly for real-time adjustments.</p>
+              </div>
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-8 items-start">
-                 <Card className="shadow-lg">
+                 <Card className="shadow-lg border-muted/40 bg-background/70 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Dumbbell /> AI Fitness Plan</CardTitle>
-                        <CardDescription>{aiPlan.fitnessPlan.title}</CardDescription>
+                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Dumbbell /> Workout Plan</CardTitle>
+                        <CardDescription className="line-clamp-1">{aiPlan.fitnessPlan.title}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="mb-4 p-3 rounded-md bg-muted/50">
@@ -348,10 +408,10 @@ export default function FitnessTrackingPage() {
                     </CardContent>
                 </Card>
 
-                 <Card className="shadow-lg">
+                 <Card className="shadow-lg border-muted/40 bg-background/70 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Utensils /> AI Diet Plan</CardTitle>
-                        <CardDescription>{aiPlan.dietPlan.title}</CardDescription>
+                        <CardTitle className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 bg-size-200 animate-text-rainbow"><Utensils /> Nutrition Plan</CardTitle>
+                        <CardDescription className="line-clamp-1">{aiPlan.dietPlan.title}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
@@ -396,6 +456,20 @@ export default function FitnessTrackingPage() {
                     </CardContent>
                 </Card>
             </div>
+            
+            <div className="border-t border-muted/40 py-6 px-6 sm:px-8 bg-gradient-to-r from-primary/5 via-background to-primary/5 rounded-b-lg">
+              <div className="max-w-4xl mx-auto space-y-3">
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <ShieldCheck className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p><strong>Science-Based:</strong> Plans are generated using proven fitness methodologies and nutritional science principles.</p>
+                </div>
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <Clock className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p><strong>Adaptive Tracking:</strong> Update measurements weekly to let the AI refine your plan in real-time based on your progress.</p>
+                </div>
+              </div>
+            </div>
+            </>
         )}
       </div>
     </div>

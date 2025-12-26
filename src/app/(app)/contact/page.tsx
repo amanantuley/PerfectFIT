@@ -26,6 +26,9 @@ import {
   Linkedin,
   Twitter,
   Globe,
+  ShieldCheck,
+  Clock3,
+  Sparkles,
 } from 'lucide-react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { submitContact } from './actions';
@@ -100,6 +103,35 @@ export default function ContactUsPage() {
           Have questions about PerfectFit? Our team is always ready to help you
           look and feel your best — every stitch of the way.
         </p>
+        <div className="flex flex-wrap justify-center gap-3 text-sm text-muted-foreground">
+          <span className="px-3 py-1 rounded-full border border-primary/30 bg-primary/5">Avg first response: &lt; 2 hours</span>
+          <span className="px-3 py-1 rounded-full border border-primary/30 bg-primary/5">Priority tailoring support for members</span>
+          <span className="px-3 py-1 rounded-full border border-primary/30 bg-primary/5">Enterprise partnerships answered within 1 business day</span>
+        </div>
+      </motion.section>
+
+      {/* Trust + Speed Indicators */}
+      <motion.section
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="grid sm:grid-cols-3 gap-4"
+      >
+        {[ 
+          { icon: ShieldCheck, label: 'Secure by design', desc: 'All messages encrypted in transit; PII handled with care.' },
+          { icon: Clock3, label: 'Fast SLA', desc: 'Human replies on weekdays, AI triage 24/7 to route faster.' },
+          { icon: Sparkles, label: 'Tailor-led help', desc: 'Fit specialists review complex sizing before we respond.' },
+        ].map(({ icon: Icon, label, desc }) => (
+          <Card key={label} className="p-4 bg-background/50 backdrop-blur-sm border shadow-sm">
+            <div className="flex items-start gap-3">
+              <Icon className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-semibold">{label}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </div>
+            </div>
+          </Card>
+        ))}
       </motion.section>
 
       {/* 💡 Why Contact Us Section */}
@@ -150,7 +182,7 @@ export default function ContactUsPage() {
               <CardTitle className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
                 Contact Information
               </CardTitle>
-              <CardDescription>We’d love to hear from you.</CardDescription>
+              <CardDescription>Choose the channel that works best for you.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-base">
               <div className="flex items-start gap-4">

@@ -16,6 +16,10 @@ import {
   Globe,
   Sparkles,
   Shield,
+  BarChart3,
+  Compass,
+  Factory,
+  Users,
 } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
@@ -29,6 +33,18 @@ type WhyItem = {
 type TimelineItem = { year: string; text: string };
 
 type ValueItem = {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  title: string;
+  desc: string;
+};
+
+type StatItem = {
+  label: string;
+  value: string;
+  detail: string;
+};
+
+type Differentiator = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   title: string;
   desc: string;
@@ -57,11 +73,18 @@ const WHY_ITEMS: WhyItem[] = [
   },
 ];
 
+const STATS: StatItem[] = [
+  { label: 'Delivery accuracy', value: '99.2%', detail: 'On-time, first-fit deliveries across 25+ countries.' },
+  { label: 'Return reduction', value: '−38%', detail: 'Materialized through AI sizing and digital fitting.' },
+  { label: 'Sustainability', value: '40% less', detail: 'Fabric waste versus conventional production.' },
+  { label: 'Customer delight', value: '4.9 / 5', detail: 'Average satisfaction across enterprise partners.' },
+];
+
 const TIMELINE: TimelineItem[] = [
-  { year: '2025', text: 'Founded PerfectFit — redefining online tailoring.' },
-  { year: '2026', text: 'Launched AI body measurement tool.' },
-  { year: '2027', text: 'Partnered with global eco-fabric suppliers.' },
-  { year: '2028', text: 'Expanded to 25+ countries, powering virtual try-ons.' },
+  { year: '2025', text: 'Founded PerfectFit to redefine how digital tailoring meets human craft.' },
+  { year: '2026', text: 'Released computer-vision sizing with millimeter-level accuracy.' },
+  { year: '2027', text: 'Secured global eco-fabric supply chain with traceability by design.' },
+  { year: '2028', text: 'Scaled virtual try-ons to 25+ countries with localized fit models.' },
 ];
 
 const VALUES: ValueItem[] = [
@@ -79,6 +102,29 @@ const VALUES: ValueItem[] = [
     icon: Handshake,
     title: 'Customer First',
     desc: 'We thrive when you feel confident — satisfaction drives every innovation.',
+  },
+];
+
+const DIFFERENTIATORS: Differentiator[] = [
+  {
+    icon: BarChart3,
+    title: 'Data-backed sizing ops',
+    desc: 'Dynamic fit models tuned per geography, fabric behavior, and brand standards.',
+  },
+  {
+    icon: Compass,
+    title: 'Ethical supply orchestration',
+    desc: 'Transparent partner network with audited, low-waste production pipelines.',
+  },
+  {
+    icon: Factory,
+    title: 'Zero-overproduction',
+    desc: 'Made-to-order manufacturing that eliminates idle inventory and markdowns.',
+  },
+  {
+    icon: Users,
+    title: 'Human-in-the-loop QA',
+    desc: 'Master tailors review AI outputs for couture-level finish on every order.',
   },
 ];
 
@@ -105,10 +151,26 @@ export default function AboutUsPage() {
             About PerfectFit
           </h1>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg lg:text-xl text-gray-200 max-w-2xl sm:max-w-3xl leading-relaxed">
-            Blending the artistry of traditional tailoring with AI precision — redefining the way the world experiences fashion.
+            Where couture craftsmanship meets AI-grade precision. We build the fit infrastructure brands trust to deliver beautiful, responsible garments at scale.
           </p>
         </div>
       </section>
+
+      {/* Performance Snapshot */}
+      <Card className="shadow-xl border border-gray-100/20 overflow-hidden backdrop-blur-sm">
+        <CardContent className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 p-6 sm:p-10 lg:p-12">
+          {STATS.map(({ label, value, detail }) => (
+            <div
+              key={label}
+              className="rounded-xl bg-gradient-to-b from-background/70 via-background/40 to-background/30 border border-white/10 p-5 sm:p-6 shadow-md"
+            >
+              <p className="text-sm uppercase tracking-wide text-muted-foreground">{label}</p>
+              <p className="text-3xl sm:text-4xl font-bold mt-2 text-primary">{value}</p>
+              <p className="text-sm sm:text-base text-muted-foreground mt-2 leading-relaxed">{detail}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       {/* Story Section */}
       <Card className="shadow-xl border border-gray-100/20 overflow-hidden backdrop-blur-sm">
@@ -118,10 +180,10 @@ export default function AboutUsPage() {
               Our Story
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-              Founded in <strong>2025</strong>, PerfectFit emerged with one goal — to make custom-fit clothing accessible to everyone. We saw the frustration in ill-fitting clothes and knew technology could solve it.
+              Founded in <strong>2025</strong>, PerfectFit began as a response to a simple tension: bespoke quality rarely scales, and scaled production rarely fits. We believed technology could reconcile both.
               <br />
               <br />
-              Our founders — a team of fashion enthusiasts and AI engineers — came together to build a bridge between <strong>style and science</strong>. Today, we’re empowering individuals and brands to achieve personalized, waste-free fashion experiences.
+              Our founding team of couture specialists and AI engineers engineered a fit engine that respects heritage craftsmanship while automating the tedious. Today, we power brands and ateliers to deliver personalized, waste-free experiences without compromising margin or design integrity.
             </p>
           </div>
 
@@ -158,6 +220,32 @@ export default function AboutUsPage() {
           ))}
         </div>
       </section>
+
+      {/* Differentiators */}
+      <Card className="shadow-xl overflow-hidden border border-gray-100/20 backdrop-blur-sm">
+        <CardContent className="space-y-8 p-6 sm:p-10 lg:p-14">
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 animate-text-rainbow">
+              How We Operate
+            </h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto text-base sm:text-lg leading-relaxed">
+              A disciplined operating model that fuses responsible sourcing, precision data, and human oversight. Every garment ships with confidence, not guesswork.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {DIFFERENTIATORS.map(({ icon: Icon, title, desc }) => (
+              <div
+                key={title}
+                className="p-5 sm:p-6 rounded-xl bg-background/40 border backdrop-blur-sm hover:border-primary/40 transition-all shadow-md"
+              >
+                <Icon className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
+                <h3 className="text-lg sm:text-xl font-semibold mt-3">{title}</h3>
+                <p className="text-muted-foreground text-sm sm:text-base mt-2 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Mission Section */}
       <Card className="shadow-xl overflow-hidden border border-gray-100/20 backdrop-blur-sm">
