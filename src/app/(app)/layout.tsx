@@ -124,6 +124,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             {[
               { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+              { path: '/store', icon: Package, label: 'Store Catalog' },
               { path: '/orders', icon: Package, label: 'My Orders' },
               { path: '/cart', icon: ShoppingCart, label: 'My Cart' },
               { path: '/wallet', icon: Wallet, label: 'My Wallet' },

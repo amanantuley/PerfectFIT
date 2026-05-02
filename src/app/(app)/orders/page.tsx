@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { FileText, Calendar, Tag, CheckCircle, XCircle, RefreshCw, Truck, Undo, Package, MessageCircle, Send, Loader2, MapPin, DollarSign, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -66,14 +66,42 @@ const getStatusConfig = (status: string) => {
   }
 };
 
+
+import { db, auth } from '@/lib/firebase';
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+
 export default function OrdersPage() {
     const { toast } = useToast();
     const router = useRouter();
-    const { orders, addReturn, updateOrderStatus } = useApp();
+    const { addReturn, updateOrderStatus } = useApp();
     const [isMessageOpen, setIsMessageOpen] = useState(false);
     const [isReturnOpen, setIsReturnOpen] = useState(false);
     const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+    const [userOrders, setUserOrders] = useState<any[]>([]);
+
+    useEffect(() => {
+        const unsubscribeAuth = auth.onAuthStateChanged(user => {
+            if (user) {
+                const q = query(
+                    collection(db, 'orders'),
+                    where('userId', '==', user.uid),
+                    orderBy('createdAt', 'desc')
+                );
+                const unsubscribeOrders = onSnapshot(q, (snapshot) => {
+                    const liveOrders: any[] = [];
+                    snapshot.forEach(doc => {
+                        liveOrders.push({ id: doc.id, ...doc.data() });
+                    });
+                    setUserOrders(liveOrders);
+                });
+                return () => unsubscribeOrders();
+            } else {
+                setUserOrders([]);
+            }
+        });
+        return () => unsubscribeAuth();
+    }, []);
 
     const handleOpenMessageDialog = (order: Order) => {
         setSelectedOrder(order);
@@ -141,20 +169,22 @@ export default function OrdersPage() {
       <CardContent>
         {/* Mobile View */}
         <div className="md:hidden space-y-4">
-          {orders && orders.map((order) => {
+          {userOrders && userOrders.map((order) => {
             const statusConfig = getStatusConfig(order.status);
+            const itemName = order.items ? order.items.map((i: any) => i.name).join(', ') : order.item;
+            const itemPrice = order.amount || order.price || 0;
             return (
               <Card key={order.id} className="overflow-hidden transition-all hover:shadow-md hover:bg-muted/50">
                 <CardContent className="p-4 flex gap-4">
                   <div className="flex-1 space-y-2">
-                    <p className="font-bold">{order.item}</p>
+                    <p className="font-bold">{itemName}</p>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <FileText className="h-4 w-4 mr-1.5"/>
-                      <p>{order.id}</p>
+                      <p>{order.orderId || order.id}</p>
                     </div>
                      <div className="flex items-center text-sm text-muted-foreground">
                         <DollarSign className="h-4 w-4 mr-1.5" />
-                        <p>₹{order.price.toFixed(2)}</p>
+                        <p>₹{itemPrice.toFixed(2)}</p>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Tag className="h-4 w-4 mr-1.5"/>
@@ -212,18 +242,18 @@ export default function OrdersPage() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {orders && orders.map((order) => {
+                {userOrders && userOrders.map((order) => {
                     const statusConfig = getStatusConfig(order.status);
+                    const itemName = order.items ? order.items.map((i: any) => i.name).join(', ') : order.item;
+                    const itemPrice = order.amount || order.price || 0;
                     return (
                         <TableRow key={order.id} className="transition-colors hover:bg-muted/50">
                             <TableCell>
-                                <span className="font-medium">{order.item}</span>
+                                <span className="font-medium">{itemName}</span>
                             </TableCell>
                             <TableCell className="text-muted-foreground text-xs">
-                                <p><b>ID:</b> {order.id}</p>
-                                <p><b>Date:</b> {order.date}</p>
-                                <p><b>Type:</b> {order.type}</p>
-                                <p><b>Price:</b> ₹{order.price.toFixed(2)}</p>
+                                <div className="flex items-center gap-1"><FileText className="h-3 w-3" /> {order.orderId || order.id}</div>
+                                <div className="flex items-center gap-1"><DollarSign className="h-3 w-3" /> ₹{itemPrice.toFixed(2)}</div>
                             </TableCell>
                             <TableCell className="max-w-xs">
                                 <p className="text-xs text-muted-foreground line-clamp-2">

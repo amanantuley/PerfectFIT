@@ -119,6 +119,9 @@ const PerfectPayIcon = () => (
     </svg>
 );
 
+import { db, auth } from '@/lib/firebase';
+import { doc, getDoc, collection, setDoc, addDoc } from 'firebase/firestore';
+
 export default function CartPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -135,9 +138,27 @@ export default function CartPage() {
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
 
+  const [userUid, setUserUid] = useState<string | null>(null);
+  const [aiMeasurements, setAiMeasurements] = useState<any | null>(null);
 
   const { activePlan, discount: subscriptionDiscount } = useSubscription();
   const { addMultipleOrders, cart, removeFromCart, clearCart, updateCartItemNote } = useApp();
+
+  useEffect(() => {
+    const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            setUserUid(user.uid);
+            // Fetch latest AI measurements
+            const userRef = doc(db, 'users', user.uid);
+            const docSnap = await getDoc(userRef);
+            if (docSnap.exists() && docSnap.data().measurements?.length > 0) {
+                const measurements = docSnap.data().measurements;
+                setAiMeasurements(measurements[measurements.length - 1]);
+            }
+        }
+    });
+    return () => unsubscribeAuth();
+  }, []);
 
   // Simulate fetching user's location and sorting tailors
   useEffect(() => {
@@ -310,7 +331,7 @@ export default function CartPage() {
     }
   }, [state, toast]);
 
-  const handlePaymentConfirmation = (method: string) => {
+  const handlePaymentConfirmation = async (method: string) => {
     setIsPaymentDialogOpen(false);
     setSelectedPaymentMethod(null);
     
@@ -325,7 +346,45 @@ export default function CartPage() {
         customizationNote: item.customizationNote,
         price: item.price,
     }));
+    
+    // Save to global context
     addMultipleOrders(newOrders);
+    
+    // Persist to scalable backend
+    try {
+        if (!userUid) {
+             console.warn('User not logged in, skipping Firestore save.');
+        } else {
+             const orderId = `ORD${Math.floor(Math.random() * 900000) + 100000}`;
+             const orderPayload = {
+                 orderId,
+                 userId: userUid,
+                 customerName: 'PerfectFit Customer', // Ideally fetch from user profile
+                 amount: finalPrice,
+                 status: 'New',
+                 dueDate: format(addDays(new Date(), deliveryOption === 'express' ? 5 : 10), 'yyyy-MM-dd'),
+                 isPriority: deliveryOption === 'express',
+                 items: cart,
+                 measurements: aiMeasurements || null, // Attach AI sizing
+                 createdAt: new Date().toISOString()
+             };
+             
+             await addDoc(collection(db, 'orders'), orderPayload);
+             
+             // Update user's total orders
+             const userRef = doc(db, 'users', userUid);
+             const userSnap = await getDoc(userRef);
+             if (userSnap.exists()) {
+                 const currentTotal = userSnap.data().totalOrders || 0;
+                 await setDoc(userRef, { totalOrders: currentTotal + 1 }, { merge: true });
+             } else {
+                 await setDoc(userRef, { totalOrders: 1 }, { merge: true });
+             }
+        }
+    } catch (e) {
+        console.error('Failed to save order to db', e);
+    }
+    
     clearCart();
 
     toast({

@@ -31,21 +31,11 @@ import { CheckCircle, RefreshCw, Truck, Package, MoreHorizontal, FileText, Calen
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useTranslation } from '@/context/translation-provider';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
-const allOrders = [
-  { orderId: '#T302', customer: 'Priya Patel', item: 'Navy Blue Suit', date: '2025-07-20', dueDate: '2025-08-05', status: 'In Progress', amount: 4500, customizationNote: 'Fit: Slim Fit, Cuffs: French Cuff, Monogram: "PP"' },
-  { orderId: '#T301', customer: 'Rohan Sharma', item: 'Classic White Shirt', date: '2025-07-18', dueDate: '2025-07-25', status: 'Completed', amount: 800, customizationNote: 'Sleeves: Longer (+1 inch), Collar: Spread' },
-  { orderId: '#T300', customer: 'Amit Singh', item: 'Charcoal Gray Suit', date: '2025-07-15', dueDate: '2025-07-30', status: 'Shipped', amount: 4200, customizationNote: 'Standard customization.' },
-  { orderId: '#T299', customer: 'Sneha Reddy', item: 'Casual Checkered Shirt', date: '2025-07-14', dueDate: '2025-07-21', status: 'Completed', amount: 950, customizationNote: 'Pocket: None' },
-  { orderId: '#T298', customer: 'Vikram Mehta', item: 'Black Tuxedo', date: '2025-07-12', dueDate: '2025-08-01', status: 'In Progress', amount: 5500, customizationNote: 'Lapel: Peak Lapel, Buttons: Satin' },
-  { orderId: '#T297', customer: 'Anjali Verma', item: 'Linen Trousers', date: '2025-07-11', dueDate: '2025-07-18', status: 'New', amount: 1200, customizationNote: 'Fit: Loose Fit' },
-  { orderId: '#T296', customer: 'Karan Malhotra', item: 'Embroidered Sherwani', date: '2025-07-10', dueDate: '2025-08-10', status: 'New', amount: 12500, customizationNote: 'Custom embroidery pattern provided.' },
-  { orderId: '#T295', customer: 'Sunita Rao', item: 'Silk Blend Kurta', date: '2025-07-09', dueDate: '2025-07-20', status: 'Shipped', amount: 1600, customizationNote: 'Sleeve Length: Standard' },
-];
-
-type Order = typeof allOrders[0];
 type OrderStatus = 'New' | 'In Progress' | 'Shipped' | 'Completed';
 
 const getStatusConfig = (status: string) => {
@@ -66,14 +56,29 @@ export default function TailorOrdersPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [orders, setOrders] = useState(allOrders);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<OrderStatus | ''>('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleOpenDialog = (order: Order, type: 'details' | 'status') => {
+  useEffect(() => {
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const liveOrders: any[] = [];
+      snapshot.forEach((docSnap) => {
+        liveOrders.push({
+            id: docSnap.id,
+            ...docSnap.data()
+        });
+      });
+      setOrders(liveOrders);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleOpenDialog = (order: any, type: 'details' | 'status') => {
     setSelectedOrder(order);
     if (type === 'details') setIsDetailOpen(true);
     if (type === 'status') {
@@ -82,18 +87,23 @@ export default function TailorOrdersPage() {
     }
   };
   
-  const handleUpdateStatus = () => {
+  const handleUpdateStatus = async () => {
     if (!selectedOrder || !newStatus) return;
     setIsUpdating(true);
-    setTimeout(() => {
-        setOrders(orders.map(o => o.orderId === selectedOrder.orderId ? { ...o, status: newStatus } : o));
-        setIsUpdating(false);
+    try {
+        const orderRef = doc(db, 'orders', selectedOrder.id);
+        await updateDoc(orderRef, { status: newStatus });
         setIsStatusOpen(false);
         toast({
             title: t('Status Updated'),
             description: `${t('Order')} ${selectedOrder.orderId} ${t('has been updated to')} "${t(newStatus as any)}".`
-        })
-    }, 1000);
+        });
+    } catch (error) {
+        console.error('Error updating status', error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to update order status.' });
+    } finally {
+        setIsUpdating(false);
+    }
   };
 
   return (
@@ -159,11 +169,12 @@ export default function TailorOrdersPage() {
             <TableBody>
                 {orders.map((order) => {
                 const { variant, icon: Icon } = getStatusConfig(order.status);
+                const itemsList = order.items ? order.items.map((i: any) => i.name).join(', ') : order.item;
                 return (
-                    <TableRow key={order.orderId} className="transition-colors hover:bg-muted/30">
-                    <TableCell className="font-medium">{order.orderId}</TableCell>
-                    <TableCell>{order.customer}</TableCell>
-                    <TableCell>{t(order.item as any)}</TableCell>
+                    <TableRow key={order.id} className="transition-colors hover:bg-muted/30">
+                    <TableCell className="font-medium">{order.orderId || order.id}</TableCell>
+                    <TableCell>{order.customer || order.customerName}</TableCell>
+                    <TableCell>{itemsList}</TableCell>
                     <TableCell>{order.dueDate}</TableCell>
                     <TableCell>
                         <Badge variant={variant} className="gap-1.5">
@@ -201,21 +212,46 @@ export default function TailorOrdersPage() {
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>{t('Order Details')}</DialogTitle>
-                <DialogDescription>{selectedOrder?.orderId}</DialogDescription>
+                <DialogDescription>{selectedOrder?.orderId || selectedOrder?.id}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-                <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Item')}:</b> {t(selectedOrder?.item as any)}</span></div>
-                <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Customer')}:</b> {selectedOrder?.customer}</span></div>
-                <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Order Date')}:</b> {selectedOrder?.date}</span></div>
+                <div className="flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Item')}:</b> {selectedOrder?.items ? selectedOrder.items.map((i: any) => i.name).join(', ') : selectedOrder?.item}</span></div>
+                <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Customer')}:</b> {selectedOrder?.customer || selectedOrder?.customerName}</span></div>
+                <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Order Date')}:</b> {selectedOrder?.date || new Date(selectedOrder?.createdAt).toLocaleDateString()}</span></div>
                 <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Due Date')}:</b> {selectedOrder?.dueDate}</span></div>
-                <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Amount')}:</b> ₹{selectedOrder?.amount.toFixed(2)}</span></div>
+                <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Amount')}:</b> ₹{selectedOrder?.amount?.toFixed(2)}</span></div>
                 <div className="flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" /> <span><b>{t('Status')}:</b> {t(selectedOrder?.status as any)}</span></div>
-                <div className="flex items-start gap-2"><Edit className="h-4 w-4 text-muted-foreground mt-1" /> 
-                    <div>
-                        <b>{t('Customizations' as any)}:</b> 
-                        <p className="text-sm text-muted-foreground pl-2">{selectedOrder?.customizationNote}</p>
+                
+                {selectedOrder?.customizationNote && (
+                    <div className="flex items-start gap-2"><Edit className="h-4 w-4 text-muted-foreground mt-1" /> 
+                        <div>
+                            <b>{t('Customizations' as any)}:</b> 
+                            <p className="text-sm text-muted-foreground pl-2">{selectedOrder?.customizationNote}</p>
+                        </div>
                     </div>
-                </div>
+                )}
+                {selectedOrder?.items && selectedOrder.items.map((item: any, idx: number) => item.customizationNote && (
+                    <div key={idx} className="flex items-start gap-2 ml-6 text-sm">
+                        <Edit className="h-3 w-3 text-muted-foreground mt-1" /> 
+                        <div>
+                            <b>{item.name}:</b> <span className="text-muted-foreground">{item.customizationNote}</span>
+                        </div>
+                    </div>
+                ))}
+                {selectedOrder?.measurements && (
+                    <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                        <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                            AI Measurements Attached
+                        </h4>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div><span className="text-muted-foreground">Chest:</span> {selectedOrder.measurements.chest} cm</div>
+                            <div><span className="text-muted-foreground">Waist:</span> {selectedOrder.measurements.waist} cm</div>
+                            <div><span className="text-muted-foreground">Hip:</span> {selectedOrder.measurements.hip} cm</div>
+                            <div><span className="text-muted-foreground">Shoulder:</span> {selectedOrder.measurements.shoulder || 'N/A'} cm</div>
+                        </div>
+                    </div>
+                )}
             </div>
         </DialogContent>
     </Dialog>

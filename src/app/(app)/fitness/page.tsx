@@ -12,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { fitnessHistory } from '@/lib/fitness-data';
 import {
   ChartContainer,
   ChartTooltip,
@@ -21,10 +20,12 @@ import {
 import { LineChart, CartesianGrid, XAxis, YAxis, Legend, Tooltip, Line } from 'recharts';
 import { PlusCircle, Dumbbell, Utensils, Target, Loader2, Bot, Info, BarChart, TrendingDown, Flame, Clock, CheckCircle, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateFitnessPlan, type GenerateFitnessPlanInput } from '@/ai/flows/generate-fitness-plan';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { db, auth } from '@/lib/firebase';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const chartConfig = {
   chest: { label: 'Chest (cm)', color: 'hsl(var(--chart-1))' },
@@ -37,6 +38,10 @@ export default function FitnessTrackingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [aiPlan, setAiPlan] = useState<any | null>(null);
   
+  // Real-time data from Firestore
+  const [fitnessHistory, setFitnessHistory] = useState<any[]>([]);
+  const [userUid, setUserUid] = useState<string | null>(null);
+
   // Form state
   const [goal, setGoal] = useState<'loss' | 'gain' | 'maintain'>('loss');
   const [fitnessLevel, setFitnessLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
@@ -44,14 +49,58 @@ export default function FitnessTrackingPage() {
   const [weightLossGoal, setWeightLossGoal] = useState<number>(5);
   const [timeframe, setTimeframe] = useState<number>(8);
   
-
-  const handleAddMeasurement = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    toast({
-      title: 'Measurement Added',
-      description: 'Your new measurements have been saved.',
+  useEffect(() => {
+    const unsubscribeAuth = auth.onAuthStateChanged(user => {
+        if (user) {
+            setUserUid(user.uid);
+            // Real-time listener for user document (measurements array)
+            const userRef = doc(db, 'users', user.uid);
+            const unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().measurements) {
+                    setFitnessHistory(docSnap.data().measurements);
+                } else {
+                    setFitnessHistory([]);
+                }
+            });
+            return () => unsubscribeDoc();
+        }
     });
-    (e.target as HTMLFormElement).reset();
+    return () => unsubscribeAuth();
+  }, []);
+
+  const handleAddMeasurement = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!userUid) return;
+    
+    const formData = new FormData(e.currentTarget);
+    const newMeasurement = {
+        date: formData.get('date'),
+        chest: Number(formData.get('chest')),
+        waist: Number(formData.get('waist')),
+        hip: Number(formData.get('hip')),
+        shoulder: Number(formData.get('shoulder')) || 0,
+        createdAt: new Date().toISOString()
+    };
+
+    try {
+        const userRef = doc(db, 'users', userUid);
+        const docSnap = await getDoc(userRef);
+        let existingMeasurements = [];
+        if (docSnap.exists() && docSnap.data().measurements) {
+            existingMeasurements = docSnap.data().measurements;
+        }
+        
+        await setDoc(userRef, { measurements: [...existingMeasurements, newMeasurement] }, { merge: true });
+        
+        toast({
+          title: 'Measurement Added',
+          description: 'Your new AI sizing measurements have been securely saved to the cloud.',
+        });
+        (e.target as HTMLFormElement).reset();
+    } catch (err) {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to save measurement.', variant: 'destructive' });
+    }
   };
   
   const handleGeneratePlan = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -65,7 +114,7 @@ export default function FitnessTrackingPage() {
             toast({
                 variant: 'destructive',
                 title: 'No Measurements Found',
-                description: 'Please add at least one measurement entry to generate a plan.',
+                description: 'Please add at least one AI sizing measurement entry to generate a plan.',
             });
             return;
         }

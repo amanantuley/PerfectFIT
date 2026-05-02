@@ -132,14 +132,17 @@ const getStatusConfig = (status: string) => {
   }
 };
 
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
+
 export default function TailorDashboard() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [recentOrders, setRecentOrders] = useState(initialRecentOrders);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [earningsData, setEarningsData] = useState(baseEarnings);
   const [earningsGrowth, setEarningsGrowth] = useState(0);
 
-  // 🔹 Simulate Live Earnings Growth
+  // 🔹 Simulate Live Earnings Growth (Can be hooked to real data later)
   useEffect(() => {
     const interval = setInterval(() => {
       setEarningsData((prev) => {
@@ -159,28 +162,38 @@ export default function TailorDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // 🔹 Simulate New Orders (every 15 seconds)
+  // 🔹 Real-time New Orders from Firestore
   useEffect(() => {
-    const interval = setInterval(() => {
-      const id = `ORD${Math.floor(Math.random() * 900) + 100}`;
-      const names = ['Kavita Rao', 'Rohit Mehta', 'Ananya Kapoor', 'Sahil Gupta'];
-      const newOrder = {
-        orderId: id,
-        customer: names[Math.floor(Math.random() * names.length)],
-        amount: Math.floor(Math.random() * 2500) + 1000,
-        status: ['Pending', 'In Progress', 'Ready'][Math.floor(Math.random() * 3)],
-        dueDate: new Date(Date.now() + Math.random() * 7 * 86400000)
-          .toISOString()
-          .split('T')[0],
-        isPriority: Math.random() > 0.7,
-      };
-      setRecentOrders((prev) => [newOrder, ...prev.slice(0, 4)]);
-      toast({
-        title: '🧵 ' + t('New Order Received!'),
-        description: `${t('Order')} ${id} ${t('from')} ${newOrder.customer} ${t('for')} ₹${newOrder.amount}`,
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(10));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const orders: any[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        orders.push({
+            orderId: data.orderId,
+            customer: data.customerName,
+            amount: data.amount,
+            status: data.status,
+            dueDate: data.dueDate,
+            isPriority: data.isPriority,
+            raw: data
+        });
       });
-    }, 15000);
-    return () => clearInterval(interval);
+      
+      // Toast on new incoming order if the state already had items (prevents initial load toast storm)
+      setRecentOrders(prev => {
+          if (prev.length > 0 && orders.length > 0 && prev[0].orderId !== orders[0].orderId) {
+             toast({
+                title: '🧵 ' + t('New Order Received!'),
+                description: `${t('Order')} ${orders[0].orderId} ${t('from')} ${orders[0].customer} ${t('for')} ₹${orders[0].amount.toFixed(2)}`,
+              });
+          }
+          return orders;
+      });
+    });
+
+    return () => unsubscribe();
   }, [t, toast]);
 
   const totalEarnings = useMemo(

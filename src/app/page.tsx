@@ -209,7 +209,7 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full py-20 sm:py-32 md:py-56 lg:py-64 text-center overflow-hidden bg-gradient-to-b from-background via-secondary/30 to-background">
+        <section className="relative w-full py-16 sm:py-24 md:py-32 lg:py-40 text-center overflow-hidden bg-gradient-to-b from-background via-secondary/30 to-background">
           <div className="absolute inset-0 z-0 dark:block hidden">
              <Image src="/landbcck.png" alt="Tailoring background" fill className="object-cover" data-ai-hint="fashion studio"/>
              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70"></div>
@@ -217,22 +217,22 @@ export default function LandingPage() {
           </div>
           
           {/* Animated gradient orbs */}
-          <div className="absolute top-10 sm:top-20 left-5 sm:left-10 w-56 sm:w-72 h-56 sm:h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse -z-0"></div>
-          <div className="absolute bottom-10 sm:bottom-20 right-5 sm:right-10 w-64 sm:w-96 h-64 sm:h-96 bg-fuchsia-500/15 rounded-full blur-3xl animate-pulse animation-delay-2000 -z-0"></div>
+          <div className="absolute top-10 sm:top-16 left-5 sm:left-10 w-48 sm:w-64 h-48 sm:h-64 bg-purple-500/20 rounded-full blur-3xl animate-pulse -z-0"></div>
+          <div className="absolute bottom-10 sm:bottom-16 right-5 sm:right-10 w-56 sm:w-72 h-56 sm:h-72 bg-fuchsia-500/15 rounded-full blur-3xl animate-pulse animation-delay-2000 -z-0"></div>
           
-          <div className="container relative px-4 sm:px-6 md:px-6 z-10 mx-auto max-w-5xl">
+          <div className="container relative px-4 sm:px-6 md:px-6 z-10 mx-auto max-w-4xl">
             <div className="grid gap-6 sm:gap-8 lg:gap-10">
               <div className="flex flex-col justify-center space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
                 <div className="space-y-3 sm:space-y-4 max-w-4xl mx-auto">
-                  <div className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-purple-500/10 dark:bg-white/10 border border-purple-500/30 dark:border-white/20 backdrop-blur-xl mb-3 sm:mb-4 mx-auto animate-in fade-in duration-500 hover:border-purple-500/50 dark:hover:border-white/40 transition-all duration-300 group cursor-pointer">
+                  <div className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-purple-500/10 dark:bg-white/10 border border-purple-500/30 dark:border-white/20 backdrop-blur-xl mb-2 sm:mb-3 mx-auto animate-in fade-in duration-500 hover:border-purple-500/50 dark:hover:border-white/40 transition-all duration-300 group cursor-pointer">
                     <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-fuchsia-500 dark:text-yellow-300 group-hover:animate-spin" />
                     <span className="text-xs sm:text-sm font-semibold text-foreground dark:text-white group-hover:opacity-90 transition-colors">AI-Powered Fashion Revolution</span>
                   </div>
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-foreground via-purple-600 to-fuchsia-600 dark:from-white dark:via-fuchsia-200 dark:to-sky-200 leading-tight sm:leading-tight md:leading-tight lg:leading-snug">
-                    The Future of<br className="hidden sm:block"/>Tailoring is<br/>Here
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-foreground via-purple-600 to-fuchsia-600 dark:from-white dark:via-fuchsia-200 dark:to-sky-200 leading-tight sm:leading-tight md:leading-tight lg:leading-snug">
+                    The Future of<br className="hidden sm:block"/>Tailoring is Here
                   </h1>
                 </div>
-                <p className="max-w-3xl text-muted-foreground dark:text-white/80 text-base sm:text-lg md:text-xl mx-auto leading-relaxed font-light animate-in fade-in duration-700 animation-delay-100 px-2" >
+                <p className="max-w-2xl text-muted-foreground dark:text-white/80 text-sm sm:text-base md:text-lg mx-auto leading-relaxed font-light animate-in fade-in duration-700 animation-delay-100 px-2" >
                   Revolutionary AI technology meets timeless craftsmanship. Get perfectly fitted custom clothing from a single photo.
                 </p>
                 <div className="flex flex-col gap-2 sm:gap-3 min-[400px]:flex-row justify-center pt-2 sm:pt-4 md:pt-6 animate-in fade-in duration-700 animation-delay-200">
