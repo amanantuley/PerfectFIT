@@ -43,6 +43,7 @@ import {
   Gem,
   Award,
   Wallet,
+  Camera,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePathname, useRouter } from 'next/navigation';
@@ -125,6 +126,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             {[
               { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
               { path: '/store', icon: Package, label: 'Store Catalog' },
+              { path: '/measure', icon: Camera, label: 'AI Measurement' },
               { path: '/orders', icon: Package, label: 'My Orders' },
               { path: '/cart', icon: ShoppingCart, label: 'My Cart' },
               { path: '/wallet', icon: Wallet, label: 'My Wallet' },
