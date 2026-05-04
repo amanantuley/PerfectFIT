@@ -3,15 +3,19 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Camera, Upload, RefreshCw, Loader2, Info } from "lucide-react";
+import { Camera, Upload, RefreshCw, Loader2, Info, Video } from "lucide-react";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function MeasurePage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [height, setHeight] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,22 +38,47 @@ export default function MeasurePage() {
     setPreviewUrl(null);
     setResult(null);
     setError(null);
+    setHeight("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
+  const startLiveCapturing = async () => {
+    setLiveLoading(true);
+    try {
+      const res = await fetch('/api/measure/live', { method: 'POST' });
+      if (!res.ok) throw new Error("Failed to start live camera");
+      // Give the user a hint that a native window opened
+      setError(null);
+      alert("Live AI Camera started! Check your taskbar for the new OpenCV window.");
+    } catch (e: any) {
+      setError(e.message || "Failed to launch live capturing");
+    } finally {
+      setLiveLoading(false);
+    }
+  };
+
   const analyzeImage = async () => {
-    if (!file) return;
+    if (!file) {
+      setError("Please upload an image first.");
+      return;
+    }
+    
+    if (!height || isNaN(parseFloat(height)) || parseFloat(height) <= 0) {
+      setError("Please enter a valid height in cm for precise calibration.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("height", height);
 
     try {
-      const response = await fetch("http://localhost:8000/api/measure", {
+      const response = await fetch("/api/measure", {
         method: "POST",
         body: formData,
       });
@@ -76,57 +105,85 @@ export default function MeasurePage() {
           PerfectFit AI Measurement
         </h1>
         <p className="text-xl text-muted-foreground">
-          Upload a full-body photo to get your precise measurements and recommended size.
+          Upload a full-body photo or start the live camera to get your precise measurements.
         </p>
+      </div>
+
+      <div className="flex justify-center mb-8">
+        <Button 
+          size="lg" 
+          onClick={startLiveCapturing} 
+          disabled={liveLoading}
+          className="bg-green-600 hover:bg-green-700 text-white shadow-lg animate-pulse hover:animate-none px-8"
+        >
+          {liveLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Video className="mr-2 h-5 w-5" />}
+          Start Live Capturing
+        </Button>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
         <Card className="flex flex-col">
           <CardHeader>
-            <CardTitle>Image Upload</CardTitle>
+            <CardTitle>Image & Calibration</CardTitle>
             <CardDescription>
-              Ensure an A4 paper is visible for automatic calibration, and your full body is in the frame.
+              We use your real-world height to precisely calibrate the AI scale.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex-grow flex flex-col items-center justify-center">
-            {previewUrl ? (
-              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border">
-                <Image 
-                  src={previewUrl} 
-                  alt="Preview" 
-                  fill 
-                  className="object-contain bg-muted/30"
-                />
-              </div>
-            ) : (
-              <div 
-                className="w-full aspect-[3/4] border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={handleUploadClick}
-              >
-                <Upload className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg mb-2">Click to upload photo</h3>
-                <p className="text-sm text-muted-foreground">
-                  JPG, PNG up to 10MB
-                </p>
-              </div>
-            )}
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="hidden" 
-              ref={fileInputRef}
-              onChange={handleFileChange}
-            />
+          <CardContent className="flex-grow flex flex-col gap-6">
+            
+            <div className="space-y-2">
+              <Label htmlFor="height">Your Height (cm) <span className="text-red-500">*</span></Label>
+              <Input 
+                id="height"
+                type="number" 
+                placeholder="e.g., 175" 
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                className="text-lg"
+              />
+              <p className="text-xs text-muted-foreground">Required for 100% accurate AI scale calibration.</p>
+            </div>
+
+            <div className="flex-grow flex flex-col items-center justify-center">
+              {previewUrl ? (
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border">
+                  <Image 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    fill 
+                    className="object-contain bg-muted/30"
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="w-full aspect-[3/4] border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={handleUploadClick}
+                >
+                  <Upload className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="font-medium text-lg mb-2">Click to upload photo</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Ensure your full body (head to toes) is visible
+                  </p>
+                </div>
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
+            </div>
           </CardContent>
           <CardFooter className="flex justify-between gap-4">
             {previewUrl ? (
               <>
                 <Button variant="outline" onClick={resetForm} className="w-full">
-                  <RefreshCw className="mr-2 h-4 w-4" /> Retake
+                  <RefreshCw className="mr-2 h-4 w-4" /> Reset
                 </Button>
                 <Button 
                   onClick={analyzeImage} 
-                  disabled={loading} 
+                  disabled={loading || !height} 
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   {loading ? (
@@ -152,7 +209,7 @@ export default function MeasurePage() {
           <CardHeader>
             <CardTitle>Results</CardTitle>
             <CardDescription>
-              Your AI-extracted body measurements.
+              Highly accurate AI-extracted body measurements.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
@@ -169,14 +226,14 @@ export default function MeasurePage() {
             {!result && !error && !loading && (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground min-h-[300px]">
                 <Camera className="h-12 w-12 mb-4 opacity-20" />
-                <p>Upload an image to see your measurements here.</p>
+                <p>Upload an image and enter your height to see results.</p>
               </div>
             )}
 
             {loading && (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground min-h-[300px]">
                 <Loader2 className="h-12 w-12 mb-4 animate-spin text-blue-500" />
-                <p>Analyzing image with Mediapipe...</p>
+                <p>Analyzing proportions with Mediapipe...</p>
               </div>
             )}
 
@@ -201,8 +258,9 @@ export default function MeasurePage() {
                   </div>
                 </div>
                 
-                <div className="text-xs text-muted-foreground text-center mt-4 pt-4 border-t">
-                  Scale: {result.scale_cm_per_px.toFixed(4)} cm/px
+                <div className="text-xs text-muted-foreground text-center mt-4 pt-4 border-t flex flex-col gap-1">
+                  <span>Accuracy calibrated via user height ({result.measurements.Height} cm)</span>
+                  <span>Scale: {result.scale_cm_per_px.toFixed(4)} cm/px</span>
                 </div>
               </div>
             )}

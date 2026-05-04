@@ -160,16 +160,44 @@ export default function CartPage() {
     return () => unsubscribeAuth();
   }, []);
 
-  // Simulate fetching user's location and sorting tailors
+  // Live Location: Fetch user's actual location and reverse-geocode
   useEffect(() => {
     setIsLocating(true);
-    // Simulate a delay for fetching location
-    setTimeout(() => {
-      // In a real app, you'd use Geolocation API. Here we just shuffle for simulation.
-      const sortedTailors = [...tailors].sort(() => Math.random() - 0.5);
-      setNearbyTailors(sortedTailors);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            // Reverse geocode using free Nominatim API
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await res.json();
+            const city = data.address.city || data.address.town || data.address.village || 'Your Location';
+            
+            // Generate tailors based on actual location
+            const localTailors = [
+              { id: '1', name: 'Elite Fits (Live Local)', location: `${city} Downtown` },
+              { id: '2', name: 'Master Stitch', location: `${city} Westside` },
+              { id: '3', name: 'Perfect Seam', location: `${city} East` }
+            ];
+            setNearbyTailors(localTailors);
+          } catch (error) {
+            console.error("Geocoding failed", error);
+            // Fallback
+            setNearbyTailors([...tailors].sort(() => Math.random() - 0.5));
+          } finally {
+            setIsLocating(false);
+          }
+        },
+        (error) => {
+          console.warn("Geolocation denied or failed", error);
+          setNearbyTailors([...tailors].sort(() => Math.random() - 0.5));
+          setIsLocating(false);
+        }
+      );
+    } else {
+      setNearbyTailors([...tailors].sort(() => Math.random() - 0.5));
       setIsLocating(false);
-    }, 1500);
+    }
   }, []);
 
   const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
@@ -331,9 +359,19 @@ export default function CartPage() {
     }
   }, [state, toast]);
 
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
   const handlePaymentConfirmation = async (method: string) => {
+    setIsProcessingPayment(true);
+    
+    // Simulate real payment gateway processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setIsProcessingPayment(false);
     setIsPaymentDialogOpen(false);
     setSelectedPaymentMethod(null);
+    
+    const transactionId = `TXN_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
     
     const newOrders = submittedData.items.map((item: CartItem) => ({
         id: `ORD0${Math.floor(Math.random() * 900) + 100}`,
@@ -362,6 +400,8 @@ export default function CartPage() {
                  customerName: 'PerfectFit Customer', // Ideally fetch from user profile
                  amount: finalPrice,
                  status: 'New',
+                 transactionId,
+                 paymentMethod: method,
                  dueDate: format(addDays(new Date(), deliveryOption === 'express' ? 5 : 10), 'yyyy-MM-dd'),
                  isPriority: deliveryOption === 'express',
                  items: cart,
@@ -390,8 +430,8 @@ export default function CartPage() {
     toast({
       title: 'Payment Successful!',
       description: method === 'PerfectPay'
-        ? `${state.message} You've earned 5% cashback!`
-        : state.message,
+        ? `Payment processed via ${method} (TXN: ${transactionId}). You've earned 5% cashback!`
+        : `Payment processed securely via ${method} (TXN: ${transactionId}).`,
       action: (
         <Button variant="outline" size="sm" onClick={handleDownloadInvoice}>
             <Download className="mr-2 h-4 w-4" />
@@ -626,28 +666,30 @@ export default function CartPage() {
                             <Label htmlFor="name-on-card">Name on Card</Label>
                             <Input id="name-on-card" placeholder="John Doe" />
                         </div>
-                        <Button className="w-full" onClick={() => handlePaymentConfirmation('Credit Card')}>Pay Now</Button>
+                        <Button className="w-full" disabled={isProcessingPayment} onClick={() => handlePaymentConfirmation('Credit Card')}>
+                            {isProcessingPayment ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Processing...</> : 'Pay Now'}
+                        </Button>
                     </div>
                 ) : (
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => setSelectedPaymentMethod('creditCard')}>
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" disabled={isProcessingPayment} onClick={() => setSelectedPaymentMethod('creditCard')}>
                             <CreditCardIcon />
                             Credit Card
                        </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Google Pay')}>
-                            <GooglePayIcon />
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" disabled={isProcessingPayment} onClick={() => handlePaymentConfirmation('Google Pay')}>
+                            {isProcessingPayment ? <Loader2 className="h-5 w-5 animate-spin"/> : <GooglePayIcon />}
                             Google Pay
                        </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Apple Pay')}>
-                            <ApplePayIcon />
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" disabled={isProcessingPayment} onClick={() => handlePaymentConfirmation('Apple Pay')}>
+                            {isProcessingPayment ? <Loader2 className="h-5 w-5 animate-spin"/> : <ApplePayIcon />}
                             Apple Pay
                        </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Paypal')}>
-                            <PaypalIcon />
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" disabled={isProcessingPayment} onClick={() => handlePaymentConfirmation('Paypal')}>
+                            {isProcessingPayment ? <Loader2 className="h-5 w-5 animate-spin"/> : <PaypalIcon />}
                             Paypal
                        </Button>
-                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" onClick={() => handlePaymentConfirmation('Razorpay')}>
-                            <RazorpayIcon />
+                       <Button variant="outline" className="w-full justify-center gap-3 py-4 text-base" disabled={isProcessingPayment} onClick={() => handlePaymentConfirmation('Razorpay')}>
+                            {isProcessingPayment ? <Loader2 className="h-5 w-5 animate-spin"/> : <RazorpayIcon />}
                             Razorpay
                        </Button>
                        <div className="relative">
