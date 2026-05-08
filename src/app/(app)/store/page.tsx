@@ -71,7 +71,7 @@ export default function StorePage() {
   return (
     <div className="space-y-8 animate-fade-in-up pb-10">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 shadow-glow bg-black">
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-purple-900/20 bg-black">
         <div className="absolute inset-0 z-0">
            <Image src="https://placehold.co/1600x400.png" alt="Store banner" fill className="object-cover opacity-50" data-ai-hint="luxury fashion banner"/>
            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent"></div>
