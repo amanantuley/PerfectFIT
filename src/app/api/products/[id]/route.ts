@@ -3,10 +3,12 @@ import { getProductById } from '@/lib/db';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  let id = 'unknown';
   try {
-    const { id } = await params;
+    const resolvedParams = await params;
+    id = resolvedParams.id;
     const product = await getProductById(id);
     
     if (!product) {
@@ -15,7 +17,7 @@ export async function GET(
     
     return NextResponse.json({ product });
   } catch (error) {
-    console.error(`Error fetching product ${params.id}:`, error);
+    console.error(`Error fetching product ${id}:`, error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

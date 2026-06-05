@@ -111,7 +111,51 @@ const generateFitnessPlanFlow = ai.defineFlow(
     outputSchema: GenerateFitnessPlanOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (error: any) {
+      console.warn("AI Fitness Plan Flow failed, using demo fallback plan. Error:", error.message || error);
+      
+      // Proportional or goal-specific calorie target estimation
+      let calorieTarget = 2000;
+      if (input.goal === 'loss') calorieTarget = 1700;
+      if (input.goal === 'gain') calorieTarget = 2500;
+      
+      const protein = input.goal === 'gain' ? "150g" : "130g";
+      const carbs = input.goal === 'loss' ? "120g" : "200g";
+      const fats = "70g";
+
+      const dailyPlan = {
+        breakfast: input.dietaryPreferences === 'vegan' ? "Oatmeal with almond milk, chia seeds, and berries" : "3 Scrambled Eggs with Avocado and Whole Wheat Toast",
+        lunch: input.dietaryPreferences === 'vegan' ? "Quinoa salad with mixed vegetables and grilled tofu" : "Grilled Chicken Breast with Brown Rice and Broccoli",
+        dinner: input.dietaryPreferences === 'vegan' ? "Lentil soup with sweet potato and steamed spinach" : "Baked Salmon with Quinoa and Asparagus",
+        snacks: input.dietaryPreferences === 'vegan' ? ["Mixed nuts", "Rice cakes with peanut butter"] : ["Greek yogurt with almonds", "Protein shake"]
+      };
+
+      const weeklySplit = [
+        { day: 'Day 1: Monday', focus: 'Upper Body Pull (Back & Biceps)', duration: '45-60 minutes', exercises: ['Lat Pulldown: 3 sets of 10 reps', 'Barbell Row: 3 sets of 8 reps', 'Dumbbell Bicep Curl: 3 sets of 12 reps', 'Face Pulls: 3 sets of 15 reps'] },
+        { day: 'Day 2: Tuesday', focus: 'Lower Body Strength (Quads & Calves)', duration: '50-60 minutes', exercises: ['Barbell Squat: 4 sets of 8 reps', 'Leg Press: 3 sets of 12 reps', 'Dumbbell Lunge: 3 sets of 10 reps each leg', 'Calf Raises: 4 sets of 15 reps'] },
+        { day: 'Day 3: Wednesday', focus: 'Active Recovery & Core', duration: '30-45 minutes', exercises: ['Plank: 3 sets of 60 seconds', 'Hanging Leg Raises: 3 sets of 12 reps', 'Russian Twists: 3 sets of 20 reps', 'Light Walking/Stretch'] },
+        { day: 'Day 4: Thursday', focus: 'Upper Body Push (Chest, Shoulders & Triceps)', duration: '45-60 minutes', exercises: ['Dumbbell Bench Press: 4 sets of 10 reps', 'Overhead Press: 3 sets of 8 reps', 'Incline Dumbbell Fly: 3 sets of 12 reps', 'Tricep Pushdown: 3 sets of 12 reps'] },
+        { day: 'Day 5: Friday', focus: 'Lower Body Posterior Chain (Hamstrings & Glutes)', duration: '50-60 minutes', exercises: ['Romanian Deadlift: 4 sets of 8 reps', 'Leg Curl: 3 sets of 12 reps', 'Hip Thrusts: 3 sets of 10 reps', 'Plank with Shoulder Taps: 3 sets of 12 reps'] }
+      ];
+
+      return {
+        fitnessPlan: {
+          title: `Demo Plan: ${input.goal.toUpperCase()} Fit Program`,
+          weeklySplit,
+          cardioSuggestion: '3 sessions of 30-minute moderate-intensity cardio (brisk walking or cycling)',
+          notes: 'Running in Demo Mode. Make sure to warm up for 5-10 minutes before starting each workout and cool down/stretch afterwards.'
+        },
+        dietPlan: {
+          title: `Demo Diet: Balanced nutrition for ${input.goal}`,
+          calorieTarget,
+          macronutrientSplit: { protein, carbs, fats },
+          dailyPlan,
+          notes: 'Running in Demo Mode. Keep hydrated by drinking at least 2.5 to 3 liters of water daily.'
+        }
+      };
+    }
   }
 );

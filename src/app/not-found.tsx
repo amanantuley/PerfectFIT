@@ -92,7 +92,7 @@ export default function NotFound() {
               <div className="text-center space-y-8">
                 {/* Animated Icon */}
                 <motion.div
-                  animate={floatingAnimation}
+                  animate={floatingAnimation as any}
                   className="relative inline-block"
                 >
                   <motion.div

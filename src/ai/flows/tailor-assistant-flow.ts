@@ -64,7 +64,33 @@ const tailorAssistantFlow = ai.defineFlow(
     outputSchema: TailorAssistantOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    try {
+      const { output } = await prompt(input);
+      return output!;
+    } catch (error: any) {
+      console.warn("AI Tailor Assistant Flow failed, using demo fallback recommendations. Error:", error.message || error);
+      
+      const fabricSuggestions = [
+        { name: input.season === 'summer' ? 'Cotton Linen Blend' : 'Super 120s Merino Wool', reasoning: `Excellent choice for ${input.season} ${input.occasion} wear due to its breathability and drape.` },
+        { name: 'Pure Premium Silk-Cotton', reasoning: `Elevates the styling for the ${input.occasion} occasion, providing a rich, premium look.` }
+      ];
+
+      const designSuggestions = [
+        { element: 'Fit', suggestion: input.customerPreferences.toLowerCase().includes('modern') ? 'Slim Modern Fit' : 'Classic Structured Fit' },
+        { element: 'Styling', suggestion: `Tailored lapels with hand-finished pick stitching to match the ${input.occasion} look.` }
+      ];
+
+      const customizationIdeas = [
+        "Contrast silk piping inside the collar lining.",
+        "A personalized monogram inside the wearer's pocket.",
+        "Custom horn buttons matching the fabric tone."
+      ];
+
+      return {
+        fabricSuggestions,
+        designSuggestions,
+        customizationIdeas
+      };
+    }
   }
 );

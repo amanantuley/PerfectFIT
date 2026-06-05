@@ -204,7 +204,7 @@ export default function DashboardPage() {
 
   const measurementFields = ['height','weight','neckSize','shoulder','chest','sleeveLength','waist','hip','inseam'] as const;
   const measurementCoverage = measurements
-    ? Math.round((measurementFields.filter(field => Boolean((measurements as Record<string, number>)[field])).length / measurementFields.length) * 100)
+    ? Math.round((measurementFields.filter(field => Boolean((measurements as Record<string, any>)[field])).length / measurementFields.length) * 100)
     : 0;
   const measurementQualityLabel = measurementCoverage >= 90 ? 'Production-ready' : measurementCoverage >= 70 ? 'Usable with review' : 'Needs completion';
   const recentMeasurement = measurementHistory[0];
